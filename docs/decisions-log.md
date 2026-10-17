@@ -446,3 +446,15 @@ failures and reproduction payloads are retained in the red-team report. Both
 issues were fixed rather than left open because the fixes were small,
 fail-closed, and directly testable. Remaining limitations are not reported as
 reproduced attacks.
+
+### 2026-10-18T01:35:58.3908217+05:30 - [CODEX] Step 12 packaging evidence
+
+Added a reproducible demo runbook, a local presentation generator, and a
+secret scanner that scans tracked/untracked non-ignored files and all
+recordings without printing matched values. The scanner found zero
+non-placeholder secret patterns across 100 files; it recognized two exact
+synthetic credential placeholders used by the existing redaction test. The
+generated PowerPoint reopened successfully with 11 slides and passed ZIP
+integrity checking. `python-pptx` is declared in the development extra;
+`pypdf` was installed only in the local environment to inspect the source
+assignment PDF and is not a project dependency.

@@ -15,6 +15,19 @@ safety/classification results, and the provider-failure scenario is injected;
 Step 8 is not yet complete. See
 [docs/voice-coordination.md](docs/voice-coordination.md).
 
+## Assignment deliverables
+
+- [Part A/B design notes](docs/design-notes.md) and
+  [Part C answers](docs/part-c-answers.md), with implementation gaps labeled.
+- [Step 9 test report](docs/step9-test-report.md) and
+  [reproduced red-team findings](docs/red-team-report.md).
+- [Reproducible demo runbook](docs/demo-runbook.md).
+- Generate the PowerPoint using `python scripts/build_presentation.py`; the
+  verified output is `presentation/agentic-customer-support.pptx`.
+- Scan tracked, untracked non-ignored, and recording files using
+  `python scripts/scan_secrets.py`. The scanner prints paths/counts only, not
+  matching secret values.
+
 ## Local setup
 
 Use Python 3.11 or newer. In PowerShell:

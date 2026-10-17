@@ -1,7 +1,8 @@
 # Requirements Matrix
 
-Status at the end of Step 0: planning only. No application code has been
-implemented yet.
+The original tables below define the assignment requirements and planned
+verification. The current evidence/status snapshot at the end of Step 12 is
+appended below and is subject to the independent Step 13 review.
 
 The assignment PDF is the source of truth: [AI_LLM_Assignment_CSA.pdf](../Problem_Statement/AI_LLM_Assignment_CSA.pdf).
 The working execution instructions are in [FINAL_CODEX_EXECUTION_PLAN.txt](../Problem_Statement/FINAL_CODEX_EXECUTION_PLAN.txt).
@@ -65,16 +66,20 @@ Labels used below:
 
 ## Deliverables Checklist
 
-- [ ] GitHub repository with genuine incremental history.
-- [ ] Real `.pptx` presentation.
-- [ ] Part A and Part B design notes.
-- [ ] Part C written answers.
-- [ ] Real voice recordings or clear logs/transcripts.
-- [ ] Timestamped decisions log.
-- [ ] Red-team report with at least two reproduced findings.
-- [ ] README and exact demo/test commands.
-- [ ] Requirements matrix with evidence links.
-- [ ] Secret scan/check and clean repository status.
+- [x] Local Git repository with genuine incremental history; no GitHub push is
+  claimed.
+- [x] Real `.pptx` presentation, reopened and checked.
+- [x] Part A and Part B design notes; known implementation gaps are labeled.
+- [x] Part C written answers, labeled as proposed where not implemented.
+- [x] Real voice recordings and per-scenario logs/transcripts.
+- [x] Timestamped decisions log.
+- [x] Red-team report with two reproduced findings and regression fixes.
+- [x] README and exact demo/test commands.
+- [x] Requirements matrix with this evidence snapshot.
+- [x] Secret scan of tracked/untracked non-ignored files and recordings; the
+  scan found no non-placeholder credential patterns.
+- [ ] Clean repository status: the user-provided `Problem_Statement/` source
+  directory remains untracked and was deliberately not staged.
 
 ## Recommendations, not independent assignment requirements
 
@@ -87,3 +92,45 @@ not displace the explicit requirements above:
 - AST/import scans in addition to call-path tests.
 - Large numerical evaluation sets beyond what is needed for meaningful evidence.
 - Live microphone mode when file-based recorded audio already gives a reliable demonstration.
+
+## Step 12 evidence/status snapshot
+
+Status values: **IMPLEMENTED+TESTED** means the implementation has focused
+test or runtime evidence; **PARTIAL** means behavior or required quality is
+not fully demonstrated; **ANSWERED-PROPOSED** means the written design answer
+exists but production behavior is not implemented; **BLOCKED** identifies an
+explicit missing requirement.
+
+| ID | Status | Evidence or blocker |
+|---|---|---|
+| A1 | IMPLEMENTED+TESTED | Three intents and distinct handlers: `tests/test_pipeline.py`, `tests/test_routing.py`; live Step 7 evidence in `docs/voice-baseline.md`. |
+| A2 | PARTIAL | Embedding retrieval/provenance tests pass, but `ProductQuestionHandler` does not generate a grounded customer answer; `docs/design-notes.md`. |
+| A3 | IMPLEMENTED+TESTED | Fictional read-only tools and ownership tests: `tests/test_tools.py`, `tests/test_step5_call_path.py`. |
+| A4 | BLOCKED | Neither Groq native function calling nor a ReAct loop is implemented; documented in `docs/design-notes.md`. |
+| A5 | PARTIAL | Input checks, low-confidence fail-closed handling, and call-path tests exist; successful live semantic classification remains unverified; `docs/red-team-report.md`. |
+| A6 | IMPLEMENTED+TESTED | Allowed-fact checks and date/money/promise regressions: `src/agentic_support/facts.py`, `tests/test_guardrails.py`; heuristic limits documented. |
+| A7 | IMPLEMENTED+TESTED | Application-level validation and fail-closed tests: `tests/test_pipeline.py`, `tests/test_step5_call_path.py`. |
+| A8 | IMPLEMENTED+TESTED | Rejected input cannot reach classifier/tools; `tests/test_step5_call_path.py`. |
+| A9 | IMPLEMENTED+TESTED | Bounded classifier cache and measured hit rate 0.5; `reports/baseline-evaluation.md`. |
+| A10 | IMPLEMENTED+TESTED | Eligibility does not approve a refund; tool and claim tests in `tests/test_tools.py` and `tests/test_guardrails.py`. |
+| A11 | IMPLEMENTED+TESTED (design) | Scale, fourth-handler rollout, and evaluation plan in `docs/design-notes.md`; no scale test is claimed. |
+| B1 | IMPLEMENTED+TESTED | Real Step 7 WAV -> Groq STT -> shared service -> local TTS: `docs/voice-baseline.md`. |
+| B2 | IMPLEMENTED+TESTED | User-recorded WAVs and metadata: `audio/manifest.json`; validated with zero errors. |
+| B3 | IMPLEMENTED+TESTED | Audible silence playback completed without interruption: `recordings/step8-silence-run.json`. |
+| B4 | IMPLEMENTED+TESTED | Audible current noise playback completed without interruption: `recordings/step8-noise-run.json`; detector corpus also reports zero false interruptions. |
+| B5 | PARTIAL | Real speech cancels playback, stale result is discarded, and one STT attempt is evidenced; live follow-up failed closed: `recordings/step8-interruption-run.json`. |
+| B6 | PARTIAL | Original adversarial clip interrupts and stale output is rejected; live classifier failed closed: `recordings/step8-adversarial-run.json`. |
+| B7 | IMPLEMENTED+TESTED (injected) | Two injected STT failures lead to audible safe handoff: `recordings/step8-provider_failure-run.json`; no real provider outage is claimed. |
+| B8 | PARTIAL | Real UTC timestamps and app playback-start latency are recorded, but not first acoustic sample/loopback: `docs/voice-coordination.md`. |
+| B9 | IMPLEMENTED+TESTED (design) | Accent/language, on-device/server VAD, and streaming/batch trade-offs in `docs/design-notes.md`. |
+| B10 | IMPLEMENTED+TESTED | Per-scenario logs and generated WAV evidence in `recordings/`; run commands in `docs/demo-runbook.md`. |
+| C1 | ANSWERED-PROPOSED | State-sharing and reauthorization design in `docs/part-c-answers.md`; persistent shared state is not implemented. |
+| C2 | ANSWERED-PROPOSED | Regression, SLO, shadow/A-B strategy and measured offline baseline in `docs/part-c-answers.md`. |
+| C3 | ANSWERED-PROPOSED | Detection, retry, handoff, and failover trade-offs in `docs/part-c-answers.md`; no alternate-provider failover is implemented. |
+| P1 | IMPLEMENTED+TESTED | Local genuine incremental history: `git log`; the user has not authorized a push in this task. |
+| P2 | IMPLEMENTED+TESTED | Actual timestamped choices and experiments: `docs/decisions-log.md`. |
+| P3 | IMPLEMENTED+TESTED | Two pre-fix behaviors were reproduced, fixed, and regression-tested: `docs/red-team-report.md`. |
+| P4 | IMPLEMENTED+TESTED | User-selected fictional Northstar Gear domain and original audio adversarial case: `docs/domain-and-contracts.md`, `audio/manifest.json`. |
+| P5 | IMPLEMENTED+TESTED | `scripts/scan_secrets.py` scanned 100 files with no non-placeholder matches; see Step 12 runbook and output. |
+| P6 | PARTIAL | Local code/docs/audio/report/PPTX deliverables exist; `Problem_Statement/` remains intentionally untracked and no remote push is claimed. |
+| P7 | NOT DONE ([REC]) | No defense notes or unaided practice drill were created or claimed. |

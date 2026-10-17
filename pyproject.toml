@@ -20,6 +20,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3,<9",
+    "python-pptx>=1.0,<2",
 ]
 
 [tool.setuptools.packages.find]

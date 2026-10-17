@@ -218,6 +218,15 @@ finding cannot be reproduced, report that blocker rather than fabricating it.
 
 **Dependencies:** Steps 9-11.
 
+**Status:** README links the design notes, Part C answers, test report, red-team
+report, and exact demo commands. A real 11-slide PowerPoint was generated,
+reopened with `python-pptx`, and passed ZIP integrity validation. The secret
+scanner examined 100 tracked/untracked non-ignored files plus recordings,
+found no non-placeholder credential patterns, and allowlisted only two
+synthetic credential fixtures in a redaction test. The optional pace/accent
+recording remains marked non-required and pending. See
+[demo-runbook.md](./demo-runbook.md).
+
 **Work:** finish README, exact runbook, logs/recordings, documentation, and
 presentation. Generate a real `.pptx` with `python-pptx`, PowerPoint, or an
 available equivalent; parse it afterward to verify slides exist.
