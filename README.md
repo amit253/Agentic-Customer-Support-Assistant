@@ -55,6 +55,11 @@ The foundation can run without a key. Code that needs a live provider must
 call `Settings.require_groq_credentials()` explicitly and handle its safe
 configuration error.
 
+The application loads an ignored local `.env` file when present. Keep
+`.env.example` blank and never place a real key there. Router retries are
+bounded by `ROUTER_MAX_ATTEMPTS` and `ROUTER_RETRY_DELAY_SECONDS`; the default
+is two total attempts with a 0.25-second initial delay.
+
 ## Logging and traceability
 
 The foundation logger writes one event per line as JSON by default. Every

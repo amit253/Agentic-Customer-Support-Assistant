@@ -29,6 +29,18 @@ class InputValue:
     text: str
 
 
+@dataclass
+class SequenceClassifier:
+    responses: list[dict[str, object]]
+
+    def __post_init__(self) -> None:
+        self.calls = 0
+
+    def classify(self, message: str) -> dict[str, object]:
+        self.calls += 1
+        return self.responses.pop(0)
+
+
 def test_valid_structured_route_is_cached() -> None:
     client = FakeClassifier({"intent": "product_question", "confidence": 0.93})
     router = StructuredIntentRouter(
@@ -59,7 +71,10 @@ def test_unknown_intent_fails_closed() -> None:
     assert decision.accepted is False
     assert decision.intent is None
     assert decision.reason == "classifier_failure_or_invalid_output"
-    assert router.cache_stats.classifier_errors == 1
+    assert router.cache_stats.classifier_errors == 2
+    assert router.cache_stats.classifier_attempts == 2
+    assert router.cache_stats.retries == 1
+    assert router.cache_stats.retry_exhausted == 1
 
 
 def test_low_confidence_fails_closed_without_caching() -> None:
@@ -73,6 +88,28 @@ def test_low_confidence_fails_closed_without_caching() -> None:
     assert router.cache_stats.entries == 0
 
 
+def test_retry_recovers_from_invalid_first_output() -> None:
+    client = SequenceClassifier(
+        [
+            {"intent": "unknown", "confidence": 0.99},
+            {"intent": "order_status", "confidence": 0.91},
+        ]
+    )
+    router = StructuredIntentRouter(
+        client,
+        retry_delay_seconds=0,
+    )
+
+    decision = router.route(InputValue("Where is my order?"))
+
+    assert decision.accepted is True
+    assert decision.intent == "order_status"
+    assert client.calls == 2
+    assert router.cache_stats.classifier_errors == 1
+    assert router.cache_stats.retries == 1
+    assert router.cache_stats.retry_exhausted == 0
+
+
 def test_provider_failure_fails_closed() -> None:
     class BrokenClassifier:
         def classify(self, message: str) -> dict[str, object]:
@@ -84,7 +121,8 @@ def test_provider_failure_fails_closed() -> None:
 
     assert decision.accepted is False
     assert decision.reason == "classifier_failure_or_invalid_output"
-    assert router.cache_stats.classifier_errors == 1
+    assert router.cache_stats.classifier_errors == 2
+    assert router.cache_stats.retries == 1
 
 
 def test_groq_adapter_validates_json_from_fake_sdk_client() -> None:

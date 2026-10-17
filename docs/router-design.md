@@ -44,6 +44,18 @@ injected instead.
 The provider model is configured with `GROQ_ROUTER_MODEL`, and the live service
 requires `GROQ_API_KEY` or `GROQ_API_KEYS` only when the live adapter is built.
 
+## Retry policy
+
+The router makes at most two total classifier attempts by default. It retries
+provider errors, malformed/unknown output, and low-confidence decisions. The
+retry delay is configurable through `ROUTER_RETRY_DELAY_SECONDS` and grows
+exponentially by attempt. `ROUTER_MAX_ATTEMPTS` and the delay are passed into
+the live service from configuration.
+
+Retry metrics are included with the cache counters: classifier attempts,
+retries, and exhausted retry sequences. A retry never bypasses input
+validation, and an exhausted sequence never reaches a handler.
+
 ## Cache and metrics
 
 Classifier results use a normalized message key that includes model name and

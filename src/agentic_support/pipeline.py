@@ -198,5 +198,7 @@ def build_live_support_service(
     router = StructuredIntentRouter(
         classifier,
         model_name=active_settings.groq_router_model,
+        max_attempts=active_settings.router_max_attempts,
+        retry_delay_seconds=active_settings.router_retry_delay_seconds,
     )
     return SupportService(router=router, registry=build_default_registry())

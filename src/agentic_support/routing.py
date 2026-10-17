@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import json
+import logging
 import time
 from collections import OrderedDict
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Literal, Protocol
+from typing import Any, Callable, Literal, Protocol
 
 from .config import Settings
+from .logging_config import log_event
 
 
 Intent = Literal["product_question", "order_status", "escalate_to_human"]
@@ -59,6 +61,9 @@ class CacheStats:
     hits: int
     misses: int
     classifier_errors: int
+    classifier_attempts: int
+    retries: int
+    retry_exhausted: int
     entries: int
 
     @property
@@ -98,6 +103,9 @@ class ClassifierCache:
         self._hits = 0
         self._misses = 0
         self._classifier_errors = 0
+        self._classifier_attempts = 0
+        self._retries = 0
+        self._retry_exhausted = 0
 
     def get(self, key: str) -> RouteDecision | None:
         self._lookups += 1
@@ -125,6 +133,15 @@ class ClassifierCache:
     def record_classifier_error(self) -> None:
         self._classifier_errors += 1
 
+    def record_classifier_attempt(self) -> None:
+        self._classifier_attempts += 1
+
+    def record_retry(self) -> None:
+        self._retries += 1
+
+    def record_retry_exhausted(self) -> None:
+        self._retry_exhausted += 1
+
     @property
     def stats(self) -> CacheStats:
         return CacheStats(
@@ -132,6 +149,9 @@ class ClassifierCache:
             hits=self._hits,
             misses=self._misses,
             classifier_errors=self._classifier_errors,
+            classifier_attempts=self._classifier_attempts,
+            retries=self._retries,
+            retry_exhausted=self._retry_exhausted,
             entries=len(self._entries),
         )
 
@@ -227,14 +247,26 @@ class StructuredIntentRouter:
         prompt_version: str = ROUTER_PROMPT_VERSION,
         cache: ClassifierCache | None = None,
         min_confidence: float = DEFAULT_MIN_CONFIDENCE,
+        max_attempts: int = 2,
+        retry_delay_seconds: float = 0.0,
+        sleeper: Callable[[float], None] = time.sleep,
+        logger: Any | None = None,
     ) -> None:
         if not 0 <= min_confidence <= 1:
             raise ValueError("min_confidence must be between zero and one")
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be at least one")
+        if retry_delay_seconds < 0:
+            raise ValueError("retry_delay_seconds must not be negative")
         self.classifier = classifier
         self.model_name = model_name
         self.prompt_version = prompt_version
         self.cache = cache or ClassifierCache()
         self.min_confidence = min_confidence
+        self.max_attempts = max_attempts
+        self.retry_delay_seconds = retry_delay_seconds
+        self.sleeper = sleeper
+        self.logger = logger or logging.getLogger("agentic_support.routing")
 
     def _cache_key(self, message: str) -> str:
         normalized = " ".join(message.casefold().split())
@@ -246,24 +278,51 @@ class StructuredIntentRouter:
         if cached is not None:
             return cached
 
-        try:
-            payload = self.classifier.classify(request.text)
-            decision = _validated_decision(
-                payload,
-                min_confidence=self.min_confidence,
-            )
-        except Exception:
-            self.cache.record_classifier_error()
-            return RouteDecision(
-                intent=None,
-                confidence=0.0,
-                accepted=False,
-                reason="classifier_failure_or_invalid_output",
-            )
+        last_decision = RouteDecision(
+            intent=None,
+            confidence=0.0,
+            accepted=False,
+            reason="classifier_failure_or_invalid_output",
+        )
+        for attempt in range(self.max_attempts):
+            self.cache.record_classifier_attempt()
+            try:
+                payload = self.classifier.classify(request.text)
+                decision = _validated_decision(
+                    payload,
+                    min_confidence=self.min_confidence,
+                )
+                last_decision = decision
+            except Exception:
+                self.cache.record_classifier_error()
+                last_decision = RouteDecision(
+                    intent=None,
+                    confidence=0.0,
+                    accepted=False,
+                    reason="classifier_failure_or_invalid_output",
+                )
 
-        if decision.accepted:
-            self.cache.set(key, decision)
-        return decision
+            if last_decision.accepted:
+                self.cache.set(key, last_decision)
+                return last_decision
+
+            if attempt + 1 < self.max_attempts:
+                delay = self.retry_delay_seconds * (2**attempt)
+                self.cache.record_retry()
+                log_event(
+                    self.logger,
+                    "classifier_retry",
+                    attempt=attempt + 2,
+                    max_attempts=self.max_attempts,
+                    reason=last_decision.reason,
+                    delay_seconds=delay,
+                )
+                if delay > 0:
+                    self.sleeper(delay)
+
+        if self.max_attempts > 1:
+            self.cache.record_retry_exhausted()
+        return last_decision
 
     @property
     def cache_stats(self) -> CacheStats:

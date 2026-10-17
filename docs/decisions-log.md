@@ -145,6 +145,23 @@ injected classifier escaped the router. The router was changed to convert all
 ordinary provider/runtime exceptions into a rejected route and increment the
 classifier-error counter. The focused and full suites then passed.
 
+### 2026-10-17T16:36:26.0789293+05:30 - [CODEX] Bounded router retry
+
+The router now allows two total classifier attempts by default for provider
+failure, invalid output, and low-confidence output. Retry delay and attempt
+count are configurable through environment settings, and retry/attempt/
+exhaustion counters are observable. Exhausted retries return a safe response;
+they never dispatch a handler.
+
+### 2026-10-17T16:36:26.0789293+05:30 - [CODEX] Secret-handling correction
+
+A real Groq key was found in the tracked example-file path during the user's
+local configuration inspection. Its value was not used for a request or
+recorded in repository files, but it must be treated as compromised and
+rotated. The example file was replaced with blank placeholders. Future live
+testing must use only the ignored `.env` file, and the rotated key must never
+be pasted into chat.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.

@@ -49,6 +49,8 @@ class Settings:
     log_level: str
     log_format: str
     groq_router_model: str
+    router_max_attempts: int
+    router_retry_delay_seconds: float
     groq_api_keys: tuple[str, ...]
 
     @classmethod
@@ -57,7 +59,13 @@ class Settings:
     ) -> "Settings":
         """Load settings without requiring a live-provider key."""
 
-        source = os.environ if environment is None else environment
+        if environment is None:
+            from dotenv import load_dotenv
+
+            load_dotenv(override=False)
+            source = os.environ
+        else:
+            source = environment
         log_level = source.get("LOG_LEVEL", "INFO").strip().upper()
         if log_level not in _ALLOWED_LOG_LEVELS:
             raise ConfigurationError(
@@ -82,12 +90,34 @@ class Settings:
         if not groq_router_model:
             raise ConfigurationError("GROQ_ROUTER_MODEL must not be empty")
 
+        try:
+            router_max_attempts = int(source.get("ROUTER_MAX_ATTEMPTS", "2"))
+        except (TypeError, ValueError) as exc:
+            raise ConfigurationError("ROUTER_MAX_ATTEMPTS must be an integer") from exc
+        if router_max_attempts < 1:
+            raise ConfigurationError("ROUTER_MAX_ATTEMPTS must be at least one")
+
+        try:
+            router_retry_delay_seconds = float(
+                source.get("ROUTER_RETRY_DELAY_SECONDS", "0.25")
+            )
+        except (TypeError, ValueError) as exc:
+            raise ConfigurationError(
+                "ROUTER_RETRY_DELAY_SECONDS must be numeric"
+            ) from exc
+        if router_retry_delay_seconds < 0:
+            raise ConfigurationError(
+                "ROUTER_RETRY_DELAY_SECONDS must not be negative"
+            )
+
         return cls(
             app_name=app_name,
             environment=environment_name,
             log_level=log_level,
             log_format=log_format,
             groq_router_model=groq_router_model,
+            router_max_attempts=router_max_attempts,
+            router_retry_delay_seconds=router_retry_delay_seconds,
             groq_api_keys=_read_groq_keys(source),
         )
 
@@ -115,6 +145,8 @@ class Settings:
             "log_level": self.log_level,
             "log_format": self.log_format,
             "groq_router_model": self.groq_router_model,
+            "router_max_attempts": self.router_max_attempts,
+            "router_retry_delay_seconds": self.router_retry_delay_seconds,
             "groq_configured": self.groq_configured,
             "groq_key_count": len(self.groq_api_keys),
         }
