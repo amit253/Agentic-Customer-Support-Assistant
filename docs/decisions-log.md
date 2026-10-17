@@ -133,10 +133,10 @@ handler exception all return safe responses without reaching an unsafe route.
 
 ### 2026-10-17T14:58:14.5417125+05:30 - [CODEX] Structured Groq adapter
 
-The live adapter uses the Groq Python client with JSON object output and local
-validation of `intent` and `confidence`. The model name is configurable through
-`GROQ_ROUTER_MODEL`; fake clients cover default tests so no Groq key is needed
-for the repository suite.
+The live adapter uses the Groq Python client with strict JSON Schema output and
+local validation of `intent` and `confidence`. The model name is configurable
+through `GROQ_ROUTER_MODEL`; fake clients cover default tests so no Groq key is
+needed for the repository suite.
 
 ### 2026-10-17T14:58:14.5417125+05:30 - [CODEX] Fail-closed correction
 
@@ -161,6 +161,22 @@ recorded in repository files, but it must be treated as compromised and
 rotated. The example file was replaced with blank placeholders. Future live
 testing must use only the ignored `.env` file, and the rotated key must never
 be pasted into chat.
+
+### 2026-10-17T17:10:02.7284731+05:30 - [CODEX] Live provider compatibility correction
+
+The first live smoke attempt used the configured `llama-3.3-70b-versatile`
+model and received a safe 404 response; the account's model list showed that
+model was unavailable. The local `.env` and configurable default were changed
+to the available `openai/gpt-oss-20b` model. JSON object mode then returned a
+safe 400 `json_validate_failed` response, so the adapter was changed to strict
+JSON Schema output with required `intent` and `confidence` fields.
+
+### 2026-10-17T17:10:02.7284731+05:30 - [CODEX] Live router smoke result
+
+Using the rotated local `.env` key without printing it, the live smoke request
+classified an order-status question successfully on the first attempt. The
+observed result was `status=ok`, intent `order_status`, handler
+`order_status_handler`, one classifier attempt, zero retries, and zero errors.
 
 ## User-authored notes
 

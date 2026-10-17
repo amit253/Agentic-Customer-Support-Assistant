@@ -20,6 +20,33 @@ VALID_INTENTS = frozenset(
 )
 DEFAULT_MIN_CONFIDENCE = 0.65
 ROUTER_PROMPT_VERSION = "router-v1"
+ROUTER_RESPONSE_FORMAT = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "intent_route",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "intent": {
+                    "type": "string",
+                    "enum": [
+                        "product_question",
+                        "order_status",
+                        "escalate_to_human",
+                    ],
+                },
+                "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                },
+            },
+            "required": ["intent", "confidence"],
+            "additionalProperties": False,
+        },
+    },
+}
 
 
 class ClassifierProviderError(RuntimeError):
@@ -205,7 +232,7 @@ class GroqStructuredClassifier:
                 model=self.model_name,
                 temperature=0,
                 max_tokens=100,
-                response_format={"type": "json_object"},
+                response_format=ROUTER_RESPONSE_FORMAT,
                 messages=[
                     {
                         "role": "system",

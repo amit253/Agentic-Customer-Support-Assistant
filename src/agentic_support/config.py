@@ -85,7 +85,7 @@ class Settings:
             raise ConfigurationError("APP_ENV must not be empty")
 
         groq_router_model = source.get(
-            "GROQ_ROUTER_MODEL", "llama-3.3-70b-versatile"
+            "GROQ_ROUTER_MODEL", "openai/gpt-oss-20b"
         ).strip()
         if not groq_router_model:
             raise ConfigurationError("GROQ_ROUTER_MODEL must not be empty")

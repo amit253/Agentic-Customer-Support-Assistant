@@ -35,9 +35,10 @@ Step 3 retrieval provenance when a retriever is injected.
 
 ## Structured classifier
 
-The live adapter uses the Groq Python client and requests JSON object output
-with `intent` and `confidence` fields. Application validation still checks the
-intent allow-list, numeric confidence range, and minimum confidence threshold.
+The live adapter uses the Groq Python client and requests strict JSON Schema
+output with required `intent` and `confidence` fields. Application validation
+still checks the intent allow-list, numeric confidence range, and minimum
+confidence threshold.
 The adapter is not constructed in the default keyless tests; a fake client is
 injected instead.
 

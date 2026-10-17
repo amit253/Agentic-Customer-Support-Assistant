@@ -10,6 +10,7 @@ from agentic_support.config import Settings
 from agentic_support.routing import (
     ClassifierCache,
     GroqStructuredClassifier,
+    ROUTER_RESPONSE_FORMAT,
     StructuredIntentRouter,
 )
 
@@ -158,4 +159,4 @@ def test_groq_adapter_validates_json_from_fake_sdk_client() -> None:
     assert payload["intent"] == "escalate_to_human"
     assert captured["model"] == "test-router-model"
     assert captured["temperature"] == 0
-    assert captured["response_format"] == {"type": "json_object"}
+    assert captured["response_format"] == ROUTER_RESPONSE_FORMAT
