@@ -6,10 +6,10 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 3 establishes local embedding retrieval, deterministic chunking, source
-provenance, and explicit insufficient-evidence behavior over the Northstar
-Gear knowledge base. Tool execution, answer agents, and voice are intentionally
-not implemented yet.
+Step 4 establishes the guarded support-service entry point, structured intent
+routing, registered handlers, cache metrics, and fail-closed routing behavior.
+Order tools, full prompt-injection/output guardrails, answer generation, and
+voice are intentionally not implemented yet.
 
 ## Local setup
 

@@ -123,6 +123,28 @@ threshold. Measured required-case scores were then collected: paraphrase
 raised to `0.45`, after which all five retrieval tests passed. This is a
 retrieval-boundary decision, not a keyword fallback.
 
+### 2026-10-17T14:58:14.5417125+05:30 - [CODEX] Router and pipeline boundary
+
+Step 4 uses one `SupportService.handle` entry point. It normalizes and validates
+raw input before invoking the classifier, then dispatches only accepted
+decisions through an explicit three-intent handler registry. Rejected input,
+invalid/uncertain classifier output, provider failure, missing handler, and
+handler exception all return safe responses without reaching an unsafe route.
+
+### 2026-10-17T14:58:14.5417125+05:30 - [CODEX] Structured Groq adapter
+
+The live adapter uses the Groq Python client with JSON object output and local
+validation of `intent` and `confidence`. The model name is configurable through
+`GROQ_ROUTER_MODEL`; fake clients cover default tests so no Groq key is needed
+for the repository suite.
+
+### 2026-10-17T14:58:14.5417125+05:30 - [CODEX] Fail-closed correction
+
+The first provider-failure tests exposed that a generic exception from an
+injected classifier escaped the router. The router was changed to convert all
+ordinary provider/runtime exceptions into a rejected route and increment the
+classifier-error counter. The focused and full suites then passed.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.

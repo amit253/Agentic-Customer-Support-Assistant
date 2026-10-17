@@ -48,6 +48,7 @@ class Settings:
     environment: str
     log_level: str
     log_format: str
+    groq_router_model: str
     groq_api_keys: tuple[str, ...]
 
     @classmethod
@@ -75,11 +76,18 @@ class Settings:
         if not environment_name:
             raise ConfigurationError("APP_ENV must not be empty")
 
+        groq_router_model = source.get(
+            "GROQ_ROUTER_MODEL", "llama-3.3-70b-versatile"
+        ).strip()
+        if not groq_router_model:
+            raise ConfigurationError("GROQ_ROUTER_MODEL must not be empty")
+
         return cls(
             app_name=app_name,
             environment=environment_name,
             log_level=log_level,
             log_format=log_format,
+            groq_router_model=groq_router_model,
             groq_api_keys=_read_groq_keys(source),
         )
 
@@ -106,6 +114,7 @@ class Settings:
             "environment": self.environment,
             "log_level": self.log_level,
             "log_format": self.log_format,
+            "groq_router_model": self.groq_router_model,
             "groq_configured": self.groq_configured,
             "groq_key_count": len(self.groq_api_keys),
         }
