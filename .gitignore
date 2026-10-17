@@ -1,0 +1,40 @@
+# Python bytecode and test/build output
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Local Python environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Runtime output and local artifacts
+*.log
+logs/
+# Do not blanket-ignore audio/ or recordings/: reviewed assignment evidence
+# must remain intentionally commit-able. Keep only private local artifacts in
+# a dedicated ignored subdirectory if one is introduced later.
+
+# IDE and operating-system files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+Thumbs.db
+.DS_Store

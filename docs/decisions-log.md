@@ -49,6 +49,30 @@ because the browser PDF view did not expose usable text to the repository
 inspection tools. The extracted requirements were cross-checked against the
 execution plan before creating the matrix.
 
+### 2026-10-17T08:56:26.9766790+05:30 - [CODEX] Traceability and logging design
+
+The Step 1 foundation uses a package logger with JSON output by default, a
+`contextvars`-based `trace_id`, and recursive redaction of common provider-key
+and bearer-token shapes. A text format and `LOG_LEVEL=DEBUG` are available for
+human debugging. The trace ID is generated or safely accepted at the transport
+boundary so later text and voice components can correlate one turn without
+putting secrets into log fields.
+
+### 2026-10-17T08:56:26.9766790+05:30 - [CODEX] Containerization scope
+
+Docker and Docker Compose are available, but no Dockerfile or Compose service
+was added in Step 1 because there is not yet an application server or file-based
+evaluation process to run. Adding one now would be a placeholder. The decision
+will be revisited when the API or evaluation path exists.
+
+### 2026-10-17T08:56:26.9766790+05:30 - [CODEX] Packaging/debugging correction
+
+The first keyless unit run passed, but a direct `python -m agentic_support`
+smoke command failed because the `src/` package was not installed for the
+interpreter. The project was then installed in editable mode, after which the
+same CLI smoke check passed. This is why the README includes editable
+installation before running the CLI.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.
