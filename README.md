@@ -6,9 +6,11 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 6 establishes reproducible routing, retrieval, input/output guardrail, and
-cache evaluations with saved JSON/Markdown baseline reports. Voice and
-production-scale orchestration are intentionally not implemented yet.
+Step 7 is complete: both required user recordings pass format validation, and
+a live Groq STT -> shared SupportService -> Windows TTS run handled the normal
+order-status request and created playable WAV output. A separate live
+return-eligibility run was safely failed closed by the classifier and is
+documented as a limitation.
 
 ## Local setup
 
@@ -44,6 +46,27 @@ python scripts/run_evaluation.py --output-dir reports
 
 The baseline uses deterministic offline routing/input-guardrail providers and
 the real local embedding model. It does not require a Groq key.
+
+Validate the real-audio manifest with:
+
+```powershell
+python scripts/validate_audio_manifest.py
+```
+
+After activating the project environment and configuring Groq credentials
+locally (do not commit or share them), run a live voice turn with:
+
+```powershell
+python scripts/run_voice_baseline.py audio/normal_order_status.wav
+```
+
+The live run record and generated response audio are saved under
+`recordings/step7-normal-order-run.json` and
+`recordings/step7-normal-order-response.wav`.
+
+The pipeline uses Windows' built-in speech synthesizer for TTS, so Groq's
+separate TTS model terms do not block local playback. Groq is still required
+for STT and the live support service.
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are

@@ -1,0 +1,28 @@
+{
+  "error_code": null,
+  "input_audio": {
+    "channels": 1,
+    "duration_seconds": 5.53625,
+    "file_bytes": 177204,
+    "frames": 88580,
+    "path": "audio\\return_eligibility.wav",
+    "sample_rate": 16000,
+    "sample_width_bytes": 2
+  },
+  "input_path": "audio\\return_eligibility.wav",
+  "output_audio": {
+    "channels": 1,
+    "duration_seconds": 6.558367346938775,
+    "file_bytes": 289270,
+    "frames": 144612,
+    "path": "recordings\\step7-return-eligibility-response.wav",
+    "sample_rate": 22050,
+    "sample_width_bytes": 2
+  },
+  "output_path": "recordings\\step7-return-eligibility-response.wav",
+  "status": "ok",
+  "support_message": "I could not classify that request safely. Please rephrase or request human support.",
+  "support_status": "failed_closed",
+  "trace_id": "step7-return-eligibility-20261017",
+  "transcript": "Can I return order NS-26-2044-8?"
+}

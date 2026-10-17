@@ -205,6 +205,45 @@ rate `1.0`, input-guardrail recall `0.6667`, output-guardrail recall `1.0`,
 and cache hit rate `0.5`. Routing/input safety were offline baselines; retrieval
 used the local embedding model. Reports were saved under `reports/`.
 
+### 2026-10-17T17:53:56.4549084+05:30 - [CODEX] Step 7 voice baseline
+
+The voice baseline uses standard-library WAV validation plus Groq's Whisper
+transcription and speech endpoints through provider interfaces. The repository
+contains a recording manifest and validator, but no real user clips were
+present during this implementation. The manifest therefore reports six
+pending recordings; no synthetic audio was treated as assignment evidence.
+
+### 2026-10-17T23:19:21.6207146+05:30 - [CODEX] Step 7 live diagnostic
+
+The two user WAVs passed the required format checks. Groq Whisper returned text
+that did not match the intended English requests for either recording, with
+both `whisper-large-v3-turbo` and `whisper-large-v3`. The order-status turn
+therefore failed closed in the shared support service. Groq TTS returned
+`model_terms_required` for `canopylabs/orpheus-v1-english`; accepting provider
+terms is an account-owner action, so the live pipeline now uses Windows
+System.Speech as its local TTS provider instead. This generated a playable
+mono, 16-bit, 22,050 Hz WAV response and a scrubbed JSON run record, but it is
+not a successful normal-turn demonstration until the user recordings are
+replaced with clips that STT recognizes as the intended requests. The focused
+voice tests passed (7 tests), and the full keyless suite passed (50 tests).
+
+### 2026-10-17T23:46:39.5681898+05:30 - [CODEX] Step 7 live normal turn
+
+The user re-recorded both required clips. Groq Whisper transcribed the normal
+order request as `Where is order NS2640068?`, removing punctuation used by the
+order handler's canonical ID parser. The STT adapter now restores hyphens only
+for an order ID whose check digit validates; invalid check digits are not
+repaired. The live normal order-status turn then used the shared support
+service and read-only tool successfully and generated playable Windows
+System.Speech output. The response stated order `NS-26-4006-8` is `in_transit`
+with estimated delivery `2026-10-22`. The captured JSON and WAV evidence are in
+`recordings/step7-normal-order-run.json` and
+`recordings/step7-normal-order-response.wav`; the run record was checked for
+configured Groq key values and contained none. The separate return-eligibility
+run was safely failed closed by the live classifier and is not claimed as a
+successful policy demonstration. Focused voice tests passed (8 tests);
+full-suite and manifest results are recorded in `docs/voice-baseline.md`.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.

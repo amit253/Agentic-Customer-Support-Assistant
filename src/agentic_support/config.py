@@ -49,6 +49,9 @@ class Settings:
     log_level: str
     log_format: str
     groq_router_model: str
+    groq_stt_model: str
+    groq_tts_model: str
+    groq_tts_voice: str
     router_max_attempts: int
     router_retry_delay_seconds: float
     groq_api_keys: tuple[str, ...]
@@ -90,6 +93,16 @@ class Settings:
         if not groq_router_model:
             raise ConfigurationError("GROQ_ROUTER_MODEL must not be empty")
 
+        groq_stt_model = source.get(
+            "GROQ_STT_MODEL", "whisper-large-v3-turbo"
+        ).strip()
+        groq_tts_model = source.get(
+            "GROQ_TTS_MODEL", "canopylabs/orpheus-v1-english"
+        ).strip()
+        groq_tts_voice = source.get("GROQ_TTS_VOICE", "austin").strip()
+        if not groq_stt_model or not groq_tts_model or not groq_tts_voice:
+            raise ConfigurationError("STT/TTS model and voice settings must not be empty")
+
         try:
             router_max_attempts = int(source.get("ROUTER_MAX_ATTEMPTS", "2"))
         except (TypeError, ValueError) as exc:
@@ -116,6 +129,9 @@ class Settings:
             log_level=log_level,
             log_format=log_format,
             groq_router_model=groq_router_model,
+            groq_stt_model=groq_stt_model,
+            groq_tts_model=groq_tts_model,
+            groq_tts_voice=groq_tts_voice,
             router_max_attempts=router_max_attempts,
             router_retry_delay_seconds=router_retry_delay_seconds,
             groq_api_keys=_read_groq_keys(source),
@@ -145,6 +161,9 @@ class Settings:
             "log_level": self.log_level,
             "log_format": self.log_format,
             "groq_router_model": self.groq_router_model,
+            "groq_stt_model": self.groq_stt_model,
+            "groq_tts_model": self.groq_tts_model,
+            "groq_tts_voice": self.groq_tts_voice,
             "router_max_attempts": self.router_max_attempts,
             "router_retry_delay_seconds": self.router_retry_delay_seconds,
             "groq_configured": self.groq_configured,

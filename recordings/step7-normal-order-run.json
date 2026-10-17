@@ -1,0 +1,28 @@
+{
+  "error_code": null,
+  "input_audio": {
+    "channels": 1,
+    "duration_seconds": 6.71625,
+    "file_bytes": 214964,
+    "frames": 107460,
+    "path": "audio\\normal_order_status.wav",
+    "sample_rate": 16000,
+    "sample_width_bytes": 2
+  },
+  "input_path": "audio\\normal_order_status.wav",
+  "output_audio": {
+    "channels": 1,
+    "duration_seconds": 11.982267573696145,
+    "file_bytes": 528464,
+    "frames": 264209,
+    "path": "recordings\\step7-normal-order-response.wav",
+    "sample_rate": 22050,
+    "sample_width_bytes": 2
+  },
+  "output_path": "recordings\\step7-normal-order-response.wav",
+  "status": "ok",
+  "support_message": "Order NS-26-4006-8 status: in_transit. Estimated delivery: 2026-10-22.",
+  "support_status": "ok",
+  "trace_id": "step7-normal-order-20261017",
+  "transcript": "Where is order NS-26-4006-8?"
+}

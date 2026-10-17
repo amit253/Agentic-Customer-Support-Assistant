@@ -1,0 +1,27 @@
+{
+  "error_code": null,
+  "input_audio": {
+    "channels": 1,
+    "duration_seconds": 22.3799375,
+    "file_bytes": 716202,
+    "frames": 358079,
+    "path": "audio\\normal_order_status.wav",
+    "sample_rate": 16000,
+    "sample_width_bytes": 2
+  },
+  "input_path": "audio\\normal_order_status.wav",
+  "output_audio": {
+    "channels": 1,
+    "duration_seconds": 6.558367346938775,
+    "file_bytes": 289270,
+    "frames": 144612,
+    "path": "recordings\\step7-fail-closed-check.wav",
+    "sample_rate": 22050,
+    "sample_width_bytes": 2
+  },
+  "output_path": "recordings\\step7-fail-closed-check.wav",
+  "status": "ok",
+  "support_status": "failed_closed",
+  "trace_id": "step7-fail-closed-20261017",
+  "transcript": "I am a school coach, who ever has a child."
+}

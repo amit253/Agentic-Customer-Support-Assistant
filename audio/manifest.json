@@ -1,0 +1,66 @@
+{
+  "schema_version": "step7-audio-v1",
+  "domain": "Northstar Gear",
+  "recording_format": {
+    "container": "wav",
+    "sample_rate_hz": 16000,
+    "channels": 1,
+    "sample_width_bits": 16
+  },
+  "clips": [
+    {
+      "id": "normal_order_status",
+      "file": "audio/normal_order_status.wav",
+      "scenario": "Normal order-status request",
+      "transcript": "Where is order NS-26-4006-8?",
+      "required": true,
+      "status": "recorded",
+      "recorded_by": "user"
+    },
+    {
+      "id": "return_eligibility",
+      "file": "audio/return_eligibility.wav",
+      "scenario": "Return-eligibility request",
+      "transcript": "Can I return order NS-26-2044-8?",
+      "required": true,
+      "status": "recorded",
+      "recorded_by": "user"
+    },
+    {
+      "id": "wrong_order_interrupt",
+      "file": "audio/wrong_order_interrupt.wav",
+      "scenario": "Future Step 8 barge-in clip",
+      "transcript": "Wait, wrong order",
+      "required": true,
+      "status": "pending_recording",
+      "recorded_by": "user"
+    },
+    {
+      "id": "pace_or_accent_variant",
+      "file": "audio/pace_or_accent_variant.wav",
+      "scenario": "Future Step 8 speech variation",
+      "transcript": "What is the return window for my backpack?",
+      "required": false,
+      "status": "pending_recording",
+      "recorded_by": "user"
+    },
+    {
+      "id": "noise_burst",
+      "file": "audio/noise_burst.wav",
+      "scenario": "Future Step 8 short real background-noise clip",
+      "transcript": "",
+      "required": false,
+      "status": "pending_recording",
+      "recorded_by": "user"
+    },
+    {
+      "id": "adversarial_false_start",
+      "file": "audio/adversarial_false_start.wav",
+      "scenario": "Future Step 8 false-start interruption",
+      "transcript": "Uh, wait, no, actually the blue one",
+      "required": false,
+      "status": "pending_recording",
+      "recorded_by": "user"
+    }
+  ]
+}
