@@ -103,6 +103,26 @@ test file was corrected, then the full keyless suite and compile check were
 rerun successfully. The failure was a local test-edit error, not a domain
 contract failure.
 
+### 2026-10-17T14:36:46.5903240+05:30 - [CODEX] Embedding and index choice
+
+The configured Python environment already had NumPy, PyTorch, Transformers,
+and SentencePiece. Sentence Transformers was installed and the local
+`sentence-transformers/all-MiniLM-L6-v2` model loaded successfully, producing
+384-dimensional vectors. The retrieval implementation uses that model and an
+exact normalized NumPy matrix index. The corpus is only 12 documents, so an
+inspectable exact scan was chosen instead of adding approximate-neighbor
+infrastructure.
+
+### 2026-10-17T14:36:46.5903240+05:30 - [CODEX] Similarity threshold correction
+
+The first real-model retrieval test failed because an unanswerable refund query
+scored `0.3618` against a related policy chunk with the initial `0.35`
+threshold. Measured required-case scores were then collected: paraphrase
+`0.5043`, conflicting policy sources `0.6234` and `0.4828`, irrelevant query
+`0.1746`, and unanswerable query best candidate `0.4399`. The threshold was
+raised to `0.45`, after which all five retrieval tests passed. This is a
+retrieval-boundary decision, not a keyword fallback.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.

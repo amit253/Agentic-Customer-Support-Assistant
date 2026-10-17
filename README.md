@@ -6,10 +6,10 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 2 establishes the fictional Northstar Gear domain, deterministic session
-and order fixtures, tool contracts, knowledge-base documents, and seed
-evaluation examples. The tool execution logic, RAG, agents, and voice
-pipeline are intentionally not implemented yet.
+Step 3 establishes local embedding retrieval, deterministic chunking, source
+provenance, and explicit insufficient-evidence behavior over the Northstar
+Gear knowledge base. Tool execution, answer agents, and voice are intentionally
+not implemented yet.
 
 ## Local setup
 
@@ -27,6 +27,14 @@ The project tests are deliberately keyless:
 ```powershell
 python -m pytest
 python -m agentic_support
+```
+
+The first retrieval run may download the configured local embedding model into
+the local Hugging Face cache. It does not use a Groq key. Retrieval-specific
+tests can be run with:
+
+```powershell
+python -m pytest -q tests/test_retrieval.py
 ```
 
 The health command prints a JSON response and one structured log event. A
