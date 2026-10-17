@@ -110,18 +110,34 @@ def test_stt_failure_returns_structured_failure(tmp_path: Path) -> None:
     write_wav(input_path)
 
     class BrokenStt:
+        attempts = 0
+
         def transcribe(self, audio_path: Path) -> SpeechTranscript:
+            self.attempts += 1
             raise VoiceProviderError("stt_provider_failed")
 
+    stt = BrokenStt()
+    tts = FakeTts()
     result = VoicePipeline(
         support_service=build_voice_service(),
-        stt=BrokenStt(),
-        tts=FakeTts(),
-    ).process(input_path, trace_id="stt-failure")
+        stt=stt,
+        tts=tts,
+    ).process(
+        input_path,
+        trace_id="stt-failure",
+        output_path=tmp_path / "safe-handoff.wav",
+    )
 
-    assert result.status == "failed"
-    assert result.error_code == "stt_provider_failed"
+    assert result.status == "handoff"
+    assert result.error_code == "stt_provider_failed_safe_handoff"
     assert result.transcript is None
+    assert result.support_status == "failed_closed"
+    assert result.stt_attempts == 2
+    assert stt.attempts == 2
+    assert result.output_audio is not None
+    assert "request human support" in (result.support_message or "")
+    assert tts.text == result.support_message
+    assert result.latency_ms is not None and result.latency_ms >= 0
 
 
 def test_groq_stt_adapter_uses_whisper_transcription_contract(tmp_path: Path) -> None:

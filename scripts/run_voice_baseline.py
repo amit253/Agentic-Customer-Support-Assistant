@@ -35,9 +35,20 @@ def main() -> None:
                 "input_path": result.input_path,
                 "transcript": result.transcript,
                 "support_status": result.support_status,
+                "support_intent": result.support_intent,
+                "support_handler": result.support_handler,
                 "support_message": result.support_message,
+                "support_metadata": result.support_metadata,
                 "output_path": result.output_path,
                 "error_code": result.error_code,
+                "end_of_speech_at": result.end_of_speech_at.isoformat()
+                if result.end_of_speech_at is not None
+                else None,
+                "first_audio_at": result.first_audio_at.isoformat()
+                if result.first_audio_at is not None
+                else None,
+                "end_of_speech_to_first_audio_ms": result.latency_ms,
+                "stt_attempts": result.stt_attempts,
                 "input_audio": asdict(result.input_audio)
                 if result.input_audio is not None
                 else None,
@@ -49,7 +60,7 @@ def main() -> None:
             sort_keys=True,
         )
     )
-    if result.status != "ok":
+    if result.status not in {"ok", "handoff"}:
         raise SystemExit(1)
 
 

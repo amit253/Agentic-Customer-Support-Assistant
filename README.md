@@ -6,11 +6,14 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 7 is complete: both required user recordings pass format validation, and
-a live Groq STT -> shared SupportService -> Windows TTS run handled the normal
-order-status request and created playable WAV output. A separate live
-return-eligibility run was safely failed closed by the classifier and is
-documented as a limitation.
+Step 7 is complete. Step 8 coordination, WebRTC plus local Silero VAD confirmation,
+stale-result rejection, and STT retry/safe-handoff code are implemented.
+Regression cases report zero false interruptions and zero missed speech in
+the tested corpus, and the latest audible noise run completed without
+interrupting playback. The latest speech follow-ups still fail closed on live
+safety/classification results, and the provider-failure scenario is injected;
+Step 8 is not yet complete. See
+[docs/voice-coordination.md](docs/voice-coordination.md).
 
 ## Local setup
 
@@ -67,6 +70,11 @@ The live run record and generated response audio are saved under
 The pipeline uses Windows' built-in speech synthesizer for TTS, so Groq's
 separate TTS model terms do not block local playback. Groq is still required
 for STT and the live support service.
+
+Run or repeat the real-time scenarios from the
+[Step 8 runbook](docs/voice-coordination.md).
+The default runner plays responses through the Windows audio device and writes
+scenario reports to `recordings/`.
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are

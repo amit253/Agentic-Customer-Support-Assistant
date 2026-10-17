@@ -10,24 +10,42 @@ customer information.
 - mono
 - 16-bit
 - 16,000 Hz
-- clear speech recorded by the user
+- clear speech/noise recorded by the user (do not synthesize evidence)
+- leave at least 0.7 seconds of silence at the end of speech clips so the
+  coordinator can detect end-of-utterance
 
 Use Windows Voice Recorder, Audacity, or another local recorder. Export each
 clip to the exact path in `audio/manifest.json`, then change its `status` from
 `pending_recording` to `recorded`.
 
+## Step 8 recording status
+
+The required clips have been recorded and their formats pass validation.
+Their scenario outcomes still need to pass; in particular, the current noise
+recording triggers VAD as speech, so it does not demonstrate noise rejection.
+Review/re-record that clip if it contains sustained or speech-like audio:
+
+- `audio/wrong_order_interrupt.wav`: “Wait, wrong order.”
+- `audio/noise_burst.wav`: a brief non-speech room/background noise burst.
+- `audio/adversarial_false_start.wav`: the user-authored Northstar Gear
+  interruption listed in `audio/manifest.json`.
+
+`audio/pace_or_accent_variant.wav` is optional. The two Step 7 recordings
+remain in the manifest and should not be overwritten.
+
 Validate the manifest with:
 
 ```powershell
+$env:PYTHONPATH = "src"
 python scripts/validate_audio_manifest.py
 ```
 
-For the Step 7 normal-turn demonstration, validate a specific recorded clip:
+`--require-recorded` requires all manifest entries, including optional clips:
 
 ```powershell
 python scripts/validate_audio_manifest.py --require-recorded
 ```
 
-The short noise and interruption clips are listed now because they are needed
-by Step 8. Do not claim those scenarios are demonstrated until the real files
-and evidence logs exist.
+After validating the manifest, run the scenarios in `docs/voice-coordination.md`. Use the default playback
+mode for audible playback/cancellation evidence; `--no-playback` is only for
+logic checks.

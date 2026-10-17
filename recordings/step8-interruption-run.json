@@ -1,0 +1,58 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-17T19:41:48.406269+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 74,
+      "observed_at": "2026-10-17T19:41:49.866767+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-17T19:41:50.003544+00:00",
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 220,
+      "observed_at": "2026-10-17T19:41:52.786314+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-17T19:41:52.793301+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-17T19:41:52.786314+00:00",
+    "end_of_speech_to_first_audio_ms": 3665.8599999999997,
+    "error_code": null,
+    "first_audio_at": "2026-10-17T19:41:56.452174+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\step8-interruption-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": null,
+    "support_intent": null,
+    "support_message": "I could not process that request safely.",
+    "support_metadata": {
+      "reason": "input_safety_provider_failure"
+    },
+    "support_status": "failed_closed",
+    "transcript": "V\u00edk r\u00f3ng\u00f3\u00f0ur.",
+    "turn_id": "turn-0002"
+  },
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "playback_device_used": true,
+  "scenario": "interruption",
+  "schema_version": "step8-voice-run-v1",
+  "started_at": "2026-10-17T19:41:46.302733+00:00",
+  "turn_id": "turn-0001"
+}

@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import wave
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable, Literal, Protocol
 
@@ -48,16 +49,23 @@ class SpeechTranscript:
 
 @dataclass(frozen=True, slots=True)
 class VoiceTurnResult:
-    status: Literal["ok", "failed"]
+    status: Literal["ok", "handoff", "failed"]
     trace_id: str
     input_path: str
     transcript: str | None
     support_status: str | None
     output_path: str | None
     error_code: str | None
+    support_intent: str | None = None
+    support_handler: str | None = None
     support_message: str | None = None
+    support_metadata: dict[str, object] | None = None
     input_audio: AudioMetadata | None = None
     output_audio: AudioMetadata | None = None
+    end_of_speech_at: datetime | None = None
+    first_audio_at: datetime | None = None
+    latency_ms: float | None = None
+    stt_attempts: int = 0
 
 
 class SpeechToText(Protocol):
@@ -285,10 +293,14 @@ class VoicePipeline:
         support_service: SupportService,
         stt: SpeechToText,
         tts: TextToSpeech,
+        max_stt_attempts: int = 2,
     ) -> None:
+        if max_stt_attempts < 1:
+            raise ValueError("max_stt_attempts must be positive")
         self.support_service = support_service
         self.stt = stt
         self.tts = tts
+        self.max_stt_attempts = max_stt_attempts
 
     def process(
         self,
@@ -297,7 +309,9 @@ class VoicePipeline:
         session_id: str = "demo-session-omar",
         trace_id: str | None = None,
         output_path: Path | None = None,
+        end_of_speech_at: datetime | None = None,
     ) -> VoiceTurnResult:
+        speech_ended = end_of_speech_at or datetime.now(UTC)
         with trace_context(trace_id) as active_trace_id:
             try:
                 input_metadata = validate_input_wav(audio_path)
@@ -311,21 +325,81 @@ class VoicePipeline:
                     output_path=None,
                     error_code=str(exc),
                     support_message=None,
+                    end_of_speech_at=speech_ended,
                 )
 
-            try:
-                transcript = self.stt.transcribe(audio_path)
-            except VoiceProviderError as exc:
+            transcript = None
+            stt_error: VoiceProviderError | None = None
+            for attempt in range(1, self.max_stt_attempts + 1):
+                try:
+                    transcript = self.stt.transcribe(audio_path)
+                    break
+                except VoiceProviderError as exc:
+                    stt_error = exc
+                    log_event(
+                        self.support_service.logger,
+                        "voice_stt_attempt_failed",
+                        attempt=attempt,
+                        will_retry=attempt < self.max_stt_attempts,
+                        reason=str(exc),
+                    )
+
+            if transcript is None:
+                if stt_error is None:
+                    raise RuntimeError("STT attempt loop ended without a result")
+                handoff_message = (
+                    "I'm having trouble processing the audio right now. "
+                    "Please try again or request human support."
+                )
+                target = output_path or (
+                    Path("recordings") / f"voice-{active_trace_id}.wav"
+                )
+                try:
+                    output_metadata = self.tts.synthesize(handoff_message, target)
+                except (AudioValidationError, VoiceProviderError) as tts_error:
+                    log_event(
+                        self.support_service.logger,
+                        "voice_safe_handoff_audio_failed",
+                        reason=str(tts_error),
+                        stt_attempts=self.max_stt_attempts,
+                    )
+                    return VoiceTurnResult(
+                        status="failed",
+                        trace_id=active_trace_id,
+                        input_path=str(audio_path),
+                        transcript=None,
+                        support_status="failed_closed",
+                        output_path=str(target),
+                        error_code=str(tts_error),
+                        support_message=handoff_message,
+                        input_audio=input_metadata,
+                        end_of_speech_at=speech_ended,
+                        stt_attempts=self.max_stt_attempts,
+                    )
+                log_event(
+                    self.support_service.logger,
+                    "voice_safe_handoff",
+                    reason="stt_provider_failed",
+                    stt_attempts=self.max_stt_attempts,
+                )
+                first_audio_at = datetime.now(UTC)
                 return VoiceTurnResult(
-                    status="failed",
+                    status="handoff",
                     trace_id=active_trace_id,
                     input_path=str(audio_path),
                     transcript=None,
-                    support_status=None,
-                    output_path=None,
-                    error_code=str(exc),
-                    support_message=None,
+                    support_status="failed_closed",
+                    output_path=str(target),
+                    error_code="stt_provider_failed_safe_handoff",
+                    support_metadata={"reason": "stt_provider_failed"},
+                    support_message=handoff_message,
                     input_audio=input_metadata,
+                    output_audio=output_metadata,
+                    end_of_speech_at=speech_ended,
+                    first_audio_at=first_audio_at,
+                    latency_ms=(first_audio_at - speech_ended).total_seconds()
+                    * 1000,
+                    stt_attempts=self.max_stt_attempts,
                 )
 
             support_response: SupportResponse = self.support_service.handle(
@@ -351,9 +425,13 @@ class VoicePipeline:
                     support_status=support_response.status,
                     output_path=str(target),
                     error_code=str(exc),
+                    support_intent=support_response.intent,
+                    support_handler=support_response.handler_name,
                     support_message=support_response.message,
+                    support_metadata=support_response.metadata,
                     input_audio=input_metadata,
                 )
+            first_audio_at = datetime.now(UTC)
             return VoiceTurnResult(
                 status="ok",
                 trace_id=active_trace_id,
@@ -362,9 +440,16 @@ class VoicePipeline:
                 support_status=support_response.status,
                 output_path=str(target),
                 error_code=None,
+                support_intent=support_response.intent,
+                support_handler=support_response.handler_name,
                 support_message=support_response.message,
+                support_metadata=support_response.metadata,
                 input_audio=input_metadata,
                 output_audio=output_metadata,
+                end_of_speech_at=speech_ended,
+                first_audio_at=first_audio_at,
+                latency_ms=(first_audio_at - speech_ended).total_seconds() * 1000,
+                stt_attempts=attempt,
             )
 
 

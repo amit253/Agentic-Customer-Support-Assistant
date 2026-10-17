@@ -137,6 +137,16 @@ evidence or logs.
 
 **Dependencies:** Step 7.
 
+**Status:** Turn ownership, WebRTC candidate detection with independent local
+Silero VAD ONNX confirmation, cancellation/stale-result handling, and
+two-attempt STT safe handoff are implemented. The regression corpus reports
+zero false interruptions and zero missed speech; the latest audible noise
+scenario completes playback without interruption. The latest audible
+wrong-order path failed closed at input safety, and the adversarial path failed
+closed at classification. The provider-failure scenario is injected, not a
+real outage. Acceptance remains incomplete; see
+[voice-coordination.md](./voice-coordination.md).
+
 **Work:** implement turn IDs, cancellation, stale-result discard, speech/noise
 decision logic, required scenarios, one original adversarial scenario, one
 provider failure path, and end-of-speech-to-first-audio timing.

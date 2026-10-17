@@ -1,0 +1,26 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-17T19:46:31.425780+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "cancelled": false,
+      "event": "assistant_playback_completed",
+      "observed_at": "2026-10-17T19:46:43.511392+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "silence_replayed_in_real_time",
+  "followup": null,
+  "interruption_detected": false,
+  "old_turn_result_discarded": false,
+  "playback_device_used": true,
+  "scenario": "silence",
+  "schema_version": "step8-voice-run-v1",
+  "started_at": "2026-10-17T19:46:26.130121+00:00",
+  "turn_id": "turn-0001"
+}
