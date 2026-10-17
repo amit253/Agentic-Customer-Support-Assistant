@@ -422,3 +422,16 @@ were reproduced before correction. The input guard now fails closed below
 and relative delivery dates. Regression tests cover direct guard behavior and
 the service boundary. Residual semantic-classifier and heuristic-coverage
 risks are documented in `docs/red-team-report.md`.
+
+### 2026-10-18T01:32:13.7636954+05:30 - [CODEX] Design-note scope and labels
+
+The assignment PDF was extracted and reviewed before writing the Part A/B
+design notes and Part C answers. The documentation labels implemented and
+tested behavior separately from untested behavior and proposed production
+architecture. In particular, review found that the product handler retrieves
+passages but does not generate a grounded answer, and the current explicit
+local tool dispatcher is neither Groq native function calling nor a ReAct
+loop. These are recorded as acceptance gaps rather than retroactively
+described as complete. Part C state sharing and high-volume operations are
+proposals because no persistent shared session store or 10,000-session test
+exists.

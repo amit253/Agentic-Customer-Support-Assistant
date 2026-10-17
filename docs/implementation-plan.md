@@ -159,6 +159,12 @@ is accepted as a successful turn.
 
 **Dependencies:** Steps 5-8.
 
+**Status:** The keyless suite passed 62 tests with two dependency deprecation
+warnings. Focused guarded-call-path/router/tool tests passed 26 tests; voice
+tests passed 15 with zero false interruptions and zero missed speech in the
+current labeled corpus. The audio manifest has zero validation errors.
+Exact commands and results are in [step9-test-report.md](./step9-test-report.md).
+
 **Work:** run unit, integration, security, and voice tests; fix critical
 issues; keep optional advanced tests explicitly labeled `[REC]`.
 
@@ -168,6 +174,14 @@ remain keyless.
 ### Step 10 - Design notes and Part C
 
 **Dependencies:** measured behavior from Steps 5-9.
+
+**Status:** Part A/B design notes and Part C answers have been written against
+the inspected implementation, measured evaluation report, and actual Step 8
+voice logs. Incomplete native function-calling/ReAct behavior, customer-facing
+RAG answer generation, persistent cross-channel state, acoustic-loopback
+latency, and live-provider limitations are called out rather than claimed.
+See [design-notes.md](./design-notes.md) and
+[part-c-answers.md](./part-c-answers.md).
 
 **Work:** write architecture, Part A/B design notes, and Part C answers tied
 to the actual implementation. Cover scale, fourth-agent extension, shared

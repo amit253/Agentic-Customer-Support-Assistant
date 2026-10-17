@@ -1,0 +1,92 @@
+# Part C - Integration and Operations Answers
+
+These are design answers for the assignment, not claims that an integrated
+production chat, human handoff, or distributed control plane exists.
+
+## Voice-to-text or human-support transfer
+
+**PROPOSED; NOT IMPLEMENTED.** The current voice and text transports can call
+the same `SupportService`, but this repository does not implement a shared
+persistent conversation/session store or a live voice-to-text transfer.
+The demo session-to-customer mapping is fictional fixture data, not
+authentication.
+
+A production handoff should persist one canonical session record containing:
+
+- server-verified customer and tenant identity, channel, consent, and access
+  scope;
+- ordered user/assistant turns with trace and turn IDs, timestamps, transcript
+  confidence, and provenance;
+- tool results and allowed facts with source/time, not model-inferred facts;
+- pending intent, cancellation/completion state, and idempotency keys;
+- transfer reason, human queue status, and a concise handoff summary.
+
+Voice should append its final transcript and validated turn events to the
+same session before handing a session reference to text or a human agent.
+Audio blobs should remain in a controlled media store with retention and
+access policy; transcripts should be redacted as required. The destination
+must reauthorize the user and tool access from trusted server-side identity,
+not accept customer/order ownership claims copied from model text. A transfer
+should be idempotent so retries do not create duplicate human tickets or
+duplicate assistant turns.
+
+The current per-process `VoiceTurnCoordinator` protects a single running
+voice interaction only. It is not the shared state layer described above.
+
+## Production evaluation, safety regression, SLOs, and routing A/B tests
+
+**PARTIALLY IMPLEMENTED.** The repository has deterministic tests, a labeled
+offline evaluation script, and local measurements. The current offline
+baseline reports routing accuracy 0.8333, retrieval recall@5 0.7273, input
+guardrail recall 0.6667, output guardrail recall 1.0, and classifier-cache
+hit rate 0.5. The sample sets are small and are not production quality
+estimates. Speech regression results are likewise limited to the current
+recorded/synthetic corpus.
+
+In production, maintain versioned, access-controlled evaluation sets for
+intent, ambiguity, benign injection-like language, adversarial instructions,
+ownership, unconfirmed refund/delivery claims, retrieval conflicts, accents,
+noise, and interruption timing. Run them on every model, prompt, schema, and
+policy change. Track false-allow and false-block separately by category;
+require zero critical ownership/claim regressions before rollout and review
+all dataset disagreements with human annotation.
+
+Proposed SLOs should be derived from a measured production baseline. One
+initial target to validate is p95 end-of-speech to first audible sample below
+3 seconds, with provider timeout/handoff completion and error-budget targets
+defined per channel. Current measurements are application playback-start
+timestamps, not acoustic loopback, and some exceed 3 seconds; this target is
+not currently met or production-validated.
+
+For routing changes, shadow-score a candidate on copied, redacted traffic but
+do not dispatch its route or tools. Compare intent confusion, low-confidence
+rates, safety decisions, unsupported-claim blocks, per-intent handoffs, cost,
+and latency by segment. After offline gates, canary a small percentage of
+sessions with stable assignment and immediate rollback on safety or SLO
+regression. Never A/B test by disabling authorization or output-claim checks.
+Log the model/prompt/policy versions and preserve a deterministic replay
+record.
+
+## Groq degradation and provider consistency
+
+**PARTIALLY IMPLEMENTED.** Router calls have bounded retries and safe
+fail-closed responses; voice STT retries twice and then uses local Windows
+TTS to play a static human-support handoff. Live Step 8 speech paths have
+failed closed, and the provider-failure recording uses an injected STT
+failure. There is no validated real-outage test, circuit breaker, or
+automatic alternate-provider failover.
+
+Production monitoring should alert on rolling provider error rate, timeout
+rate, p95/p99 latency, rate-limit responses, malformed/partial structured
+outputs, and queue depth. Apply bounded retries with jitter and deadlines,
+then open a circuit to avoid compounding an outage. Continue only deterministic
+read-only operations that remain safe; otherwise speak/display a static
+handoff. Any alternate provider must pass the same schema, tool authorization,
+input safety, output validation, and regression gates before use.
+
+Failover can reduce outage impact but can change intent boundaries,
+calibration, refusal style, latency, cost, and structured-output behavior.
+Maintain provider-specific prompts/adapters behind one validated contract,
+version them, and run shadow and canary comparisons. Do not silently switch
+providers mid-session if that can produce inconsistent policy decisions;
+pin the provider/model per turn or transfer explicitly to a safe handoff.
