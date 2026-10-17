@@ -196,6 +196,16 @@ implemented/tested, implemented/untested, or proposed claims where useful.
 **Dependencies:** a working text and voice path. Begin exploratory attacks
 during Steps 5 and 8; formalize them here.
 
+**Status:** Two weaknesses were reproduced before correction: an explicitly
+signaled unauthorized-refund input was allowed when the safety provider
+returned `safe=true` with confidence 0.0, and an unsupported natural-language
+delivery date passed output validation. Both were fixed and covered by
+service-boundary regression tests. Pre-fix reproductions, exact input/output,
+root causes, fixes, and residual risks are documented in
+[red-team-report.md](./red-team-report.md). The findings were fixed because
+they crossed the core safety boundary and had narrow, testable corrections;
+the semantic-classifier and heuristic-coverage limitations remain.
+
 **Work:** attack injection handling, unsupported claims, order ownership,
 router edge cases, and barge-in timing. Reproduce at least two genuine
 weaknesses required by the PDF; document evidence, root cause, severity,

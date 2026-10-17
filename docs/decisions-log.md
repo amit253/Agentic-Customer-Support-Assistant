@@ -435,3 +435,14 @@ loop. These are recorded as acceptance gaps rather than retroactively
 described as complete. Part C state sharing and high-volume operations are
 proposals because no persistent shared session store or 10,000-session test
 exists.
+
+### 2026-10-18T01:32:42.2700666+05:30 - [CODEX] Step 11 reproduced findings
+
+The four focused red-team regressions passed after the fixes: low-confidence
+input is stopped before route dispatch; unsupported natural-language date
+claims fail closed at the service boundary; relative delivery dates are
+blocked; and a verified month-name date remains allowed. The two pre-fix
+failures and reproduction payloads are retained in the red-team report. Both
+issues were fixed rather than left open because the fixes were small,
+fail-closed, and directly testable. Remaining limitations are not reported as
+reproduced attacks.
