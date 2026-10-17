@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date
 
 from .contracts import OrderStatusResult, ReturnEligibilityResult
+from .retrieval import DocumentChunk
 
 
 _ORDER_ID_PATTERN = re.compile(r"\bNS-\d{2}-\d{4}-\d\b")
@@ -24,6 +26,20 @@ _NUMERIC_DATE_PATTERN = re.compile(
 _MONEY_PATTERN = re.compile(
     r"(?<![\w.])(?:[$€£]\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?)(?!\w)"
 )
+_MONTH_NUMBERS = {
+    "jan": 1,
+    "feb": 2,
+    "mar": 3,
+    "apr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dec": 12,
+}
 _RELATIVE_DELIVERY_PATTERN = re.compile(
     r"\b(?:deliver(?:y|ed|s)?|arriv(?:e|es|al)|ship(?:s|ped|ping)?)\b"
     r".{0,60}\b(?:today|tomorrow|tonight|next\s+\w+|in\s+\d+\s+days?)\b"
@@ -37,6 +53,18 @@ _PROMISE_PATTERNS = (
     re.compile(r"\bguaranteed (?:delivery|refund|replacement)\b", re.IGNORECASE),
     re.compile(r"\byou will receive (?:it|your order) by\b", re.IGNORECASE),
 )
+
+
+def _month_date_value(match: re.Match[str]) -> str | None:
+    month = match.group("month").lower()[:3]
+    try:
+        return date(
+            int(match.group("year")),
+            _MONTH_NUMBERS[month],
+            int(match.group("day")),
+        ).isoformat()
+    except (KeyError, ValueError):
+        return None
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +108,45 @@ class AllowedFacts:
         )
         return cls(order_ids=frozenset({result.order_id}), dates=dates)
 
+    @classmethod
+    def from_retrieval(
+        cls, chunks: Sequence[DocumentChunk]
+    ) -> "AllowedFacts":
+        order_ids: set[str] = set()
+        dates: set[str] = set()
+        amounts: set[str] = set()
+        for chunk in chunks:
+            order_ids.update(_ORDER_ID_PATTERN.findall(chunk.text))
+            for value in _DATE_PATTERN.findall(chunk.text):
+                try:
+                    date.fromisoformat(value)
+                except ValueError:
+                    continue
+                dates.add(value)
+            dates.update(
+                value
+                for match in _MONTH_DATE_PATTERN.finditer(chunk.text)
+                if (value := _month_date_value(match)) is not None
+            )
+            for match in _NUMERIC_DATE_PATTERN.finditer(chunk.text):
+                first = int(match.group("first"))
+                second = int(match.group("second"))
+                year = int(match.group("year"))
+                interpretations: set[str] = set()
+                for month, day in ((first, second), (second, first)):
+                    try:
+                        interpretations.add(date(year, month, day).isoformat())
+                    except ValueError:
+                        continue
+                if len(interpretations) == 1:
+                    dates.update(interpretations)
+            amounts.update(_MONEY_PATTERN.findall(chunk.text))
+        return cls(
+            order_ids=frozenset(order_ids),
+            dates=frozenset(dates),
+            amounts=frozenset(amounts),
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class ClaimValidationResult:
@@ -95,29 +162,7 @@ class OutputClaimGuard:
 
     @staticmethod
     def _month_date(match: re.Match[str]) -> str | None:
-        month = match.group("month").lower()[:3]
-        month_numbers = {
-            "jan": 1,
-            "feb": 2,
-            "mar": 3,
-            "apr": 4,
-            "may": 5,
-            "jun": 6,
-            "jul": 7,
-            "aug": 8,
-            "sep": 9,
-            "oct": 10,
-            "nov": 11,
-            "dec": 12,
-        }
-        try:
-            return date(
-                int(match.group("year")),
-                month_numbers[month],
-                int(re.sub(r"(?:st|nd|rd|th)$", "", match.group("day"), flags=re.I)),
-            ).isoformat()
-        except ValueError:
-            return None
+        return _month_date_value(match)
 
     def validate(
         self, message: str, allowed_facts: AllowedFacts | None = None

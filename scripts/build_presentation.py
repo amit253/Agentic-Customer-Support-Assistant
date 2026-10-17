@@ -49,18 +49,18 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
         ),
     ),
     (
-        "Grounding and implementation gaps",
+        "Grounded answers and tool-calling choice",
         (
             "12 original KB documents; local MiniLM embeddings and exact cosine scan",
             "Retrieval keeps source and chunk provenance; insufficient evidence is explicit",
-            "Product handler retrieves passages but does not yet generate a grounded answer",
-            "Tool dispatch is deterministic; native function calling/ReAct is not implemented",
+            "Product answers cite retrieved chunks; only cited facts reach the output claim guard",
+            "Native Groq calls select one allow-listed tool; local code validates arguments and ownership",
         ),
     ),
     (
         "Measured offline baseline",
         (
-            "Keyless regression suite: 62 passed; 2 dependency deprecation warnings",
+            "Keyless suite: 81 passed, 2 live checks skipped; 2 dependency warnings",
             "Routing accuracy 0.8333; retrieval recall@5 0.7273",
             "Input guardrail recall 0.6667; output guardrail recall 1.0",
             "Classifier cache hit rate 0.5 on the measured workload",
@@ -116,8 +116,8 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
         (
             "Voice-to-text/human shared-state transfer is designed, not implemented",
             "Groq degradation: bounded retry then fail-closed or local safe handoff",
-            "Next: compliant tool-calling/ReAct path and grounded product answer generation",
-            "Then: live interruption follow-up validation and acoustic latency measurement",
+            "Separate live Groq product-answer and native-tool smoke checks passed",
+            "Next: speech follow-up and acoustic latency measurement",
         ),
     ),
 )

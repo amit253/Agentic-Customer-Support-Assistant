@@ -6,10 +6,12 @@ import logging
 import re
 import unicodedata
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 
 from .config import Settings
 from .facts import AllowedFacts, OutputClaimGuard
+from .grounded_answers import GroqGroundedAnswerer
 from .guardrails import (
     GroqSafetyClassifier,
     InputGuard,
@@ -22,6 +24,8 @@ from .handlers import (
 )
 from .logging_config import log_event
 from .routing import GroqStructuredClassifier, RouteDecision, StructuredIntentRouter
+from .retrieval import GroundedRetriever
+from .tool_calling import GroqOrderToolCaller
 from .tools import DeterministicOrderTools
 from .tracing import trace_context
 
@@ -254,9 +258,17 @@ def build_live_support_service(
         max_attempts=active_settings.router_max_attempts,
         retry_delay_seconds=active_settings.router_retry_delay_seconds,
     )
+    retriever = GroundedRetriever.from_directory(
+        Path(__file__).resolve().parents[2] / "knowledge_base"
+    )
     return SupportService(
         router=router,
-        registry=build_default_registry(order_tools=DeterministicOrderTools()),
+        registry=build_default_registry(
+            retriever=retriever,
+            answerer=GroqGroundedAnswerer(active_settings),
+            order_tools=DeterministicOrderTools(),
+            order_tool_caller=GroqOrderToolCaller(active_settings),
+        ),
         input_guard=InputGuard(safety_classifier),
         output_guard=OutputClaimGuard(),
     )

@@ -93,20 +93,23 @@ not displace the explicit requirements above:
 - Large numerical evaluation sets beyond what is needed for meaningful evidence.
 - Live microphone mode when file-based recorded audio already gives a reliable demonstration.
 
-## Step 12 evidence/status snapshot
+## Step 13 status update
 
 Status values: **IMPLEMENTED+TESTED** means the implementation has focused
 test or runtime evidence; **PARTIAL** means behavior or required quality is
 not fully demonstrated; **ANSWERED-PROPOSED** means the written design answer
 exists but production behavior is not implemented; **BLOCKED** identifies an
-explicit missing requirement.
+explicit missing requirement. A2 and A4 were implemented after the Step 13
+audit, covered by keyless fake-provider tests, and each passed one separate
+live Groq smoke case. The live samples do not establish broad answer quality
+or tool-selection reliability.
 
 | ID | Status | Evidence or blocker |
 |---|---|---|
 | A1 | IMPLEMENTED+TESTED | Three intents and distinct handlers: `tests/test_pipeline.py`, `tests/test_routing.py`; live Step 7 evidence in `docs/voice-baseline.md`. |
-| A2 | PARTIAL | Embedding retrieval/provenance tests pass, but `ProductQuestionHandler` does not generate a grounded customer answer; `docs/design-notes.md`. |
+| A2 | IMPLEMENTED+TESTED (keyless + live smoke) | `ProductQuestionHandler` generates structured answers only from sufficient retrieved hits, validates chunk citations, and scopes allowed facts to cited chunks; `tests/test_native_llm_paths.py`; one live answer passed citation and output-claim checks, without proving semantic entailment. |
 | A3 | IMPLEMENTED+TESTED | Fictional read-only tools and ownership tests: `tests/test_tools.py`, `tests/test_step5_call_path.py`. |
-| A4 | BLOCKED | Neither Groq native function calling nor a ReAct loop is implemented; documented in `docs/design-notes.md`. |
+| A4 | IMPLEMENTED+TESTED (keyless + live smoke) | Live construction injects strict Groq function calling; the handler validates one exact user order ID and executes only local allow-listed tools with server-side session authorization; `tests/test_native_llm_paths.py`; one live status selection and local execution passed. |
 | A5 | PARTIAL | Input checks, low-confidence fail-closed handling, and call-path tests exist; successful live semantic classification remains unverified; `docs/red-team-report.md`. |
 | A6 | IMPLEMENTED+TESTED | Allowed-fact checks and date/money/promise regressions: `src/agentic_support/facts.py`, `tests/test_guardrails.py`; heuristic limits documented. |
 | A7 | IMPLEMENTED+TESTED | Application-level validation and fail-closed tests: `tests/test_pipeline.py`, `tests/test_step5_call_path.py`. |

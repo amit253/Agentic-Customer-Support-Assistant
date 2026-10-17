@@ -177,10 +177,11 @@ remain keyless.
 
 **Status:** Part A/B design notes and Part C answers have been written against
 the inspected implementation, measured evaluation report, and actual Step 8
-voice logs. Incomplete native function-calling/ReAct behavior, customer-facing
-RAG answer generation, persistent cross-channel state, acoustic-loopback
-latency, and live-provider limitations are called out rather than claimed.
-See [design-notes.md](./design-notes.md) and
+voice logs. A2 grounded answer generation and A4 native Groq function calling
+are now implemented with fake-provider regression coverage; live provider
+behavior remains untested. Persistent cross-channel state, acoustic-loopback
+latency, and other live-provider limitations remain explicit. See
+[design-notes.md](./design-notes.md) and
 [part-c-answers.md](./part-c-answers.md).
 
 **Work:** write architecture, Part A/B design notes, and Part C answers tied
@@ -238,6 +239,16 @@ and findings.
 ### Step 13 - Independent final review
 
 **Dependencies:** Step 12.
+
+**Status (in progress):** The initial audit found the A2 and A4 gaps. Both now
+have implementation and focused keyless fake-provider tests. The focused
+group passed 28 tests with the two opt-in live cases skipped; the full default
+suite passed 81 with two live cases skipped and two third-party deprecation
+warnings. The separate live Groq product-answer and native-tool smoke tests
+both passed. The final packaging refresh, complete matrix re-audit, secret
+scan, and Git review remain pending. Step 8 remains incomplete for the live
+speech-interruption and adversarial follow-up outcomes, and acoustic-loopback
+latency is not measured. Step 13 is not complete.
 
 **Work:** first audit without editing; compare every matrix row with code,
 tests, docs, evidence, Git history, and secret scan. Report blockers, then

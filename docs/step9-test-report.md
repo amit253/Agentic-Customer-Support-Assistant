@@ -25,6 +25,25 @@ The independently exercised voice corpus includes genuine user recordings
 and synthetic controls. The measured detector results are corpus outcomes,
 not production accuracy estimates.
 
+## Step 13 A2/A4 follow-up validation
+
+**Run date:** 2026-10-18 (local time, Asia/Calcutta)
+
+| Purpose | Exact command | Result |
+|---|---|---|
+| Grounded-answer, native-tool, and guardrail regressions | `$env:PYTHONPATH='src'; Remove-Item Env:RUN_LIVE_GROQ_TESTS -ErrorAction SilentlyContinue; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest tests\test_native_llm_paths.py tests\test_step5_call_path.py tests\test_guardrails.py` | **28 passed, 2 skipped**; live-only tests were intentionally gated; 0.38 s |
+| Full default keyless suite | `$env:PYTHONPATH='src'; Remove-Item Env:RUN_LIVE_GROQ_TESTS -ErrorAction SilentlyContinue; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest` | **81 passed, 2 skipped**, 2 third-party deprecation warnings, 20.55 s |
+| Separate live Groq paths | `$env:PYTHONPATH='src'; $env:RUN_LIVE_GROQ_TESTS='1'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest -q -m live tests\test_native_llm_paths.py` | **2 passed, 17 deselected**, 2 third-party deprecation warnings, 21.28 s |
+
+The live product check confirmed a nonempty answer, citations limited to
+retrieved chunks, and acceptance by the output-claim guard using facts from
+those cited chunks. The live order check selected the requested read-only
+status function for the exact fictional order ID and executed the local tool
+using the verified demo session. The tests deliberately do not print or
+persist the generated answer or credentials. These checks exercise the
+provider contract, not an independent semantic proof that every natural
+language statement is entailed by its cited passages.
+
 ## Live-provider evidence (separate from keyless tests)
 
 The audible Step 8 scenario reports are real-time file-backed runs using the

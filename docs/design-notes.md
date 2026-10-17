@@ -31,29 +31,44 @@ document/chunk provenance. The retrieval tests cover paraphrase, irrelevant,
 conflicting, and insufficient-evidence queries. See
 [retrieval-design.md](./retrieval-design.md).
 
-**IMPLEMENTED+UNTESTED / ACCEPTANCE GAP:** the `ProductQuestionHandler`
-retrieves relevant passages but does not generate a natural-language answer
-grounded in those passages. Its current success response says that verified
-passages were retrieved for a later answer stage. Do not present this as a
-complete customer-facing RAG answer path.
+**IMPLEMENTED+TESTED; LIVE SMOKE LIMITED TO ONE CASE.**
+`ProductQuestionHandler` sends sufficient retrieved hits to the structured
+Groq answer adapter, requires nonempty citations, rejects chunk IDs not
+returned by that retrieval, and passes only cited chunks' extracted facts to
+`OutputClaimGuard`. Insufficient evidence skips generation; provider or
+citation errors fail closed. Keyless tests cover the adapter contract,
+retrieval boundary, cited-fact scope, and output guard. A separate live smoke
+check passed, validating a nonempty answer, retrieved-chunk citations, and
+output-claim guard acceptance without recording generated text. It does not
+independently prove that every natural-language statement is entailed by the
+cited passages or establish answer quality across queries.
 
 ### Tool-calling choice and refund reconciliation
 
-**IMPLEMENTED+TESTED:** order actions use an explicit deterministic dispatcher:
-the intent classifier chooses the order-status route, the handler extracts
-exactly one order ID, and `DeterministicOrderTools` validates its format,
-verified demo session, existence, and ownership before returning read-only
-facts. Return eligibility is policy evidence only. It cannot approve a refund
-or add a refund amount to `AllowedFacts`. Output claims are checked against
-facts returned by the tool.
+**IMPLEMENTED+TESTED; LIVE SMOKE LIMITED TO ONE CASE.** The live order handler
+uses Groq native function calling with strict schemas, disables
+parallel calls, requires exactly one allow-listed read-only function, and
+validates its JSON arguments locally. The user message must contain exactly
+one order ID and the model-selected ID must match it exactly. Only then does
+the handler execute the local deterministic tool with the verified
+server-side demo session. The model cannot provide a session/customer ID.
+Malformed, altered, multi-call, unknown-function, or provider-failure results
+fail closed without executing a tool. Keyless tests cover parsing, dispatch,
+ownership, and no-execution failure behavior. A separate live smoke selected
+the requested status function and executed the local ownership-checked tool
+for one fictional order; this is not broad model-selection evaluation.
 
-**ACCEPTANCE GAP:** this is not Groq native function calling and is not a
-ReAct-style model/tool loop. No model-provided function call or iterative
-reason/act/observe cycle is implemented. The explicit dispatcher is easier to
-audit for the current two read-only operations, but it does not meet the
-assignment's stated native-function-calling-or-ReAct choice. A compliant next
-change must select and test one of those two mechanisms without allowing the
-model to supply or override server-side session identity.
+Native function calling was selected over ReAct because the application has
+two bounded read-only operations and needs one tool selection, not an
+open-ended observe/act loop. This keeps tool execution and authorization in
+the application while avoiding extra model turns and loop termination/retry
+complexity. The default keyless registry retains deterministic intent-text
+selection when no provider adapter is injected; live construction always
+injects the native Groq caller.
+
+Return eligibility is policy evidence only. It cannot approve a refund or add
+a refund amount to `AllowedFacts`. Output claims are checked against facts
+returned by the executed tool.
 
 ### Guardrails and cache
 

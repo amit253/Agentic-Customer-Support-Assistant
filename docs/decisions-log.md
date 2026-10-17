@@ -458,3 +458,28 @@ generated PowerPoint reopened successfully with 11 slides and passed ZIP
 integrity checking. `python-pptx` is declared in the development extra;
 `pypdf` was installed only in the local environment to inspect the source
 assignment PDF and is not a project dependency.
+
+### 2026-10-18T01:47:54.1166801+05:30 - [USER/CODEX] A2/A4 completion approach
+
+The user selected native Groq function calling rather than ReAct and requested
+implementation of both the grounded product-answer path and tool-calling
+path. Native calling was chosen for the two bounded read-only tools because a
+single required selection is easier to bound and audit than an iterative
+reason/act/observe loop. Product answers use structured JSON with retrieved
+chunk citations; only verified retrieved chunk IDs are accepted, and output
+allowed facts are derived from cited chunks. Order calls must contain one
+user-provided ID that matches the selected call exactly; execution remains
+local and uses server-side session ownership. Fake-provider tests are the
+current evidence; live Groq behavior remains unverified.
+
+### 2026-10-18T01:55:37.1491532+05:30 - [CODEX] A2/A4 live smoke results
+
+The opt-in live Groq tests passed for one grounded product question and one
+native order-status function selection. The product test verified nonempty
+answer text, citations within retrieved chunks, and output-claim guard
+acceptance using cited-chunk facts. The order test selected the exact
+user-provided fictional order ID and executed the local status tool with its
+verified demo session. The command and results are in
+`docs/step9-test-report.md`. Generated answer text and credentials were not
+printed or persisted. These two samples do not establish semantic citation
+entailment or general model accuracy.
