@@ -1,0 +1,12 @@
+{"id":"route-001","session_id":"demo-session-nadia","text":"What features does the Trailmark 28 have?","expected_intent":"product_question","source":"user-authored-seed"}
+{"id":"route-002","session_id":"demo-session-omar","text":"Are import duties refundable on an international order?","expected_intent":"product_question","source":"user-authored-seed"}
+{"id":"route-003","session_id":"demo-session-nadia","text":"Can I return a personalized Latitude Pack if I changed my mind?","expected_intent":"product_question","source":"domain-specific-seed"}
+{"id":"route-004","session_id":"demo-session-omar","text":"What is the Trail Week return deadline?","expected_intent":"product_question","source":"domain-specific-seed"}
+{"id":"route-005","session_id":"demo-session-nadia","text":"Where is order NS-26-1042-5?","expected_intent":"order_status","source":"user-authored-seed"}
+{"id":"route-006","session_id":"demo-session-omar","text":"Has NS-26-2044-8 been delivered?","expected_intent":"order_status","source":"user-authored-seed"}
+{"id":"route-007","session_id":"demo-session-priya","text":"Was the refund for NS-26-3005-6 issued?","expected_intent":"order_status","source":"domain-specific-seed"}
+{"id":"route-008","session_id":"demo-session-omar","text":"When should NS-26-4006-8 arrive?","expected_intent":"order_status","source":"user-authored-seed"}
+{"id":"route-009","session_id":"demo-session-nadia","text":"Please connect me to a human about my damaged backpack.","expected_intent":"escalate_to_human","source":"user-authored-seed"}
+{"id":"route-010","session_id":"demo-session-omar","text":"I want a specialist to review a possible manufacturing defect.","expected_intent":"escalate_to_human","source":"domain-specific-seed"}
+{"id":"route-011","session_id":"demo-session-nadia","text":"My package seems lost and I need an agent.","expected_intent":"escalate_to_human","source":"user-authored-seed"}
+{"id":"route-012","session_id":"demo-session-unverified","text":"I need a human to resolve an ownership issue.","expected_intent":"escalate_to_human","source":"safety-seed"}

@@ -6,9 +6,10 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 1 establishes the Python project foundation, safe configuration, a smoke
-check, and traceable structured logging. The support agents, RAG, tools, and
-voice pipeline are intentionally not implemented yet.
+Step 2 establishes the fictional Northstar Gear domain, deterministic session
+and order fixtures, tool contracts, knowledge-base documents, and seed
+evaluation examples. The tool execution logic, RAG, agents, and voice
+pipeline are intentionally not implemented yet.
 
 ## Local setup
 

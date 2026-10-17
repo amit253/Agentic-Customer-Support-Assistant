@@ -73,6 +73,36 @@ interpreter. The project was then installed in editable mode, after which the
 same CLI smoke check passed. This is why the README includes editable
 installation before running the CLI.
 
+### 2026-10-17T14:11:15.7160051+05:30 - [USER] Domain selection
+
+The user selected the recommended fictional Northstar Gear travel-gear domain
+for Step 2. The repository will use fictional backpack products, orders,
+customers, and sessions only.
+
+### 2026-10-17T14:11:15.7160051+05:30 - [CODEX] Northstar Gear data quirks
+
+The Step 2 fixtures use a standard 30-day return window, a September 2026
+Trail Week extension through November 15, personalized items as final sale,
+a separate manufacturing-defect warranty path, and non-refundable
+international duties. These choices create domain-specific retrieval,
+authorization, and later red-team cases while keeping policy precedence
+explicit in the knowledge base.
+
+### 2026-10-17T14:11:15.7160051+05:30 - [CODEX] Contract boundary
+
+The eligibility result intentionally contains policy facts only. Confirmed
+refund status and amount are fields of the order-status record, not the
+eligibility contract. This prevents a future tool or response generator from
+silently treating eligibility as refund approval.
+
+### 2026-10-17T14:21:40.7476531+05:30 - [CODEX] Contract-test correction
+
+An added order-ID validation test initially caused a collection-time
+`IndentationError` because a patch duplicated part of the import block. The
+test file was corrected, then the full keyless suite and compile check were
+rerun successfully. The failure was a local test-edit error, not a domain
+contract failure.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.

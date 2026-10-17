@@ -1,0 +1,12 @@
+{"id":"retrieval-001","query":"How many liters can the Trailmark 28 carry?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"paraphrase"}
+{"id":"retrieval-002","query":"What is the capacity of the CityHaul commuter pack?","expected_doc_ids":["kb-003-cityhaul-20"],"case_type":"paraphrase"}
+{"id":"retrieval-003","query":"Can an embroidered bag be returned because I changed my mind?","expected_doc_ids":["kb-004-custom-latitude-pack","kb-007-final-sale-and-warranty"],"case_type":"policy"}
+{"id":"retrieval-004","query":"What is the normal deadline for an unused standard bag?","expected_doc_ids":["kb-005-standard-returns"],"case_type":"policy"}
+{"id":"retrieval-005","query":"Does a September Trail Week order get extra return time?","expected_doc_ids":["kb-005-standard-returns","kb-006-trail-week-returns"],"case_type":"date-qualified-exception"}
+{"id":"retrieval-006","query":"Do Trail Week rules refund import tax?","expected_doc_ids":["kb-006-trail-week-returns","kb-008-international-shipping-and-duties"],"case_type":"multi-policy"}
+{"id":"retrieval-007","query":"How are manufacturing defects different from change-of-mind returns?","expected_doc_ids":["kb-007-final-sale-and-warranty"],"case_type":"policy"}
+{"id":"retrieval-008","query":"Can support guarantee the estimated delivery date?","expected_doc_ids":["kb-009-domestic-shipping"],"case_type":"unsupported-promise"}
+{"id":"retrieval-009","query":"What should I do if the courier damaged my pack?","expected_doc_ids":["kb-010-delivery-troubleshooting"],"case_type":"troubleshooting"}
+{"id":"retrieval-010","query":"How should I clean the coated fabric?","expected_doc_ids":["kb-011-gear-care"],"case_type":"product-care"}
+{"id":"retrieval-011","query":"When should a safety concern go to a human?","expected_doc_ids":["kb-012-human-escalation"],"case_type":"escalation"}
+{"id":"retrieval-012","query":"What is the refund amount for an order not in the database?","expected_doc_ids":[],"case_type":"unanswerable"}

@@ -1,0 +1,181 @@
+"""Fictional Northstar Gear sessions and deterministic order records."""
+
+from __future__ import annotations
+
+from datetime import date
+from decimal import Decimal
+from types import MappingProxyType
+from typing import Mapping
+
+from .contracts import CustomerSession, DemoOrder
+
+
+DEMO_AS_OF_DATE = date(2026, 10, 17)
+
+DEMO_SESSIONS: Mapping[str, CustomerSession] = MappingProxyType(
+    {
+        "demo-session-nadia": CustomerSession(
+            session_id="demo-session-nadia",
+            customer_id="cust_nadia",
+            verified=True,
+            channel="text",
+        ),
+        "demo-session-omar": CustomerSession(
+            session_id="demo-session-omar",
+            customer_id="cust_omar",
+            verified=True,
+            channel="voice",
+        ),
+        "demo-session-priya": CustomerSession(
+            session_id="demo-session-priya",
+            customer_id="cust_priya",
+            verified=True,
+            channel="text",
+        ),
+        "demo-session-unverified": CustomerSession(
+            session_id="demo-session-unverified",
+            customer_id="cust_unknown",
+            verified=False,
+            channel="text",
+        ),
+    }
+)
+
+
+DEMO_ORDERS: Mapping[str, DemoOrder] = MappingProxyType(
+    {
+        "NS-26-1042-5": DemoOrder(
+            order_id="NS-26-1042-5",
+            customer_id="cust_nadia",
+            sku="TM-28",
+            item_name="Trailmark 28 backpack",
+            category="backpack",
+            order_date=date(2026, 10, 2),
+            delivered_date=date(2026, 10, 5),
+            status="delivered",
+            estimated_delivery_date=None,
+            sale_type="standard",
+            return_policy_code="standard_30_day",
+            return_deadline=date(2026, 11, 4),
+            country_code="IN",
+            international_duties=Decimal("0.00"),
+            refund_status="not_requested",
+            confirmed_refund_amount=None,
+            confirmed_refund_date=None,
+        ),
+        "NS-26-1043-6": DemoOrder(
+            order_id="NS-26-1043-6",
+            customer_id="cust_nadia",
+            sku="CLP-CUSTOM",
+            item_name="Custom Latitude Pack",
+            category="personalized_backpack",
+            order_date=date(2026, 9, 18),
+            delivered_date=date(2026, 9, 23),
+            status="delivered",
+            estimated_delivery_date=None,
+            sale_type="personalized_final_sale",
+            return_policy_code="personalized_final_sale",
+            return_deadline=None,
+            country_code="IN",
+            international_duties=Decimal("0.00"),
+            refund_status="not_requested",
+            confirmed_refund_amount=None,
+            confirmed_refund_date=None,
+        ),
+        "NS-26-2044-8": DemoOrder(
+            order_id="NS-26-2044-8",
+            customer_id="cust_omar",
+            sku="CH-20",
+            item_name="CityHaul 20 backpack",
+            category="backpack",
+            order_date=date(2026, 9, 20),
+            delivered_date=date(2026, 9, 25),
+            status="delivered",
+            estimated_delivery_date=None,
+            sale_type="standard",
+            return_policy_code="trail_week_extended",
+            return_deadline=date(2026, 11, 15),
+            country_code="IN",
+            international_duties=Decimal("0.00"),
+            refund_status="not_requested",
+            confirmed_refund_amount=None,
+            confirmed_refund_date=None,
+        ),
+        "NS-26-3005-6": DemoOrder(
+            order_id="NS-26-3005-6",
+            customer_id="cust_priya",
+            sku="TM-28",
+            item_name="Trailmark 28 backpack",
+            category="backpack",
+            order_date=date(2026, 9, 3),
+            delivered_date=date(2026, 9, 8),
+            status="return_received",
+            estimated_delivery_date=None,
+            sale_type="standard",
+            return_policy_code="standard_30_day",
+            return_deadline=date(2026, 10, 8),
+            country_code="IN",
+            international_duties=Decimal("0.00"),
+            refund_status="issued",
+            confirmed_refund_amount=Decimal("120.00"),
+            confirmed_refund_date=date(2026, 10, 12),
+        ),
+        "NS-26-4006-8": DemoOrder(
+            order_id="NS-26-4006-8",
+            customer_id="cust_omar",
+            sku="CH-20",
+            item_name="CityHaul 20 backpack",
+            category="backpack",
+            order_date=date(2026, 10, 14),
+            delivered_date=None,
+            status="in_transit",
+            estimated_delivery_date=date(2026, 10, 22),
+            sale_type="standard",
+            return_policy_code="not_yet_delivered",
+            return_deadline=None,
+            country_code="IN",
+            international_duties=Decimal("0.00"),
+            refund_status="not_requested",
+            confirmed_refund_amount=None,
+            confirmed_refund_date=None,
+        ),
+        "NS-26-5007-0": DemoOrder(
+            order_id="NS-26-5007-0",
+            customer_id="cust_nadia",
+            sku="TM-28",
+            item_name="Trailmark 28 backpack",
+            category="backpack",
+            order_date=date(2026, 10, 1),
+            delivered_date=date(2026, 10, 5),
+            status="delivered",
+            estimated_delivery_date=None,
+            sale_type="standard",
+            return_policy_code="standard_30_day",
+            return_deadline=date(2026, 11, 4),
+            country_code="GB",
+            international_duties=Decimal("24.50"),
+            refund_status="not_requested",
+            confirmed_refund_amount=None,
+            confirmed_refund_date=None,
+        ),
+        "NS-26-6008-2": DemoOrder(
+            order_id="NS-26-6008-2",
+            customer_id="cust_omar",
+            sku="CLP-CUSTOM",
+            item_name="Custom Latitude Pack",
+            category="personalized_backpack",
+            order_date=date(2026, 9, 15),
+            delivered_date=date(2026, 9, 20),
+            status="delivered",
+            estimated_delivery_date=None,
+            sale_type="personalized_final_sale",
+            return_policy_code="personalized_final_sale",
+            return_deadline=None,
+            country_code="GB",
+            international_duties=Decimal("19.00"),
+            refund_status="not_requested",
+            confirmed_refund_amount=None,
+            confirmed_refund_date=None,
+        ),
+    }
+)
