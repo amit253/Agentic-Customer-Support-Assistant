@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+import re
 from typing import Protocol
 
+from .demo_data import DEMO_SESSIONS
+from .facts import AllowedFacts
 from .retrieval import GroundedRetriever
 from .routing import Intent, RouteDecision
+from .tools import DeterministicOrderTools, OrderToolError
 
 
 class CheckedInputLike(Protocol):
@@ -70,12 +74,83 @@ class OrderStatusHandler:
 
     name = "order_status_handler"
 
+    def __init__(self, tools: DeterministicOrderTools | None = None) -> None:
+        self._tools = tools
+
     def handle(
         self, request: CheckedInputLike, decision: RouteDecision
     ) -> HandlerResult:
+        if self._tools is None:
+            return HandlerResult(
+                message="Order-status handler selected; read-only tools will be wired in the next milestone.",
+                handler_name=self.name,
+            )
+
+        order_ids = re.findall(r"\bNS-\d{2}-\d{4}-\d\b", request.text)
+        if len(order_ids) != 1:
+            return HandlerResult(
+                message="Please provide one Northstar order ID so I can check it safely.",
+                handler_name=self.name,
+                metadata={"tool_error": "missing_or_ambiguous_order_id"},
+            )
+        session = DEMO_SESSIONS.get(request.session_id)
+        if session is None:
+            return HandlerResult(
+                message="I could not verify the support session for that order.",
+                handler_name=self.name,
+                metadata={"tool_error": "unknown_session"},
+            )
+        order_id = order_ids[0]
+        try:
+            if re.search(r"\b(?:return|eligible|send back)\b", request.text, re.I):
+                result = self._tools.check_return_eligibility(
+                    order_id=order_id, session=session
+                )
+                message = (
+                    f"Return eligibility for {result.order_id}: "
+                    f"{'eligible' if result.eligible else 'not eligible'}. "
+                    f"{result.policy_basis} {result.next_action}"
+                )
+                if result.deadline is not None:
+                    message += f" Applicable deadline: {result.deadline.isoformat()}."
+                return HandlerResult(
+                    message=message,
+                    handler_name=self.name,
+                    metadata={
+                        "allowed_facts": AllowedFacts.from_return_eligibility(result),
+                        "tool_name": "check_return_eligibility",
+                    },
+                )
+
+            result = self._tools.get_order_status(
+                order_id=order_id, session=session
+            )
+        except OrderToolError as exc:
+            return HandlerResult(
+                message="I could not access that order safely.",
+                handler_name=self.name,
+                metadata={"tool_error": exc.reason_code},
+            )
+
+        message = f"Order {result.order_id} status: {result.status}."
+        if result.delivered_date is not None:
+            message += f" Delivered: {result.delivered_date.isoformat()}."
+        elif result.estimated_delivery_date is not None:
+            message += (
+                f" Estimated delivery: {result.estimated_delivery_date.isoformat()}."
+            )
+        if (
+            result.refund_status == "issued"
+            and result.confirmed_refund_amount is not None
+        ):
+            message += f" Confirmed refund: ${result.confirmed_refund_amount:.2f}."
         return HandlerResult(
-            message="Order-status handler selected; read-only tools will be wired in the next milestone.",
+            message=message,
             handler_name=self.name,
+            metadata={
+                "allowed_facts": AllowedFacts.from_order_status(result),
+                "tool_name": "get_order_status",
+            },
         )
 
 
@@ -115,12 +190,14 @@ class HandlerRegistry:
 
 
 def build_default_registry(
-    *, retriever: GroundedRetriever | None = None
+    *,
+    retriever: GroundedRetriever | None = None,
+    order_tools: DeterministicOrderTools | None = None,
 ) -> HandlerRegistry:
     return HandlerRegistry(
         {
             "product_question": ProductQuestionHandler(retriever),
-            "order_status": OrderStatusHandler(),
+            "order_status": OrderStatusHandler(order_tools),
             "escalate_to_human": EscalateToHumanHandler(),
         }
     )

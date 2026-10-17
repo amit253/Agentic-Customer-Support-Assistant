@@ -6,10 +6,10 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 4 establishes the guarded support-service entry point, structured intent
-routing, registered handlers, cache metrics, and fail-closed routing behavior.
-Order tools, full prompt-injection/output guardrails, answer generation, and
-voice are intentionally not implemented yet.
+Step 5 establishes read-only order tools, session ownership checks, layered
+input safety, allowed-facts output validation, and fail-closed tool/guardrail
+behavior. Voice and production-scale orchestration are intentionally not
+implemented yet.
 
 ## Local setup
 

@@ -9,6 +9,12 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from .config import Settings
+from .facts import AllowedFacts, OutputClaimGuard
+from .guardrails import (
+    GroqSafetyClassifier,
+    InputGuard,
+    RuleBasedSafetyClassifier,
+)
 from .handlers import (
     HandlerRegistry,
     HandlerResult,
@@ -16,6 +22,7 @@ from .handlers import (
 )
 from .logging_config import log_event
 from .routing import GroqStructuredClassifier, RouteDecision, StructuredIntentRouter
+from .tools import DeterministicOrderTools
 from .tracing import trace_context
 
 
@@ -98,10 +105,14 @@ class SupportService:
         router: StructuredIntentRouter,
         registry: HandlerRegistry,
         logger: logging.Logger | None = None,
+        input_guard: InputGuard | None = None,
+        output_guard: OutputClaimGuard | None = None,
     ) -> None:
         self.router = router
         self.registry = registry
         self.logger = logger or logging.getLogger("agentic_support.pipeline")
+        self.input_guard = input_guard or InputGuard(RuleBasedSafetyClassifier())
+        self.output_guard = output_guard or OutputClaimGuard()
 
     def handle(
         self,
@@ -129,6 +140,20 @@ class SupportService:
                     status="rejected",
                     message="I could not process that request safely.",
                     metadata={"reason": rejection_reason or "invalid_input"},
+                )
+
+            safety_decision = self.input_guard.check(checked_input)
+            if not safety_decision.allowed:
+                log_event(
+                    self.logger,
+                    "input_guard_failed_closed",
+                    reason=safety_decision.reason,
+                )
+                return SupportResponse(
+                    trace_id=active_trace_id,
+                    status="failed_closed",
+                    message="I could not process that request safely.",
+                    metadata={"reason": safety_decision.reason},
                 )
 
             decision = self.router.route(checked_input)
@@ -175,6 +200,33 @@ class SupportService:
                     metadata={"reason": "handler_error"},
                 )
 
+            allowed_facts = result.metadata.get("allowed_facts", AllowedFacts())
+            if not isinstance(allowed_facts, AllowedFacts):
+                allowed_facts = AllowedFacts()
+            claim_decision = self.output_guard.validate(
+                result.message, allowed_facts
+            )
+            if not claim_decision.allowed:
+                log_event(
+                    self.logger,
+                    "output_guard_failed_closed",
+                    reason=claim_decision.reason,
+                )
+                return SupportResponse(
+                    trace_id=active_trace_id,
+                    status="failed_closed",
+                    message="I could not verify that response safely.",
+                    intent=decision.intent,
+                    handler_name=result.handler_name,
+                    metadata={"reason": claim_decision.reason},
+                )
+
+            public_metadata = {
+                key: value
+                for key, value in result.metadata.items()
+                if key != "allowed_facts"
+            }
+
             return SupportResponse(
                 trace_id=active_trace_id,
                 status="ok",
@@ -182,7 +234,7 @@ class SupportService:
                 intent=decision.intent,
                 handler_name=result.handler_name,
                 metadata={
-                    **dict(result.metadata),
+                    **public_metadata,
                     "confidence": decision.confidence,
                 },
             )
@@ -195,10 +247,16 @@ def build_live_support_service(
 
     active_settings = settings or Settings.from_environment()
     classifier = GroqStructuredClassifier(active_settings)
+    safety_classifier = GroqSafetyClassifier(active_settings)
     router = StructuredIntentRouter(
         classifier,
         model_name=active_settings.groq_router_model,
         max_attempts=active_settings.router_max_attempts,
         retry_delay_seconds=active_settings.router_retry_delay_seconds,
     )
-    return SupportService(router=router, registry=build_default_registry())
+    return SupportService(
+        router=router,
+        registry=build_default_registry(order_tools=DeterministicOrderTools()),
+        input_guard=InputGuard(safety_classifier),
+        output_guard=OutputClaimGuard(),
+    )

@@ -178,6 +178,23 @@ classified an order-status question successfully on the first attempt. The
 observed result was `status=ok`, intent `order_status`, handler
 `order_status_handler`, one classifier attempt, zero retries, and zero errors.
 
+### 2026-10-17T17:23:07.7429235+05:30 - [CODEX] Step 5 guardrail/tool boundary
+
+The pipeline now performs layered input safety before routing, then invokes
+read-only tools only after an accepted route and verified session lookup. Tool
+facts are converted into an allowed-facts set, and output claims are checked
+before a response is returned. Invalid safety-provider output or exceptions,
+ownership failures, unsupported claims, and malformed arguments all use safe
+failure paths.
+
+### 2026-10-17T17:24:52.2041908+05:30 - [CODEX] Live Step 5 smoke result
+
+Using the current local `.env` key without printing it, a full live request
+passed through the Groq safety classifier, Groq router, order-status handler,
+ownership check, and output claim guard. The observed result was `status=ok`,
+intent `order_status`, handler `order_status_handler`, one classifier attempt,
+zero retries, and zero errors.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.
