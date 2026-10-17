@@ -399,3 +399,26 @@ discarded, but their live follow-up safety/classifier paths failed closed. The
 audible provider-failure scenario made two injected STT attempts and played a
 safe handoff; it does not demonstrate an actual provider outage. Step 8
 acceptance remains incomplete. No files were staged or committed.
+
+### 2026-10-18T01:27:07.8629987+05:30 - [CODEX] Step 9 integration results
+
+The full keyless suite passed 62 tests with two third-party deprecation
+warnings. The guardrail/pipeline/call-path/tools/router group passed 26 tests;
+the voice group passed 15 tests and reported zero false interruptions and zero
+missed speech in the current corpus. Audio manifest validation reported zero
+errors (five recorded clips and one optional clip pending). The refreshed
+offline evaluation measured routing accuracy 0.8333, retrieval recall@5
+0.7273, input guardrail recall 0.6667, output guardrail recall 1.0, and cache
+hit rate 0.5. Live voice reports are separately labeled in the test report.
+
+### 2026-10-18T01:31:10.9726560+05:30 - [CODEX] Reproduced guardrail gaps
+
+During the red-team checks, a safe=true input-safety response with confidence
+0.0 allowed an explicitly signaled unauthorized-refund attack through the
+actual `SupportService` boundary. The output claim guard also accepted the
+unverified claim “Your order will arrive December 31, 2099.” Both behaviors
+were reproduced before correction. The input guard now fails closed below
+0.5 confidence; the output guard recognizes month-name and numeric date forms
+and relative delivery dates. Regression tests cover direct guard behavior and
+the service boundary. Residual semantic-classifier and heuristic-coverage
+risks are documented in `docs/red-team-report.md`.

@@ -82,3 +82,24 @@ def test_output_guard_allows_only_verified_facts_and_blocks_promises() -> None:
     assert unsupported.allowed is False
     assert "amount:$999.00" in unsupported.unsupported_claims
     assert any(claim.startswith("promise:") for claim in unsupported.unsupported_claims)
+
+
+def test_output_guard_blocks_unverified_natural_and_relative_delivery_dates() -> None:
+    guard = OutputClaimGuard()
+
+    natural_date = guard.validate(
+        "Your order will arrive December 31, 2099."
+    )
+    relative_date = guard.validate("Your order will arrive next Tuesday.")
+
+    assert natural_date.allowed is False
+    assert relative_date.allowed is False
+
+
+def test_output_guard_accepts_a_verified_month_name_date() -> None:
+    result = OutputClaimGuard().validate(
+        "Estimated delivery: October 12, 2026.",
+        AllowedFacts(dates=frozenset({"2026-10-12"})),
+    )
+
+    assert result.allowed is True

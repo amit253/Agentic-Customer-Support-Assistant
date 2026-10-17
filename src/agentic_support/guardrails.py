@@ -34,6 +34,9 @@ class InputSafetyDecision:
     confidence: float
 
 
+MIN_SAFETY_CONFIDENCE = 0.5
+
+
 _RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "ignore_instructions",
@@ -189,6 +192,13 @@ class InputGuard:
                 allowed=False,
                 fail_closed=False,
                 reason=reason_code or "unsafe_input",
+                confidence=confidence,
+            )
+        if confidence < MIN_SAFETY_CONFIDENCE:
+            return InputSafetyDecision(
+                allowed=False,
+                fail_closed=True,
+                reason="input_safety_uncertain",
                 confidence=confidence,
             )
         return InputSafetyDecision(

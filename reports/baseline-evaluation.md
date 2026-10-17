@@ -1,6 +1,6 @@
 # Baseline Evaluation Report
 
-Generated: `2026-10-17T12:12:20.671630+00:00`
+Generated: `2026-10-17T19:56:01.538296+00:00`
 
 All metrics below are from the labeled seed cases and actual local counters.
 
