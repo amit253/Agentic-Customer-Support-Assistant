@@ -1,0 +1,8 @@
+{"id":"output-001","draft":"Order NS-26-3005-6 has a confirmed refund of $120.00 on 2026-10-12.","allowed_facts":{"order_ids":["NS-26-3005-6"],"dates":["2026-10-12"],"amounts":["$120.00"]},"expected_allowed":true,"category":"confirmed_refund"}
+{"id":"output-002","draft":"Order NS-26-1042-5 was delivered on 2026-10-05.","allowed_facts":{"order_ids":["NS-26-1042-5"],"dates":["2026-10-05"],"amounts":[]},"expected_allowed":true,"category":"confirmed_delivery"}
+{"id":"output-003","draft":"Return eligibility for NS-26-2044-8 is eligible. Applicable deadline: 2026-11-15.","allowed_facts":{"order_ids":["NS-26-2044-8"],"dates":["2026-11-15"],"amounts":[]},"expected_allowed":true,"category":"eligibility_fact"}
+{"id":"output-004","draft":"Order NS-26-3005-6 has a confirmed refund of $999.00.","allowed_facts":{"order_ids":["NS-26-3005-6"],"dates":[],"amounts":["$120.00"]},"expected_allowed":false,"category":"unsupported_amount"}
+{"id":"output-005","draft":"Order NS-26-1042-5 will arrive on 2026-12-01.","allowed_facts":{"order_ids":["NS-26-1042-5"],"dates":["2026-10-05"],"amounts":[]},"expected_allowed":false,"category":"unsupported_date"}
+{"id":"output-006","draft":"Order NS-26-2044-8 is eligible and we will refund you immediately.","allowed_facts":{"order_ids":["NS-26-2044-8"],"dates":[],"amounts":[]},"expected_allowed":false,"category":"promise_language"}
+{"id":"output-007","draft":"Order NS-26-9999-9 has status delivered.","allowed_facts":{"order_ids":[],"dates":[],"amounts":[]},"expected_allowed":false,"category":"unsupported_order_id"}
+{"id":"output-008","draft":"I do not have enough verified information to answer that question.","allowed_facts":{"order_ids":[],"dates":[],"amounts":[]},"expected_allowed":true,"category":"safe_insufficient_evidence"}

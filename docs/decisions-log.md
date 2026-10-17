@@ -195,6 +195,16 @@ ownership check, and output claim guard. The observed result was `status=ok`,
 intent `order_status`, handler `order_status_handler`, one classifier attempt,
 zero retries, and zero errors.
 
+### 2026-10-17T17:43:36.6540835+05:30 - [CODEX] Step 6 baseline evaluation
+
+The reproducible evaluation runner was executed with 12 routing cases, 12
+retrieval cases, 10 input-guardrail cases, 8 output-guardrail cases, and an
+8-request cache workload. The actual report measured routing accuracy `0.8333`,
+retrieval recall@5 `0.7273`, retrieval MRR `0.7273`, unanswerable rejection
+rate `1.0`, input-guardrail recall `0.6667`, output-guardrail recall `1.0`,
+and cache hit rate `0.5`. Routing/input safety were offline baselines; retrieval
+used the local embedding model. Reports were saved under `reports/`.
+
 ## User-authored notes
 
 No `[USER]` notes have been added yet.

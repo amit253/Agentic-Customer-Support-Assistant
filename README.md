@@ -6,10 +6,9 @@ The assignment PDF and execution plan are kept under `Problem_Statement/`.
 
 ## Current status
 
-Step 5 establishes read-only order tools, session ownership checks, layered
-input safety, allowed-facts output validation, and fail-closed tool/guardrail
-behavior. Voice and production-scale orchestration are intentionally not
-implemented yet.
+Step 6 establishes reproducible routing, retrieval, input/output guardrail, and
+cache evaluations with saved JSON/Markdown baseline reports. Voice and
+production-scale orchestration are intentionally not implemented yet.
 
 ## Local setup
 
@@ -36,6 +35,15 @@ tests can be run with:
 ```powershell
 python -m pytest -q tests/test_retrieval.py
 ```
+
+Run the Step 6 baseline evaluation and save reports with:
+
+```powershell
+python scripts/run_evaluation.py --output-dir reports
+```
+
+The baseline uses deterministic offline routing/input-guardrail providers and
+the real local embedding model. It does not require a Groq key.
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are
