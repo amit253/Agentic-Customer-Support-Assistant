@@ -523,3 +523,12 @@ record-then-send browser voice. Both inputs call the existing guarded
 safe transcript, response audio, status, trace ID, and debug metadata. This is
 not a live microphone/barge-in transport; the CLI evidence path remains the
 place for the recorded real-time interruption scenarios.
+
+### 2026-10-18T12:35:58.6722653+05:30 - [CODEX] First-run voice warm-up clarification
+
+The first browser voice request exposed an opaque loading state while the
+local `sentence-transformers/all-MiniLM-L6-v2` model was downloaded and the
+grounded vector index was built. The model completed caching locally and an
+independent pipeline build succeeded. The demo was restarted on `127.0.0.1:8502`
+and the cache spinner/caption now explain that this one-time local warm-up can
+take longer; the provider key remains unread and undisplayed.

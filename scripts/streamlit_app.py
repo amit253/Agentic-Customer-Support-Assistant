@@ -45,7 +45,12 @@ def load_support_service() -> tuple[Settings, SupportService]:
     return settings, build_live_support_service(settings)
 
 
-@st.cache_resource(show_spinner="Loading the live voice pipeline...")
+@st.cache_resource(
+    show_spinner=(
+        "Preparing voice support; the first run may load the local RAG "
+        "embedding model (~90 MB)..."
+    )
+)
 def load_voice_pipeline() -> tuple[Settings, VoicePipeline]:
     settings = Settings.from_environment()
     settings.require_groq_credentials()
@@ -205,7 +210,9 @@ def render_voice_input(session_id: str) -> None:
     st.subheader("Voice input")
     st.caption(
         "Record, preview, and send one voice turn. This is batch voice input; "
-        "the real-time barge-in demo remains available in the CLI runbook."
+        "the real-time barge-in demo remains available in the CLI runbook. "
+        "The first voice request may take a little longer while the local "
+        "embedding model is prepared."
     )
     recorded_audio = st.audio_input(
         "Record a voice message",
