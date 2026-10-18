@@ -54,9 +54,11 @@ all dataset disagreements with human annotation.
 Proposed SLOs should be derived from a measured production baseline. One
 initial target to validate is p95 end-of-speech to first audible sample below
 3 seconds, with provider timeout/handoff completion and error-budget targets
-defined per channel. Current measurements are application playback-start
-timestamps, not acoustic loopback, and some exceed 3 seconds; this target is
-not currently met or production-validated.
+defined per channel. On 2026-10-18 the recorded-audio scenarios measured
+15,886.752-20,168.889 ms from VAD end-of-speech to application playback
+start. The runs had no physical audio loopback, so they do not measure the
+first acoustic sample. The observed application latency is already far above
+the proposed target; no p95 or production SLO claim is made.
 
 For routing changes, shadow-score a candidate on copied, redacted traffic but
 do not dispatch its route or tools. Compare intent confusion, low-confidence
@@ -71,10 +73,12 @@ record.
 
 **PARTIALLY IMPLEMENTED.** Router calls have bounded retries and safe
 fail-closed responses; voice STT retries twice and then uses local Windows
-TTS to play a static human-support handoff. Live Step 8 speech paths have
-failed closed, and the provider-failure recording uses an injected STT
-failure. There is no validated real-outage test, circuit breaker, or
-automatic alternate-provider failover.
+TTS to play a static human-support handoff. Live Step 8 recorded-speech paths
+completed safely after adding a primary-STT readability fallback and a
+narrowly conditioned structured-output fallback. The provider-failure
+recording uses an injected STT failure, not a real outage. There is no
+validated real-outage test, circuit breaker, or automatic alternate-provider
+failover.
 
 Production monitoring should alert on rolling provider error rate, timeout
 rate, p95/p99 latency, rate-limit responses, malformed/partial structured

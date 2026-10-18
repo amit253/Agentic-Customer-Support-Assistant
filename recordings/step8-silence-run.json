@@ -3,24 +3,26 @@
     {
       "audio_path": "recordings\\step7-normal-order-response.wav",
       "event": "assistant_playback_started",
-      "observed_at": "2026-10-17T19:46:31.425780+00:00",
+      "observed_at": "2026-10-18T04:11:46.899198+00:00",
       "playback_device_used": true,
       "turn_id": "turn-0001"
     },
     {
       "cancelled": false,
       "event": "assistant_playback_completed",
-      "observed_at": "2026-10-17T19:46:43.511392+00:00",
+      "observed_at": "2026-10-18T04:11:59.001749+00:00",
       "turn_id": "turn-0001"
     }
   ],
   "evidence_type": "silence_replayed_in_real_time",
   "followup": null,
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
   "interruption_detected": false,
   "old_turn_result_discarded": false,
   "playback_device_used": true,
   "scenario": "silence",
   "schema_version": "step8-voice-run-v1",
-  "started_at": "2026-10-17T19:46:26.130121+00:00",
+  "speech_detection_to_cancel_ms": null,
+  "started_at": "2026-10-18T04:11:44.786344+00:00",
   "turn_id": "turn-0001"
 }

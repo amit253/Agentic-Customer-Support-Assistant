@@ -1,0 +1,38 @@
+{
+  "end_of_speech_at": "2026-10-18T05:27:57.613999+00:00",
+  "end_of_speech_to_first_audio_ms": 3541.408,
+  "error_code": null,
+  "first_audio_at": "2026-10-18T05:28:01.155407+00:00",
+  "input_audio": {
+    "channels": 1,
+    "duration_seconds": 6.71625,
+    "file_bytes": 214964,
+    "frames": 107460,
+    "path": "audio\\normal_order_status.wav",
+    "sample_rate": 16000,
+    "sample_width_bytes": 2
+  },
+  "input_path": "audio\\normal_order_status.wav",
+  "output_audio": {
+    "channels": 1,
+    "duration_seconds": 11.982267573696145,
+    "file_bytes": 528464,
+    "frames": 264209,
+    "path": "recordings\\step7-final-normal-response.wav",
+    "sample_rate": 22050,
+    "sample_width_bytes": 2
+  },
+  "output_path": "recordings\\step7-final-normal-response.wav",
+  "status": "ok",
+  "stt_attempts": 1,
+  "support_handler": "order_status_handler",
+  "support_intent": "order_status",
+  "support_message": "Order NS-26-4006-8 status: in_transit. Estimated delivery: 2026-10-22.",
+  "support_metadata": {
+    "confidence": 0.95,
+    "tool_name": "get_order_status"
+  },
+  "support_status": "ok",
+  "trace_id": "final-step7-20261018",
+  "transcript": "Where is order NS-26-4006-8?"
+}

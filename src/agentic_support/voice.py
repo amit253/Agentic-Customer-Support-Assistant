@@ -126,6 +126,9 @@ def validate_input_wav(audio_path: Path) -> AudioMetadata:
 class GroqSpeechToText:
     """Groq Whisper-compatible transcription adapter."""
 
+    FALLBACK_MODEL = "whisper-large-v3"
+    TRANSCRIPTION_LANGUAGE = "en"
+
     def __init__(self, settings: Settings, *, client: Any | None = None) -> None:
         self.model_name = settings.groq_stt_model
         if client is None:
@@ -136,13 +139,37 @@ class GroqSpeechToText:
 
     def transcribe(self, audio_path: Path) -> SpeechTranscript:
         validate_input_wav(audio_path)
+        transcript = self._transcribe_with_model(audio_path, self.model_name)
+        if self._requires_transcription_fallback(transcript.text):
+            transcript = self._transcribe_with_model(
+                audio_path, self.FALLBACK_MODEL
+            )
+            if self._requires_transcription_fallback(transcript.text):
+                raise VoiceProviderError("stt_returned_unreadable_transcript")
+        return SpeechTranscript(
+            text=_normalize_transcribed_order_ids(" ".join(transcript.text.split())),
+            language=transcript.language,
+            duration_seconds=transcript.duration_seconds,
+        )
+
+    @staticmethod
+    def _requires_transcription_fallback(text: str) -> bool:
+        return "\ufffd" in text or any(
+            not character.isascii() and character.isalpha()
+            for character in text
+        )
+
+    def _transcribe_with_model(
+        self, audio_path: Path, model_name: str
+    ) -> SpeechTranscript:
         try:
             with audio_path.open("rb") as audio_file:
                 response = self._client.audio.transcriptions.create(
                     file=(audio_path.name, audio_file),
-                    model=self.model_name,
+                    model=model_name,
                     response_format="verbose_json",
                     temperature=0.0,
+                    language=self.TRANSCRIPTION_LANGUAGE,
                 )
         except Exception as exc:
             raise VoiceProviderError("stt_provider_failed") from exc
@@ -151,7 +178,7 @@ class GroqSpeechToText:
             raise VoiceProviderError("stt_returned_empty_transcript")
         duration = getattr(response, "duration", None)
         return SpeechTranscript(
-            text=_normalize_transcribed_order_ids(" ".join(text.split())),
+            text=" ".join(text.split()),
             language=getattr(response, "language", None),
             duration_seconds=float(duration) if isinstance(duration, (int, float)) else None,
         )

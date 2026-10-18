@@ -162,6 +162,63 @@ def test_groq_stt_adapter_uses_whisper_transcription_contract(tmp_path: Path) ->
     assert transcript.text == "Where is order NS-26-4006-8?"
     assert captured["model"] == "whisper-large-v3-turbo"
     assert captured["response_format"] == "verbose_json"
+    assert captured["language"] == "en"
+
+
+def test_groq_stt_retries_unreadable_english_with_large_model(tmp_path: Path) -> None:
+    input_path = tmp_path / "input.wav"
+    write_wav(input_path)
+    requests: list[dict[str, object]] = []
+    responses = iter(
+        [
+            SimpleNamespace(
+                text="Vig Róngóður", language="en", duration=1.2
+            ),
+            SimpleNamespace(
+                text="Wait, wrong order.", language="en", duration=1.2
+            ),
+        ]
+    )
+
+    def create(**kwargs: object) -> object:
+        requests.append(kwargs)
+        return next(responses)
+
+    client = SimpleNamespace(
+        audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+    )
+    settings = Settings.from_environment({"GROQ_API_KEY": "fake"})
+
+    transcript = GroqSpeechToText(settings, client=client).transcribe(input_path)
+
+    assert transcript.text == "Wait, wrong order."
+    assert [request["model"] for request in requests] == [
+        "whisper-large-v3-turbo",
+        "whisper-large-v3",
+    ]
+    assert all(request["language"] == "en" for request in requests)
+
+
+def test_groq_stt_fails_closed_if_fallback_is_unreadable(tmp_path: Path) -> None:
+    input_path = tmp_path / "input.wav"
+    write_wav(input_path)
+    requests: list[dict[str, object]] = []
+
+    def create(**kwargs: object) -> object:
+        requests.append(kwargs)
+        return SimpleNamespace(
+            text="Vig r\ufffdng\ufffdur", language="en", duration=1.2
+        )
+
+    client = SimpleNamespace(
+        audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+    )
+    settings = Settings.from_environment({"GROQ_API_KEY": "fake"})
+
+    with pytest.raises(VoiceProviderError, match="unreadable"):
+        GroqSpeechToText(settings, client=client).transcribe(input_path)
+
+    assert len(requests) == 2
 
 
 def test_groq_stt_does_not_repair_invalid_order_id_check_digit(

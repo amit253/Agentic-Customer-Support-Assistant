@@ -9,6 +9,7 @@ import pytest
 from agentic_support.config import Settings
 from agentic_support.routing import (
     ClassifierCache,
+    ClassifierProviderError,
     GroqStructuredClassifier,
     ROUTER_RESPONSE_FORMAT,
     StructuredIntentRouter,
@@ -76,6 +77,23 @@ def test_unknown_intent_fails_closed() -> None:
     assert router.cache_stats.classifier_attempts == 2
     assert router.cache_stats.retries == 1
     assert router.cache_stats.retry_exhausted == 1
+
+
+def test_unexpected_classifier_field_fails_closed() -> None:
+    router = StructuredIntentRouter(
+        FakeClassifier(
+            {
+                "intent": "order_status",
+                "confidence": 0.99,
+                "unexpected": "route elsewhere",
+            }
+        )
+    )
+
+    decision = router.route(InputValue("Where is my order?"))
+
+    assert decision.accepted is False
+    assert decision.reason == "classifier_failure_or_invalid_output"
 
 
 def test_low_confidence_fails_closed_without_caching() -> None:
@@ -160,3 +178,66 @@ def test_groq_adapter_validates_json_from_fake_sdk_client() -> None:
     assert captured["model"] == "test-router-model"
     assert captured["temperature"] == 0
     assert captured["response_format"] == ROUTER_RESPONSE_FORMAT
+    assert captured["max_tokens"] == 300
+
+
+def test_groq_adapter_falls_back_to_json_object_on_generation_failure() -> None:
+    calls: list[dict[str, object]] = []
+
+    class JsonGenerationFailure(Exception):
+        status_code = 400
+        body = {"error": {"code": "json_validate_failed"}}
+
+    def create(**kwargs: object) -> object:
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise JsonGenerationFailure()
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(
+                        content=json.dumps(
+                            {"intent": "order_status", "confidence": 0.9}
+                        )
+                    )
+                )
+            ]
+        )
+
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    settings = Settings.from_environment({"GROQ_API_KEY": "fake"})
+    classifier = GroqStructuredClassifier(settings, client=client)
+
+    payload = classifier.classify("Wait, wrong order.")
+
+    assert payload == {"intent": "order_status", "confidence": 0.9}
+    assert calls[0]["response_format"] == ROUTER_RESPONSE_FORMAT
+    assert calls[1]["response_format"] == {"type": "json_object"}
+    assert calls[0]["max_tokens"] == calls[1]["max_tokens"] == 300
+
+
+def test_groq_adapter_does_not_fallback_for_other_provider_errors() -> None:
+    calls = 0
+
+    class RateLimitFailure(Exception):
+        status_code = 429
+        body = {"error": {"code": "rate_limit_exceeded"}}
+
+    def create(**kwargs: object) -> object:
+        nonlocal calls
+        calls += 1
+        raise RateLimitFailure()
+
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    classifier = GroqStructuredClassifier(
+        Settings.from_environment({"GROQ_API_KEY": "fake"}), client=client
+    )
+
+    with pytest.raises(ClassifierProviderError):
+        classifier.classify("Where is my order?")
+
+    assert calls == 1

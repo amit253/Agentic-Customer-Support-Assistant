@@ -86,11 +86,15 @@ It reports file paths and counts only; it never prints a detected value.
 
 - The keyless pytest/evaluation results are offline/stub or local-model
   evidence and are not live Groq success claims.
-- The audible interruption reports include the actual live provider status;
-  the wrong-order and adversarial follow-ups failed closed.
+- The audible speech reports use recorded WAV input replayed as microphone
+  frames and real Windows output playback; they are not live-microphone runs.
+  Normal order status, return eligibility, wrong-order interruption, and the
+  adversarial request completed through the live provider path without a
+  stale response or refund promise.
 - The injected provider-failure run demonstrates retry and local handoff, not
   a real provider outage.
 - Latency reports end at application playback start, not a physical
-  microphone/speaker loopback measurement.
+  microphone/speaker loopback measurement. Current observed end-of-speech to
+  app-start times are 15.9-20.2 seconds, above the proposed <3 second target.
 - No real customer data is present; demo identity and order records are
   fictional.

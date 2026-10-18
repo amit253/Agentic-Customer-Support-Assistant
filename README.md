@@ -2,18 +2,22 @@
 
 This repository is being built for the accompanying senior AI engineer
 assignment. The implementation is developed one reviewed milestone at a time.
-The assignment PDF and execution plan are kept under `Problem_Statement/`.
+The assignment PDF and execution plan are kept locally under
+`Problem_Statement/`; those source files are intentionally outside the
+submission commit.
 
 ## Current status
 
-Step 7 is complete. Step 8 coordination, WebRTC plus local Silero VAD confirmation,
-stale-result rejection, and STT retry/safe-handoff code are implemented.
-Regression cases report zero false interruptions and zero missed speech in
-the tested corpus, and the latest audible noise run completed without
-interrupting playback. The latest speech follow-ups still fail closed on live
-safety/classification results, and the provider-failure scenario is injected;
-Step 8 is not yet complete. See
-[docs/voice-coordination.md](docs/voice-coordination.md).
+Step 7 is complete. Step 8 coordination, WebRTC plus local Silero VAD
+confirmation, stale-result rejection, and STT retry/safe-handoff code are
+implemented. The labeled regression corpus reported zero false interruptions
+and zero missed speech. Audible recorded-audio runs completed normal order,
+return eligibility, wrong-order, and adversarial follow-ups; silence and noise
+completed without interruption. The injected provider-failure run played a
+safe handoff. App-level response-start latency was 15.9-20.2 seconds, above
+the proposed <3 second target; first-acoustic-sample loopback was unavailable.
+Live microphone capture and real provider-outage behavior are not claimed.
+See [docs/voice-coordination.md](docs/voice-coordination.md).
 
 ## Assignment deliverables
 
@@ -22,6 +26,8 @@ Step 8 is not yet complete. See
 - [Step 9 test report](docs/step9-test-report.md) and
   [reproduced red-team findings](docs/red-team-report.md).
 - [Reproducible demo runbook](docs/demo-runbook.md).
+- [Live-defense notes](docs/live-defense-notes.md); no unaided practice is
+  claimed.
 - Generate the PowerPoint using `python scripts/build_presentation.py`; the
   verified output is `presentation/agentic-customer-support.pptx`.
 - Scan tracked, untracked non-ignored, and recording files using
@@ -87,7 +93,8 @@ for STT and the live support service.
 Run or repeat the real-time scenarios from the
 [Step 8 runbook](docs/voice-coordination.md).
 The default runner plays responses through the Windows audio device and writes
-scenario reports to `recordings/`.
+scenario reports to `recordings/`. Speech input is replayed from recorded WAV
+files as microphone frames; it is not captured from a live microphone.
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are

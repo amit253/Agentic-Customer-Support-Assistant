@@ -27,6 +27,8 @@ secrets/
 # Runtime output and local artifacts
 *.log
 logs/
+.hf-cache/
+.tmp/
 # Do not blanket-ignore audio/ or recordings/: reviewed assignment evidence
 # must remain intentionally commit-able. Keep only private local artifacts in
 # a dedicated ignored subdirectory if one is introduced later.

@@ -37,6 +37,8 @@ RESPONSE_AUDIO = ROOT / "recordings" / "step7-normal-order-response.wav"
 SCENARIOS = {
     "silence": None,
     "noise": ROOT / "audio" / "noise_burst.wav",
+    "normal_speech": ROOT / "audio" / "normal_order_status.wav",
+    "return_eligibility": ROOT / "audio" / "return_eligibility.wav",
     "interruption": ROOT / "audio" / "wrong_order_interrupt.wav",
     "adversarial": ROOT / "audio" / "adversarial_false_start.wav",
 }
@@ -108,7 +110,7 @@ def _monitor_playback(
     input_audio: Path | None,
     on_speech_end: Callable[[ActivityEvent], None],
     events: list[dict[str, object]],
-) -> tuple[bool, ActivityEvent | None]:
+) -> tuple[bool, ActivityEvent | None, float | None]:
     metadata = inspect_wav(playback_audio)
     detector = VoiceActivityDetector(confirmer=SileroSpeechConfirmer())
     source = iter_pcm_frames(input_audio) if input_audio is not None else iter(())
@@ -116,6 +118,7 @@ def _monitor_playback(
     playback_deadline = time.monotonic() + metadata.duration_seconds
     next_frame_at = time.monotonic()
     cancel_requested = False
+    interruption_latency_ms: float | None = None
     speech_end: ActivityEvent | None = None
     if not coordinator.start_playback(token, playback.cancel):
         raise RuntimeError("coordinator_rejected_playback_start")
@@ -156,9 +159,14 @@ def _monitor_playback(
             and event.activity is VoiceActivity.SPEECH_STARTED
             and not cancel_requested
         ):
+            speech_detected_monotonic = time.monotonic()
             cancel_requested = coordinator.interrupt(
                 token, reason="sustained_user_speech_detected"
             )
+            if cancel_requested:
+                interruption_latency_ms = (
+                    time.monotonic() - speech_detected_monotonic
+                ) * 1000
             events.append(
                 {
                     "event": (
@@ -169,6 +177,7 @@ def _monitor_playback(
                     "turn_id": token.turn_id,
                     "observed_at": datetime.now(UTC).isoformat(),
                     "cancelled": cancel_requested,
+                    "speech_detection_to_cancel_ms": interruption_latency_ms,
                 }
             )
             if not cancel_requested:
@@ -198,7 +207,7 @@ def _monitor_playback(
                 "cancelled": False,
             }
         )
-    return cancel_requested, speech_end
+    return cancel_requested, speech_end, interruption_latency_ms
 
 
 def _pipeline_for(
@@ -247,7 +256,7 @@ def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
     if not coordinator.result_ready(first_token):
         raise RuntimeError("coordinator_rejected_initial_response")
     ended_events: list[ActivityEvent] = []
-    cancelled, _ = _monitor_playback(
+    cancelled, _, interruption_latency_ms = _monitor_playback(
         coordinator=coordinator,
         token=first_token,
         playback=playback,
@@ -390,6 +399,8 @@ def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
         "started_at": scenario_started_at.isoformat(),
         "turn_id": first_token.turn_id,
         "interruption_detected": cancelled,
+        "speech_detection_to_cancel_ms": interruption_latency_ms,
+        "input_source": "recorded_wav_replayed_as_microphone_frames",
         "old_turn_result_discarded": stale_old_result_discarded,
         "events": events,
         "followup": handoff_result,

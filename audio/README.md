@@ -21,9 +21,10 @@ clip to the exact path in `audio/manifest.json`, then change its `status` from
 ## Step 8 recording status
 
 The required clips have been recorded and their formats pass validation.
-Their scenario outcomes still need to pass; in particular, the current noise
-recording triggers VAD as speech, so it does not demonstrate noise rejection.
-Review/re-record that clip if it contains sustained or speech-like audio:
+Their scenario outcomes pass in the current evidence. The noise clip can
+produce a WebRTC speech candidate, but independent Silero confirmation rejects
+it before interruption; this is the demonstrated noise-rejection behavior.
+Review/re-record that clip only if it contains sustained or speech-like audio:
 
 - `audio/wrong_order_interrupt.wav`: “Wait, wrong order.”
 - `audio/noise_burst.wav`: a brief non-speech room/background noise burst.

@@ -1,0 +1,62 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T04:09:57.806381+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 61,
+      "observed_at": "2026-10-18T04:09:59.004359+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T04:09:59.122164+00:00",
+      "speech_detection_to_cancel_ms": 117.73210001410916,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 341,
+      "observed_at": "2026-10-18T04:10:04.604590+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T04:10:04.612913+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T04:10:04.604590+00:00",
+    "end_of_speech_to_first_audio_ms": 20168.889,
+    "error_code": null,
+    "first_audio_at": "2026-10-18T04:10:24.773479+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\step8-return_eligibility-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": "order_status_handler",
+    "support_intent": "order_status",
+    "support_message": "Return eligibility for NS-26-2044-8: eligible. trail_week_extended Start a return request; eligibility is not refund approval. Applicable deadline: 2026-11-15.",
+    "support_metadata": {
+      "confidence": 0.9,
+      "tool_name": "check_return_eligibility"
+    },
+    "support_status": "ok",
+    "transcript": "Can I return order NS-26-2044-8?",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "playback_device_used": true,
+  "scenario": "return_eligibility",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 117.73210001410916,
+  "started_at": "2026-10-18T04:09:55.302462+00:00",
+  "turn_id": "turn-0001"
+}

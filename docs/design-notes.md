@@ -78,9 +78,11 @@ provider-neutral safety classifier; unsafe decisions and low-confidence
 claims are limited to verified order IDs, dates, and amounts, and detected
 delivery promises without verified dates are rejected. The rule-based
 keyless provider is a deterministic test baseline, not a semantic production
-defense. Live speech transcripts have failed closed on safety/classifier
-provider results; successful live semantic guardrail behavior is not
-demonstrated.
+defense. Live recorded-speech scenarios completed the safety/router path after
+provider-generation corrections; this small number of live examples is not a
+broad semantic-guardrail evaluation. Strict JSON Schema remains primary. Only
+the exact HTTP 400 `json_validate_failed` condition triggers JSON-object retry,
+and local exact-key, type, and range checks keep malformed output fail-closed.
 
 **IMPLEMENTED+TESTED:** classifier cache metrics report measured lookups,
 hits, misses, retries, errors, and hit rate. The current cache is bounded but
@@ -132,12 +134,15 @@ cancellation callbacks, stale-result rejection, and bounded STT retry are
 tested. The regression corpus reports zero false interruptions and zero
 missed speech in its labeled cases; this is not a universal guarantee.
 
-The report's current latency definition ends at app playback handoff after
-the output WAV exists. It is not hardware loopback and does not prove the
-time-to-first-acoustic-sample requirement. Audible run values range from
-2585.583 ms (injected failure handoff) to 5672.024 ms (adversarial live
-follow-up); the wrong-order run measured 3665.86 ms. Small sample counts and
-fail-closed outcomes mean these are observations, not SLO percentiles.
+The report's current latency definition ends at app playback start after the
+output WAV exists. It is not hardware loopback and does not prove the
+time-to-first-acoustic-sample requirement. On 2026-10-18, successful audible
+speech follow-ups measured 19,293.912-20,168.889 ms; the injected failure
+handoff measured 15,886.752 ms. The confirmed-speech-to-cancellation-call
+measurements were 105.217-117.732 ms. These are individual observations, not
+SLO percentiles, and the end-to-playback values are far above the proposed
+sub-three-second target. No loopback capture package was installed, so
+acoustic output latency could not be instrumented.
 
 For multilingual and varied-pause production audio, calibrate end-of-utterance
 against language/accent-specific labeled audio, including short pauses,
@@ -152,9 +157,11 @@ until utterance completion. Partial transcripts must never trigger tools
 without the same final validation and authorization path.
 
 Provider fallback currently retries STT at most twice and then speaks a
-static local handoff. The Step 8 failure run injected that STT error. No
-provider circuit breaker, alternate LLM failover, or real outage recovery has
-been validated.
+static local handoff. The Step 8 failure run injected that STT error. Live
+STT uses English for this recording set and retries unreadable primary output
+with `whisper-large-v3`; multilingual behavior is unsupported and unverified.
+No provider circuit breaker, alternate LLM failover, or real outage recovery
+has been validated.
 
 ## Evidence
 

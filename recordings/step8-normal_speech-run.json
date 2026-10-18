@@ -1,0 +1,62 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T04:09:02.876094+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 76,
+      "observed_at": "2026-10-18T04:09:04.375776+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T04:09:04.488731+00:00",
+      "speech_detection_to_cancel_ms": 112.9001000081189,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 403,
+      "observed_at": "2026-10-18T04:09:10.914395+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T04:09:10.919508+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T04:09:10.914395+00:00",
+    "end_of_speech_to_first_audio_ms": 19954.733999999997,
+    "error_code": null,
+    "first_audio_at": "2026-10-18T04:09:30.869129+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\step8-normal_speech-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": "order_status_handler",
+    "support_intent": "order_status",
+    "support_message": "Order NS-26-4006-8 status: in_transit. Estimated delivery: 2026-10-22.",
+    "support_metadata": {
+      "confidence": 0.95,
+      "tool_name": "get_order_status"
+    },
+    "support_status": "ok",
+    "transcript": "Where is order NS-26-4006-8?",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "playback_device_used": true,
+  "scenario": "normal_speech",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 112.9001000081189,
+  "started_at": "2026-10-18T04:08:59.618701+00:00",
+  "turn_id": "turn-0001"
+}

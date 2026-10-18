@@ -483,3 +483,14 @@ verified demo session. The command and results are in
 `docs/step9-test-report.md`. Generated answer text and credentials were not
 printed or persisted. These two samples do not establish semantic citation
 entailment or general model accuracy.
+
+### 2026-10-18T10:57:15.8273652+05:30 - [USER] Submission source and environment decision
+
+The user confirmed that the locally renamed assignment PDF does not need to be
+committed. The submission commit therefore excludes `Problem_Statement/` while
+retaining the requirements matrix and implementation evidence in the
+repository. The user also confirmed that the recorded audio contains no
+personal information and that the Groq credential remains only in the ignored
+`.env`. The local Python 3.14 environment was installed with the project
+extras, and the fresh keyless suite passed 89 tests with two live-provider
+tests skipped.

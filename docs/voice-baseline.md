@@ -3,10 +3,10 @@
 Status: Step 7 acceptance is met. Both required Step 7 user recordings are
 format-validated. A live Groq STT -> shared support service -> local Windows
 TTS run handled the normal order-status request and created a playable WAV
-response. A separate return-eligibility run was correctly failed closed after
-the live classifier rejected its request; this is recorded as a limitation,
-not a successful return-policy demonstration. No synthetic input is claimed
-as assignment evidence.
+response. The first recorded return-eligibility attempt failed closed after
+the live classifier rejected its request; a later Step 8 rerun succeeded and
+is documented in the Step 8 evidence. No synthetic input is claimed as
+assignment evidence.
 
 ## Pipeline
 
@@ -40,7 +40,7 @@ sample rate.
 
 The user recorded the required normal order-status and return-eligibility clips
 as WAV/PCM, mono, 16-bit, 16,000 Hz. Both entries are marked `recorded` in
-`audio/manifest.json`; four clips remain pending for later scenarios.
+`audio/manifest.json`; one optional pace/accent clip remains pending.
 
 Groq Whisper removes punctuation from spoken order IDs, so the STT adapter
 restores the Northstar order-ID separators only when the check digit validates.
@@ -51,13 +51,13 @@ The manifest validator and voice tests were run from the repository root:
 
 ```text
 $env:PYTHONPATH='src'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' scripts/validate_audio_manifest.py
-clip_count=6, error_count=0, pending_count=4, recorded_count=2
+clip_count=6, error_count=0, pending_count=1, recorded_count=5
 
 $env:PYTHONPATH='src'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest tests/test_voice.py -q
-8 passed
+10 passed
 
 $env:PYTHONPATH='src'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest -q
-51 passed, 2 warnings
+89 passed, 2 skipped, 2 warnings
 ```
 
 The normal-order clip transcribed as `Where is order NS2640068?`. The adapter
@@ -71,10 +71,11 @@ playable local TTS response is `recordings/step7-normal-order-response.wav`
 The recorded return-eligibility clip transcribed as
 `Can I return order NS-26-2044-8?`, but the live intent classifier returned
 `classifier_failure_or_invalid_output`. The voice pipeline safely generated
-its failed-closed response rather than claiming a policy answer. This separate
-run is captured in `recordings/step7-return-eligibility-run.json` and
-`recordings/step7-return-eligibility-response.wav`; this case should be
-revisited if claiming a live return-eligibility demo.
+its failed-closed response rather than claiming a policy answer. This initial
+attempt is captured in `recordings/step7-return-eligibility-run.json` and
+`recordings/step7-return-eligibility-response.wav`. The later successful
+recorded-audio return-eligibility run is
+`recordings/step8-return_eligibility-run.json`.
 
 The successful normal-turn command and result were:
 
@@ -105,3 +106,14 @@ python scripts/run_voice_baseline.py audio/normal_order_status.wav
 The command creates playable WAV output and prints the trace, transcript,
 support response, statuses, paths, and audio metadata. Review generated output
 and logs in `recordings/` before committing or sharing them.
+
+## Final live verification
+
+On 2026-10-18, the current local `.env` was used without printing its
+credential. The normal order clip completed with trace
+`final-step7-20261018`, transcript `Where is order NS-26-4006-8?`, the
+authorized `get_order_status` tool, and a playable WAV at
+`recordings/step7-final-normal-response.wav`. The return clip completed with
+trace `final-step7-return-20261018`, the `check_return_eligibility` tool, and a
+playable WAV at `recordings/step7-final-return-response.wav`. Both run records
+contain fictional data only and are stored beside the response audio.

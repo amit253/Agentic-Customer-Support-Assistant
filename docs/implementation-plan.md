@@ -140,12 +140,15 @@ evidence or logs.
 **Status:** Turn ownership, WebRTC candidate detection with independent local
 Silero VAD ONNX confirmation, cancellation/stale-result handling, and
 two-attempt STT safe handoff are implemented. The regression corpus reports
-zero false interruptions and zero missed speech; the latest audible noise
-scenario completes playback without interruption. The latest audible
-wrong-order path failed closed at input safety, and the adversarial path failed
-closed at classification. The provider-failure scenario is injected, not a
-real outage. Acceptance remains incomplete; see
-[voice-coordination.md](./voice-coordination.md).
+zero false interruptions and zero missed speech. Audible recorded-audio runs
+demonstrate silence, noise, normal order status, return eligibility,
+wrong-order interruption, the original adversarial utterance, and injected
+STT failure with safe handoff. Provider fixes add unreadable-English
+transcription fallback and narrowly triggered JSON-object retries after
+Groq's strict-schema generation error, with local exact-field validation.
+App-level playback-start latency is measured at 15.9-20.2 seconds; physical
+first-acoustic-sample loopback is unavailable, and the provider-failure case is
+injected rather than a real outage. See [voice-coordination.md](./voice-coordination.md).
 
 **Work:** implement turn IDs, cancellation, stale-result discard, speech/noise
 decision logic, required scenarios, one original adversarial scenario, one
@@ -159,10 +162,10 @@ is accepted as a successful turn.
 
 **Dependencies:** Steps 5-8.
 
-**Status:** The keyless suite passed 62 tests with two dependency deprecation
-warnings. Focused guarded-call-path/router/tool tests passed 26 tests; voice
-tests passed 15 with zero false interruptions and zero missed speech in the
-current labeled corpus. The audio manifest has zero validation errors.
+**Status:** The latest full default keyless suite passed 89 tests with two
+live-provider tests skipped and two third-party deprecation warnings.
+Focused voice/VAD/safety/routing regressions passed 35 tests; the current
+labeled corpus reported zero false interruptions and zero missed speech.
 Exact commands and results are in [step9-test-report.md](./step9-test-report.md).
 
 **Work:** run unit, integration, security, and voice tests; fix critical
@@ -178,9 +181,9 @@ remain keyless.
 **Status:** Part A/B design notes and Part C answers have been written against
 the inspected implementation, measured evaluation report, and actual Step 8
 voice logs. A2 grounded answer generation and A4 native Groq function calling
-are now implemented with fake-provider regression coverage; live provider
-behavior remains untested. Persistent cross-channel state, acoustic-loopback
-latency, and other live-provider limitations remain explicit. See
+are implemented with fake-provider regression coverage and a separate live
+smoke case each. Persistent cross-channel state, acoustic-loopback latency,
+long live voice latency, and provider-outage behavior remain explicit. See
 [design-notes.md](./design-notes.md) and
 [part-c-answers.md](./part-c-answers.md).
 
@@ -222,10 +225,10 @@ finding cannot be reproduced, report that blocker rather than fabricating it.
 **Status:** README links the design notes, Part C answers, test report, red-team
 report, and exact demo commands. A real 11-slide PowerPoint was generated,
 reopened with `python-pptx`, and passed ZIP integrity validation. The secret
-scanner examined 100 tracked/untracked non-ignored files plus recordings,
-found no non-placeholder credential patterns, and allowlisted only two
-synthetic credential fixtures in a redaction test. The optional pace/accent
-recording remains marked non-required and pending. See
+scanner examined 113 tracked/untracked non-ignored files plus recordings,
+found no secret-pattern files, and allowlisted only two synthetic
+test-placeholder shapes. The optional pace/accent recording remains marked
+non-required and pending. See
 [demo-runbook.md](./demo-runbook.md).
 
 **Work:** finish README, exact runbook, logs/recordings, documentation, and
@@ -240,28 +243,43 @@ and findings.
 
 **Dependencies:** Step 12.
 
-**Status (in progress):** The initial audit found the A2 and A4 gaps. Both now
-have implementation and focused keyless fake-provider tests. The focused
-group passed 28 tests with the two opt-in live cases skipped; the full default
-suite passed 81 with two live cases skipped and two third-party deprecation
-warnings. The separate live Groq product-answer and native-tool smoke tests
-both passed. The final packaging refresh, complete matrix re-audit, secret
-scan, and Git review remain pending. Step 8 remains incomplete for the live
-speech-interruption and adversarial follow-up outcomes, and acoustic-loopback
-latency is not measured. Step 13 is not complete.
+**Status (audit completed 2026-10-18; blockers listed):** The initial audit
+found the A2 and A4 gaps; both now have implementation, focused keyless tests,
+and separate live smoke evidence. The final full keyless suite passed 89
+tests, skipped two opt-in live tests, and emitted two warnings. The focused
+voice/VAD/safety/routing group passed 35
+tests with zero false interruptions and zero missed speech in its labeled
+corpus. The audio manifest validated six entries with zero errors (five
+recorded, one optional pending); the secret scan examined 113 files with no
+secret-pattern files; and the 11-slide presentation reopened with valid ZIP
+integrity. Git status and diff were reviewed. The application changes were
+selectively reviewed for commit; `Problem_Statement/` remains outside the
+submission commit by user decision.
+
+Remaining acceptance blockers are explicit: end-of-speech to app playback
+start is 15.9-20.2 seconds and first-acoustic-sample latency is unmeasured;
+no live microphone or real provider outage was tested; the optional
+pace/accent recording and unaided defense practice are pending; and P3's two
+genuine pre-fix weaknesses were both fixed, so no current unmitigated
+reproduced weakness is being claimed even though the assignment asks why two
+weaknesses were left unfixed. `Problem_Statement/` remains intentionally
+untracked per the user's submission decision. Step 13's audit and blocker
+report are complete; these limitations remain documented for review.
 
 **Work:** first audit without editing; compare every matrix row with code,
 tests, docs, evidence, Git history, and secret scan. Report blockers, then
 make only separately committed real fixes.
 
-**Acceptance:** no mandatory item is marked complete without evidence; Git
-status is clean or explicitly explained.
+**Acceptance:** evidence and blockers are recorded per matrix row; application
+changes are committed after review. The user-provided `Problem_Statement/`
+directory remains intentionally outside the submission commit.
 
 ### Step 14 - Live-defense preparation [REC]
 
-Only after mandatory deliverables are complete: prepare concise module notes
-and practice one small extension without AI assistance. Do not sacrifice a
-required voice scenario, red-team report, evidence artifact, or presentation.
+Concise notes tied to actual module and symbol names are prepared in
+[live-defense-notes.md](./live-defense-notes.md). No unaided extension drill
+has been performed or claimed; the user should practice one small change
+without AI assistance if time remains.
 
 ## Cut lines if time is lost
 

@@ -27,7 +27,7 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "Northstar Gear - fictional customer-support domain",
             "Text and recorded-audio voice paths share SupportService",
             "Evidence snapshot: 2026-10-18",
-            "Status: Step 8 live follow-up acceptance remains incomplete",
+            "Status: recorded-audio follow-ups pass; live latency remains high",
         ),
     ),
     (
@@ -60,7 +60,7 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "Measured offline baseline",
         (
-            "Keyless suite: 81 passed, 2 live checks skipped; 2 dependency warnings",
+            "Keyless suite: 89 passed, 2 live checks skipped; 2 dependency warnings",
             "Routing accuracy 0.8333; retrieval recall@5 0.7273",
             "Input guardrail recall 0.6667; output guardrail recall 1.0",
             "Classifier cache hit rate 0.5 on the measured workload",
@@ -79,18 +79,18 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
         "Audible scenario evidence",
         (
             "Silence and current noise clip completed audible playback without interruption",
-            "Wrong-order speech interrupted; live input safety failed closed",
-            "Adversarial speech interrupted; live classifier failed closed; no refund promised",
+            "Normal order, return eligibility, and wrong-order follow-ups completed safely",
+            "Adversarial follow-up escalated; no refund promise or stale response",
             "Injected STT failure retried twice and played a safe handoff",
         ),
     ),
     (
         "Latency and measurement limits",
         (
-            "Wrong-order: 3665.86 ms to application playback start",
-            "Adversarial: 5672.024 ms; injected failure handoff: 2585.583 ms",
-            "Timestamps are real; endpoint is application playback handoff",
-            "No acoustic loopback or first-physical-sample measurement",
+            "Successful speech follow-ups: 19,293.912-20,168.889 ms to app playback start",
+            "Injected failure handoff: 15,886.752 ms; cancellation call: 105-128 ms",
+            "App playback-start latency is not first-acoustic-sample latency",
+            "All voice latency observations exceed proposed <3 second target",
         ),
     ),
     (
@@ -117,7 +117,7 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "Voice-to-text/human shared-state transfer is designed, not implemented",
             "Groq degradation: bounded retry then fail-closed or local safe handoff",
             "Separate live Groq product-answer and native-tool smoke checks passed",
-            "Next: speech follow-up and acoustic latency measurement",
+            "Next: reduce voice latency, measure acoustic output, practice unaided",
         ),
     ),
 )

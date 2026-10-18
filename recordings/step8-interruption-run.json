@@ -3,56 +3,61 @@
     {
       "audio_path": "recordings\\step7-normal-order-response.wav",
       "event": "assistant_playback_started",
-      "observed_at": "2026-10-17T19:41:48.406269+00:00",
+      "observed_at": "2026-10-18T04:08:22.121989+00:00",
       "playback_device_used": true,
       "turn_id": "turn-0001"
     },
     {
       "event": "speech_started",
       "frame_index": 74,
-      "observed_at": "2026-10-17T19:41:49.866767+00:00"
+      "observed_at": "2026-10-18T04:08:23.582571+00:00"
     },
     {
       "cancelled": true,
       "event": "barge_in_cancelled_playback",
-      "observed_at": "2026-10-17T19:41:50.003544+00:00",
+      "observed_at": "2026-10-18T04:08:23.699562+00:00",
+      "speech_detection_to_cancel_ms": 116.90989998169243,
       "turn_id": "turn-0001"
     },
     {
       "event": "speech_ended",
       "frame_index": 220,
-      "observed_at": "2026-10-17T19:41:52.786314+00:00"
+      "observed_at": "2026-10-18T04:08:26.502214+00:00"
     },
     {
       "event": "stale_result_discarded",
-      "observed_at": "2026-10-17T19:41:52.793301+00:00",
+      "observed_at": "2026-10-18T04:08:26.511376+00:00",
       "turn_id": "turn-0001"
     }
   ],
   "evidence_type": "recorded_user_audio_replayed_in_real_time",
   "followup": {
-    "end_of_speech_at": "2026-10-17T19:41:52.786314+00:00",
-    "end_of_speech_to_first_audio_ms": 3665.8599999999997,
+    "end_of_speech_at": "2026-10-18T04:08:26.502214+00:00",
+    "end_of_speech_to_first_audio_ms": 19708.175,
     "error_code": null,
-    "first_audio_at": "2026-10-17T19:41:56.452174+00:00",
+    "first_audio_at": "2026-10-18T04:08:46.210389+00:00",
     "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\step8-interruption-response.wav",
     "status": "ok",
     "stt_attempts": 1,
-    "support_handler": null,
-    "support_intent": null,
-    "support_message": "I could not process that request safely.",
+    "support_handler": "escalate_to_human_handler",
+    "support_intent": "escalate_to_human",
+    "support_message": "Your request has been marked for human support review.",
     "support_metadata": {
-      "reason": "input_safety_provider_failure"
+      "confidence": 0.9,
+      "handoff_required": true,
+      "session_id": "demo-session-omar"
     },
-    "support_status": "failed_closed",
-    "transcript": "V\u00edk r\u00f3ng\u00f3\u00f0ur.",
+    "support_status": "ok",
+    "transcript": "Wait, wrong order.",
     "turn_id": "turn-0002"
   },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
   "interruption_detected": true,
   "old_turn_result_discarded": true,
   "playback_device_used": true,
   "scenario": "interruption",
   "schema_version": "step8-voice-run-v1",
-  "started_at": "2026-10-17T19:41:46.302733+00:00",
+  "speech_detection_to_cancel_ms": 116.90989998169243,
+  "started_at": "2026-10-18T04:08:19.571763+00:00",
   "turn_id": "turn-0001"
 }

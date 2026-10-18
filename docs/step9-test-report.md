@@ -46,30 +46,65 @@ language statement is entailed by its cited passages.
 
 ## Live-provider evidence (separate from keyless tests)
 
-The audible Step 8 scenario reports are real-time file-backed runs using the
-configured live Groq STT/support path except for the explicitly injected
-provider-failure scenario. Reports and limitations:
+### Prior reproduced failures and corrections
 
-- `recordings/step8-noise-run.json`: noise did not interrupt playback; no STT
-  follow-up was started.
-- `recordings/step8-interruption-run.json`: recorded speech interrupted
-  playback and the old turn was discarded; live input safety failed closed on
-  the resulting transcript.
-- `recordings/step8-adversarial-run.json`: recorded speech interrupted
-  playback and the stale result was discarded; the transcript retained the
-  refund request, but live classification failed closed.
-- `recordings/step8-provider_failure-run.json`: two injected STT failures
-  produced a safe audible handoff; this is not evidence of an actual Groq
-  outage.
+An earlier audible wrong-order run reached STT but the primary
+`whisper-large-v3-turbo` model returned garbled text. A controlled live
+transcription with `whisper-large-v3`, English forced, returned
+`Wait, wrong order.` The STT adapter now retries a suspect English transcript
+with that model and fails closed if the fallback remains unreadable.
 
-The detailed scenario timestamps and app-level playback-start latencies are
-in [the Step 8 runbook](./voice-coordination.md). These live results are not
-included in the keyless test pass count.
+Direct safety-classifier calls using the earlier 120-token strict-schema
+budget produced HTTP 400 `json_validate_failed`. Increasing the bounded
+budget to 300 tokens allowed controlled strict-schema calls. One intervening
+full live route still failed closed; its exact provider exception was not
+captured, so it is not attributed to a specific cause. The safety and router
+adapters now retry JSON-object mode only for HTTP 400
+`json_validate_failed`, with exact-key/type/range validation in application
+code. Fake-client tests cover both the targeted fallback and the rule that
+other provider errors do not trigger it.
+
+### Latest audible runs (2026-10-18 UTC)
+
+These used recorded WAV input replayed as microphone frames and actual
+Windows output playback. They used the live Groq STT/support path except for
+the explicitly injected provider-failure scenario.
+
+| Scenario | Result | End-of-speech to app playback start |
+|---|---|---:|
+| Silence | Playback completed, no interruption or follow-up | n/a |
+| Noise | Playback completed, no interruption or follow-up | n/a |
+| Normal order | Transcript matched; `order_status_handler`; old turn discarded | 19,954.734 ms |
+| Return eligibility | Transcript matched; `order_status_handler` called `check_return_eligibility`; old turn discarded | 20,168.889 ms |
+| “Wait, wrong order” | Transcript matched; safe human escalation; one STT attempt; old turn discarded | 19,708.175 ms |
+| Original adversarial utterance | Transcript retained refund request; safe human escalation; no refund promise; old turn discarded | 19,293.912 ms |
+| Injected STT failure | Two failures; safe audible handoff; old turn discarded | 15,886.752 ms |
+
+Reports are stored in `recordings/step8-*-run.json`; the WAV response files
+are stored beside them. Confirmed-speech-to-cancellation-call latency ranged
+from 105.217 to 128.318 ms. Application playback-start latency is not
+first-acoustic-sample latency. No loopback capture was available. The measured
+15.9-20.2 second voice response times exceed the proposed <3 second target;
+the live runs are evidence of safe handling, not acceptable conversational
+latency or an SLO percentile.
 
 ## Limitations
 
-- A successful live end-to-end follow-up after speech interruption is not
-  demonstrated; Step 8 remains incomplete.
 - `end_of_speech_to_first_audio_ms` measures the application playback-start
   handoff, not acoustic loopback at the first physical audio sample.
+- The provider-failure case is injected; no real Groq outage or live
+  microphone capture was demonstrated.
 - The optional pace/accent recording remains pending.
+
+## Final keyless validation (2026-10-18)
+
+| Purpose | Exact command | Result |
+|---|---|---|
+| Focused voice, VAD, safety, and routing regressions | `$env:PYTHONPATH='src'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest -q -s tests\test_voice.py tests\test_voice_coordination.py tests\test_guardrails.py tests\test_routing.py` | **35 passed in 3.98 s**; false interruptions **0**; missed speech **0** |
+| Full default keyless suite | `Remove-Item Env:RUN_LIVE_GROQ_TESTS,Env:GROQ_API_KEY,Env:GROQ_API_KEYS -ErrorAction SilentlyContinue; $env:PYTHONPATH='src'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest -q` | **89 passed, 2 skipped, 2 warnings in 16.29 s**; both live-provider tests were skipped |
+
+The two `SwigPy*` warnings are third-party deprecations from retrieval
+dependencies. The local model was loaded from the project cache. The keyless
+run removed provider credential variables from its process environment and did
+not invoke live tests. See `recordings/step8-*.json` for timestamped live
+scenario outcomes.

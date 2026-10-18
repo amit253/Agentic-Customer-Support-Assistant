@@ -4,8 +4,10 @@ The original tables below define the assignment requirements and planned
 verification. The current evidence/status snapshot at the end of Step 12 is
 appended below and is subject to the independent Step 13 review.
 
-The assignment PDF is the source of truth: [AI_LLM_Assignment_CSA.pdf](../Problem_Statement/AI_LLM_Assignment_CSA.pdf).
-The working execution instructions are in [FINAL_CODEX_EXECUTION_PLAN.txt](../Problem_Statement/FINAL_CODEX_EXECUTION_PLAN.txt).
+The assignment PDF and working execution plan are local review inputs under
+`Problem_Statement/` and are intentionally outside the submission commit, per
+the user's decision. The PDF was renamed locally; this matrix records the
+verified requirements without depending on that untracked source filename.
 
 Labels used below:
 
@@ -66,8 +68,8 @@ Labels used below:
 
 ## Deliverables Checklist
 
-- [x] Local Git repository with genuine incremental history; no GitHub push is
-  claimed.
+- [x] Local Git repository with genuine incremental history; the renamed local
+  PDF/plan inputs remain intentionally outside the submission commit.
 - [x] Real `.pptx` presentation, reopened and checked.
 - [x] Part A and Part B design notes; known implementation gaps are labeled.
 - [x] Part C written answers, labeled as proposed where not implemented.
@@ -110,7 +112,7 @@ or tool-selection reliability.
 | A2 | IMPLEMENTED+TESTED (keyless + live smoke) | `ProductQuestionHandler` generates structured answers only from sufficient retrieved hits, validates chunk citations, and scopes allowed facts to cited chunks; `tests/test_native_llm_paths.py`; one live answer passed citation and output-claim checks, without proving semantic entailment. |
 | A3 | IMPLEMENTED+TESTED | Fictional read-only tools and ownership tests: `tests/test_tools.py`, `tests/test_step5_call_path.py`. |
 | A4 | IMPLEMENTED+TESTED (keyless + live smoke) | Live construction injects strict Groq function calling; the handler validates one exact user order ID and executes only local allow-listed tools with server-side session authorization; `tests/test_native_llm_paths.py`; one live status selection and local execution passed. |
-| A5 | PARTIAL | Input checks, low-confidence fail-closed handling, and call-path tests exist; successful live semantic classification remains unverified; `docs/red-team-report.md`. |
+| A5 | IMPLEMENTED+TESTED (keyless + limited live clips) | Input checks and low-confidence fail-closed handling are tested; live wrong-order and adversarial recordings passed the safety path after provider-generation fixes. This is not broad semantic-classifier evaluation; `docs/red-team-report.md`, `recordings/step8-*-run.json`. |
 | A6 | IMPLEMENTED+TESTED | Allowed-fact checks and date/money/promise regressions: `src/agentic_support/facts.py`, `tests/test_guardrails.py`; heuristic limits documented. |
 | A7 | IMPLEMENTED+TESTED | Application-level validation and fail-closed tests: `tests/test_pipeline.py`, `tests/test_step5_call_path.py`. |
 | A8 | IMPLEMENTED+TESTED | Rejected input cannot reach classifier/tools; `tests/test_step5_call_path.py`. |
@@ -121,10 +123,10 @@ or tool-selection reliability.
 | B2 | IMPLEMENTED+TESTED | User-recorded WAVs and metadata: `audio/manifest.json`; validated with zero errors. |
 | B3 | IMPLEMENTED+TESTED | Audible silence playback completed without interruption: `recordings/step8-silence-run.json`. |
 | B4 | IMPLEMENTED+TESTED | Audible current noise playback completed without interruption: `recordings/step8-noise-run.json`; detector corpus also reports zero false interruptions. |
-| B5 | PARTIAL | Real speech cancels playback, stale result is discarded, and one STT attempt is evidenced; live follow-up failed closed: `recordings/step8-interruption-run.json`. |
-| B6 | PARTIAL | Original adversarial clip interrupts and stale output is rejected; live classifier failed closed: `recordings/step8-adversarial-run.json`. |
+| B5 | IMPLEMENTED+TESTED (recorded audio) | Audible “Wait, wrong order” interrupted playback, had one STT attempt, safely escalated, and discarded the old turn: `recordings/step8-interruption-run.json`. |
+| B6 | IMPLEMENTED+TESTED (recorded audio) | Original adversarial speech interrupted playback, was transcribed and escalated, made no refund promise, and discarded the old turn: `recordings/step8-adversarial-run.json`. |
 | B7 | IMPLEMENTED+TESTED (injected) | Two injected STT failures lead to audible safe handoff: `recordings/step8-provider_failure-run.json`; no real provider outage is claimed. |
-| B8 | PARTIAL | Real UTC timestamps and app playback-start latency are recorded, but not first acoustic sample/loopback: `docs/voice-coordination.md`. |
+| B8 | PARTIAL | Real UTC end-of-speech-to-app-playback-start timestamps are recorded (15,886.752-20,168.889 ms); the proposed <3 second target is exceeded and first-acoustic-sample loopback is unavailable: `docs/voice-coordination.md`. |
 | B9 | IMPLEMENTED+TESTED (design) | Accent/language, on-device/server VAD, and streaming/batch trade-offs in `docs/design-notes.md`. |
 | B10 | IMPLEMENTED+TESTED | Per-scenario logs and generated WAV evidence in `recordings/`; run commands in `docs/demo-runbook.md`. |
 | C1 | ANSWERED-PROPOSED | State-sharing and reauthorization design in `docs/part-c-answers.md`; persistent shared state is not implemented. |
@@ -134,6 +136,6 @@ or tool-selection reliability.
 | P2 | IMPLEMENTED+TESTED | Actual timestamped choices and experiments: `docs/decisions-log.md`. |
 | P3 | IMPLEMENTED+TESTED | Two pre-fix behaviors were reproduced, fixed, and regression-tested: `docs/red-team-report.md`. |
 | P4 | IMPLEMENTED+TESTED | User-selected fictional Northstar Gear domain and original audio adversarial case: `docs/domain-and-contracts.md`, `audio/manifest.json`. |
-| P5 | IMPLEMENTED+TESTED | `scripts/scan_secrets.py` scanned 100 files with no non-placeholder matches; see Step 12 runbook and output. |
-| P6 | PARTIAL | Local code/docs/audio/report/PPTX deliverables exist; `Problem_Statement/` remains intentionally untracked and no remote push is claimed. |
-| P7 | NOT DONE ([REC]) | No defense notes or unaided practice drill were created or claimed. |
+| P5 | IMPLEMENTED+TESTED | `scripts/scan_secrets.py` scanned 113 files with no secret-pattern matches; see Step 12 runbook and output. |
+| P6 | IMPLEMENTED+TESTED | Local code/docs/audio/report/PPTX deliverables exist; the assignment source directory remains intentionally untracked per the user's decision. |
+| P7 | PARTIAL ([REC]) | Actual-module notes exist in `docs/live-defense-notes.md`; no unaided practice drill has been performed or claimed. |

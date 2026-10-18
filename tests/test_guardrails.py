@@ -1,9 +1,19 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from types import SimpleNamespace
 
+import pytest
+
+from agentic_support.config import Settings
 from agentic_support.facts import AllowedFacts, OutputClaimGuard
-from agentic_support.guardrails import InputGuard, RuleBasedSafetyClassifier
+from agentic_support.guardrails import (
+    GroqSafetyClassifier,
+    GuardrailProviderError,
+    InputGuard,
+    RuleBasedSafetyClassifier,
+)
 
 
 @dataclass
@@ -19,6 +29,102 @@ class StaticSafetyProvider:
     def classify(self, message: str, rule_signals: tuple[str, ...]) -> object:
         self.calls.append((message, rule_signals))
         return self.payload
+
+
+def test_groq_safety_adapter_uses_bounded_strict_json_schema() -> None:
+    captured: dict[str, object] = {}
+
+    def create(**kwargs: object) -> object:
+        captured.update(kwargs)
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(
+                        content=json.dumps(
+                            {
+                                "safe": True,
+                                "confidence": 0.9,
+                                "reason_code": "unintelligible_but_not_unsafe",
+                            }
+                        )
+                    )
+                )
+            ]
+        )
+
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    classifier = GroqSafetyClassifier(Settings.from_environment({}), client=client)
+
+    result = classifier.classify("Wait, wrong order", ())
+
+    assert result["safe"] is True
+    assert captured["response_format"] == classifier._response_format
+    assert captured["max_tokens"] == 300
+
+
+def test_groq_safety_adapter_falls_back_only_after_json_generation_failure() -> None:
+    calls: list[dict[str, object]] = []
+
+    class JsonGenerationFailure(Exception):
+        status_code = 400
+        body = {"error": {"code": "json_validate_failed"}}
+
+    def create(**kwargs: object) -> object:
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise JsonGenerationFailure()
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(
+                        content=json.dumps(
+                            {
+                                "safe": True,
+                                "confidence": 0.95,
+                                "reason_code": "normal_request",
+                            }
+                        )
+                    )
+                )
+            ]
+        )
+
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    classifier = GroqSafetyClassifier(Settings.from_environment({}), client=client)
+
+    payload = classifier.classify("Wait, wrong order.", ())
+
+    assert payload["safe"] is True
+    assert calls[0]["response_format"] == classifier._response_format
+    assert calls[1]["response_format"] == {"type": "json_object"}
+    assert calls[0]["max_tokens"] == calls[1]["max_tokens"] == 300
+
+
+def test_groq_safety_adapter_does_not_fallback_for_other_provider_errors() -> None:
+    calls = 0
+
+    class RateLimitFailure(Exception):
+        status_code = 429
+        body = {"error": {"code": "rate_limit_exceeded"}}
+
+    def create(**kwargs: object) -> object:
+        nonlocal calls
+        calls += 1
+        raise RateLimitFailure()
+
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create))
+    )
+    classifier = GroqSafetyClassifier(Settings.from_environment({}), client=client)
+
+    with pytest.raises(GuardrailProviderError):
+        classifier.classify("Wait, wrong order.", ())
+
+    assert calls == 1
 
 
 def test_direct_injection_is_rejected_by_layered_baseline() -> None:
@@ -51,12 +157,24 @@ def test_invalid_or_failed_safety_provider_fails_closed() -> None:
     invalid = InputGuard(
         StaticSafetyProvider({"safe": "yes", "confidence": 0.99})
     ).check(GuardedRequest("What is the return policy?"))
+    extra_field = InputGuard(
+        StaticSafetyProvider(
+            {
+                "safe": True,
+                "confidence": 0.99,
+                "reason_code": "normal_request",
+                "unexpected": True,
+            }
+        )
+    ).check(GuardedRequest("What is the return policy?"))
     broken = InputGuard(
         StaticSafetyProvider(RuntimeError("provider unavailable"))
     ).check(GuardedRequest("What is the return policy?"))
 
     assert invalid.allowed is False
     assert invalid.fail_closed is True
+    assert extra_field.allowed is False
+    assert extra_field.fail_closed is True
     assert broken.allowed is False
     assert broken.fail_closed is True
 

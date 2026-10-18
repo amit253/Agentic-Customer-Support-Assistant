@@ -1,0 +1,38 @@
+{
+  "end_of_speech_at": "2026-10-18T05:28:26.048022+00:00",
+  "end_of_speech_to_first_audio_ms": 3225.142,
+  "error_code": null,
+  "first_audio_at": "2026-10-18T05:28:29.273164+00:00",
+  "input_audio": {
+    "channels": 1,
+    "duration_seconds": 5.53625,
+    "file_bytes": 177204,
+    "frames": 88580,
+    "path": "audio\\return_eligibility.wav",
+    "sample_rate": 16000,
+    "sample_width_bytes": 2
+  },
+  "input_path": "audio\\return_eligibility.wav",
+  "output_audio": {
+    "channels": 1,
+    "duration_seconds": 18.30625850340136,
+    "file_bytes": 807352,
+    "frames": 403653,
+    "path": "recordings\\step7-final-return-response.wav",
+    "sample_rate": 22050,
+    "sample_width_bytes": 2
+  },
+  "output_path": "recordings\\step7-final-return-response.wav",
+  "status": "ok",
+  "stt_attempts": 1,
+  "support_handler": "order_status_handler",
+  "support_intent": "order_status",
+  "support_message": "Return eligibility for NS-26-2044-8: eligible. trail_week_extended Start a return request; eligibility is not refund approval. Applicable deadline: 2026-11-15.",
+  "support_metadata": {
+    "confidence": 0.9,
+    "tool_name": "check_return_eligibility"
+  },
+  "support_status": "ok",
+  "trace_id": "final-step7-return-20261018",
+  "transcript": "Can I return order NS-26-2044-8?"
+}
