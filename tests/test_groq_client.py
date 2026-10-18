@@ -80,3 +80,22 @@ def test_reasoning_and_timeout_settings_are_validated() -> None:
     with pytest.raises(ConfigurationError):
         Settings.from_environment({"GROQ_TIMEOUT_SECONDS": "0"})
     assert Settings.from_environment({}).groq_timeout_seconds == 15.0
+
+
+def test_router_defaults_to_low_reasoning_effort_and_others_do_not() -> None:
+    from types import SimpleNamespace as NS
+
+    from agentic_support.routing import GroqStructuredClassifier
+
+    captured: dict[str, object] = {}
+
+    def create(**kwargs: object) -> object:
+        captured.update(kwargs)
+        return NS(choices=[NS(message=NS(content='{"intent": "smalltalk", "confidence": 0.9}'))])
+
+    settings = Settings.from_environment({"GROQ_ROUTER_MODEL": "openai/gpt-oss-20b"})
+    client = NS(chat=NS(completions=NS(create=create)))
+    GroqStructuredClassifier(settings, client=client).classify("hi")
+
+    assert captured["reasoning_effort"] == "low"
+    assert reasoning_options(settings, "openai/gpt-oss-20b") == {}

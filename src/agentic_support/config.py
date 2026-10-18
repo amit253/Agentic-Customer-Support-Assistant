@@ -70,6 +70,7 @@ class Settings:
     router_retry_delay_seconds: float
     groq_api_keys: tuple[str, ...]
     groq_reasoning_effort: str = ""
+    groq_router_reasoning_effort: str = "low"
     groq_timeout_seconds: float = 15.0
 
     @classmethod
@@ -145,6 +146,18 @@ class Settings:
                 "GROQ_REASONING_EFFORT must be empty, low, medium, or high"
             )
 
+        # The router's own setting defaults to "low": on the live routing
+        # evaluation it matched the provider default's accuracy with lower
+        # latency. The other adapters were not measured, so they keep the
+        # provider default unless GROQ_REASONING_EFFORT is set.
+        groq_router_reasoning_effort = (
+            source.get("GROQ_ROUTER_REASONING_EFFORT", "low").strip().lower()
+        )
+        if groq_router_reasoning_effort not in _ALLOWED_REASONING_EFFORTS:
+            raise ConfigurationError(
+                "GROQ_ROUTER_REASONING_EFFORT must be empty, low, medium, or high"
+            )
+
         try:
             groq_timeout_seconds = float(source.get("GROQ_TIMEOUT_SECONDS", "15"))
         except (TypeError, ValueError) as exc:
@@ -165,6 +178,7 @@ class Settings:
             router_retry_delay_seconds=router_retry_delay_seconds,
             groq_api_keys=_read_groq_keys(source),
             groq_reasoning_effort=groq_reasoning_effort,
+            groq_router_reasoning_effort=groq_router_reasoning_effort,
             groq_timeout_seconds=groq_timeout_seconds,
         )
 
@@ -198,6 +212,8 @@ class Settings:
             "router_max_attempts": self.router_max_attempts,
             "router_retry_delay_seconds": self.router_retry_delay_seconds,
             "groq_reasoning_effort": self.groq_reasoning_effort or "provider_default",
+            "groq_router_reasoning_effort": self.groq_router_reasoning_effort
+            or "provider_default",
             "groq_timeout_seconds": self.groq_timeout_seconds,
             "groq_configured": self.groq_configured,
             "groq_key_count": len(self.groq_api_keys),

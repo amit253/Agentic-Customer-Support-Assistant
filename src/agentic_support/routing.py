@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import re
+import threading
 import time
 from collections import OrderedDict
 from collections.abc import Mapping
@@ -73,6 +75,16 @@ def describe_provider_error(error: BaseException) -> dict[str, object]:
         "status_code": getattr(root, "status_code", None),
         "provider_code": provider_code,
     }
+
+
+# Words that make a message depend on earlier turns ("can I return it?").
+# Only such messages include the memory hint in the cache key; a
+# self-contained message gets the same route whatever came before it.
+_CONTEXT_DEPENDENT = re.compile(
+    r"\b(?:it|its|that|this|they|them|those|these|one|other|another|same|"
+    r"again|also|what\s+about|how\s+about)\b|^\s*and\b",
+    re.I,
+)
 
 
 class ClassifierProviderError(RuntimeError):
@@ -174,6 +186,7 @@ class ClassifierCache:
         self.ttl_seconds = ttl_seconds
         self._clock = clock
         self._entries: OrderedDict[str, _CacheEntry] = OrderedDict()
+        self._lock = threading.Lock()
         self._lookups = 0
         self._hits = 0
         self._misses = 0
@@ -183,27 +196,29 @@ class ClassifierCache:
         self._retry_exhausted = 0
 
     def get(self, key: str) -> RouteDecision | None:
-        self._lookups += 1
-        entry = self._entries.get(key)
-        if entry is None:
-            self._misses += 1
-            return None
-        if entry.expires_at <= self._clock():
-            del self._entries[key]
-            self._misses += 1
-            return None
-        self._entries.move_to_end(key)
-        self._hits += 1
-        return entry.decision
+        with self._lock:
+            self._lookups += 1
+            entry = self._entries.get(key)
+            if entry is None:
+                self._misses += 1
+                return None
+            if entry.expires_at <= self._clock():
+                del self._entries[key]
+                self._misses += 1
+                return None
+            self._entries.move_to_end(key)
+            self._hits += 1
+            return entry.decision
 
     def set(self, key: str, decision: RouteDecision) -> None:
-        self._entries[key] = _CacheEntry(
-            expires_at=self._clock() + self.ttl_seconds,
-            decision=decision,
-        )
-        self._entries.move_to_end(key)
-        while len(self._entries) > self.max_entries:
-            self._entries.popitem(last=False)
+        with self._lock:
+            self._entries[key] = _CacheEntry(
+                expires_at=self._clock() + self.ttl_seconds,
+                decision=decision,
+            )
+            self._entries.move_to_end(key)
+            while len(self._entries) > self.max_entries:
+                self._entries.popitem(last=False)
 
     def record_classifier_error(self) -> None:
         self._classifier_errors += 1
@@ -294,7 +309,11 @@ class GroqStructuredClassifier:
 
     def __init__(self, settings: Settings, *, client: Any | None = None) -> None:
         self.model_name = settings.groq_router_model
-        self._reasoning = reasoning_options(settings, self.model_name)
+        self._reasoning = reasoning_options(
+            settings,
+            self.model_name,
+            effort=settings.groq_router_reasoning_effort or settings.groq_reasoning_effort,
+        )
         self._client = client or build_groq_chat_client(settings)
 
     def classify(
@@ -388,7 +407,11 @@ class StructuredIntentRouter:
 
     def _cache_key(self, message: str, memory_hint: str = "") -> str:
         normalized = " ".join(message.casefold().split())
-        normalized_hint = " ".join(memory_hint.casefold().split())
+        normalized_hint = (
+            " ".join(memory_hint.casefold().split())
+            if memory_hint and _CONTEXT_DEPENDENT.search(message)
+            else ""
+        )
         return (
             f"{self.model_name}|{self.prompt_version}|{normalized}|"
             f"{normalized_hint}"

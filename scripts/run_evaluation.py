@@ -29,6 +29,7 @@ from agentic_support.memory import MemoryTurn
 from agentic_support.pipeline import SupportService
 from agentic_support.retrieval import GroundedRetriever, RetrievalHit
 from agentic_support.routing import GroqStructuredClassifier, StructuredIntentRouter
+from agentic_support.semantic_routing import build_semantic_router
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -188,7 +189,11 @@ class CountingClassifier:
 def build_routing_service(
     mode: str, settings: Settings
 ) -> tuple[SupportService, CountingClassifier]:
-    """Build the production routing stack with a live or unavailable LLM tier."""
+    """Build the production hybrid routing stack with a live or unavailable LLM tier.
+
+    Rules and the semantic tier always run; only the LLM tier differs, so the
+    offline report shows what the local tiers decide without any provider.
+    """
 
     inner = GroqStructuredClassifier(settings) if mode == "live" else UnavailableClassifier()
     classifier = CountingClassifier(inner)
@@ -198,7 +203,12 @@ def build_routing_service(
         max_attempts=settings.router_max_attempts,
         retry_delay_seconds=settings.router_retry_delay_seconds if mode == "live" else 0.0,
     )
-    return SupportService(router=router, registry=HandlerRegistry()), classifier
+    service = SupportService(
+        router=router,
+        registry=HandlerRegistry(),
+        semantic_router=build_semantic_router(),
+    )
+    return service, classifier
 
 
 def seed_memory(service: SupportService, session_id: str, memory: Mapping[str, Any] | None) -> None:
@@ -282,6 +292,16 @@ def evaluate_routing(
         "llm_model": active_settings.groq_router_model if mode == "live" else None,
         "metrics": metrics,
         "lenient_accuracy": safe_ratio(sum(item["correct"] for item in case_results), total),
+        # The pipeline answers an unaccepted route with the "unclear" clarifying
+        # reply, so this is the outcome the customer sees.
+        "outcome_accuracy": safe_ratio(
+            sum(
+                item["correct"]
+                or (item["predicted"] == REJECTED and "unclear" in item["acceptable"])
+                for item in case_results
+            ),
+            total,
+        ),
         "dead_end_rate": safe_ratio(sum(item["predicted"] == REJECTED for item in case_results), total),
         "false_escalation_rate": safe_ratio(
             sum(item["predicted"] == "escalate_to_human" for item in non_escalation),
@@ -555,6 +575,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             "|---|---:|",
             f"| Strict accuracy | {_fmt(routing['metrics']['accuracy'])} |",
             f"| Lenient accuracy (acceptable alternatives) | {_fmt(routing['lenient_accuracy'])} |",
+            f"| Outcome accuracy (no route answered as unclear) | {_fmt(routing.get('outcome_accuracy'))} |",
             f"| Dead-end rate (no route) | {_fmt(routing['dead_end_rate'])} |",
             f"| False escalation rate | {_fmt(routing['false_escalation_rate'])} |",
             f"| Order requests sent to product search | {routing['order_to_product_misroutes']} |",
@@ -686,6 +707,7 @@ def summarize(report: dict[str, Any]) -> dict[str, Any]:
     if "routing" in report:
         summary["routing_accuracy"] = report["routing"]["metrics"]["accuracy"]
         summary["routing_lenient_accuracy"] = report["routing"]["lenient_accuracy"]
+        summary["routing_outcome_accuracy"] = report["routing"]["outcome_accuracy"]
         summary["routing_dead_end_rate"] = report["routing"]["dead_end_rate"]
         summary["routing_llm_calls"] = report["routing"]["llm_calls"]
     if "retrieval" in report:

@@ -40,6 +40,7 @@ from agentic_support.retrieval import (
 )
 from agentic_support.routing import StructuredIntentRouter, describe_provider_error
 from scripts.run_evaluation import (
+    CountingClassifier,
     evaluate_retrieval_set,
     evaluate_routing,
     percentile,
@@ -144,9 +145,26 @@ def test_offline_routing_evaluation_counts_unavailable_llm_calls() -> None:
 
     assert result["mode"] == "offline_llm_tier_unavailable"
     assert result["cases"][0]["predicted"] == "order_status"
-    assert result["cases"][0]["llm_calls"] == 0
-    assert result["llm_calls"] >= 1
+    assert result["cases"][0]["routing_source"] == "deterministic_order_signal"
+    assert result["cases"][1]["routing_source"] == "rule_smalltalk"
+    assert all(case["llm_calls"] == 0 for case in result["cases"])
+    assert result["llm_calls"] == 0
     assert result["by_category"]["order_with_id"] == {"total": 1, "correct": 1}
+
+
+def test_counting_classifier_counts_both_entry_points() -> None:
+    class Inner:
+        def classify(self, message: str) -> dict[str, object]:
+            return {"intent": "unclear", "confidence": 0.9}
+
+        def classify_with_context(self, message: str, context: str) -> dict[str, object]:
+            return {"intent": "unclear", "confidence": 0.9}
+
+    counter = CountingClassifier(Inner())
+    counter.classify("a")
+    counter.classify_with_context("b", "context")
+
+    assert counter.calls == 2
 
 
 def test_provider_error_description_excludes_message_text() -> None:

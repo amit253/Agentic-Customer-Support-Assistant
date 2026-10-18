@@ -1,0 +1,1838 @@
+{
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.3"
+  },
+  "generated_at": "2026-10-18T10:53:31.428396+00:00",
+  "label": "phase2-hybrid-live-low-effort",
+  "routing": {
+    "by_category": {
+      "acknowledgement": {
+        "correct": 2,
+        "total": 2
+      },
+      "capabilities": {
+        "correct": 2,
+        "total": 2
+      },
+      "complaint": {
+        "correct": 1,
+        "total": 1
+      },
+      "damaged_package": {
+        "correct": 1,
+        "total": 1
+      },
+      "defect_review": {
+        "correct": 1,
+        "total": 1
+      },
+      "explicit_human": {
+        "correct": 6,
+        "total": 6
+      },
+      "filler": {
+        "correct": 1,
+        "total": 1
+      },
+      "frustrated": {
+        "correct": 1,
+        "total": 1
+      },
+      "gibberish": {
+        "correct": 5,
+        "total": 6
+      },
+      "goodbye": {
+        "correct": 3,
+        "total": 3
+      },
+      "greeting": {
+        "correct": 6,
+        "total": 6
+      },
+      "greeting_plus_request": {
+        "correct": 3,
+        "total": 3
+      },
+      "human_hinglish": {
+        "correct": 1,
+        "total": 1
+      },
+      "human_with_order_id": {
+        "correct": 1,
+        "total": 1
+      },
+      "identity": {
+        "correct": 2,
+        "total": 2
+      },
+      "lost_package": {
+        "correct": 1,
+        "total": 1
+      },
+      "negation_trap": {
+        "correct": 2,
+        "total": 2
+      },
+      "order_follow_up": {
+        "correct": 6,
+        "total": 6
+      },
+      "order_hinglish": {
+        "correct": 2,
+        "total": 2
+      },
+      "order_typo": {
+        "correct": 1,
+        "total": 1
+      },
+      "order_with_id": {
+        "correct": 10,
+        "total": 10
+      },
+      "order_without_id": {
+        "correct": 3,
+        "total": 3
+      },
+      "out_of_scope": {
+        "correct": 14,
+        "total": 14
+      },
+      "ownership_issue": {
+        "correct": 1,
+        "total": 1
+      },
+      "policy": {
+        "correct": 6,
+        "total": 6
+      },
+      "policy_troubleshooting": {
+        "correct": 1,
+        "total": 1
+      },
+      "policy_typo": {
+        "correct": 1,
+        "total": 1
+      },
+      "policy_with_order_id": {
+        "correct": 1,
+        "total": 1
+      },
+      "product_care": {
+        "correct": 2,
+        "total": 2
+      },
+      "product_comparison": {
+        "correct": 1,
+        "total": 1
+      },
+      "product_feature": {
+        "correct": 5,
+        "total": 5
+      },
+      "product_hinglish": {
+        "correct": 1,
+        "total": 1
+      },
+      "product_unanswerable": {
+        "correct": 2,
+        "total": 2
+      },
+      "product_with_order_id": {
+        "correct": 1,
+        "total": 1
+      },
+      "punctuation_only": {
+        "correct": 3,
+        "total": 3
+      },
+      "safety_concern": {
+        "correct": 1,
+        "total": 1
+      },
+      "thanks": {
+        "correct": 3,
+        "total": 3
+      },
+      "vague_fragment": {
+        "correct": 3,
+        "total": 4
+      },
+      "wellbeing": {
+        "correct": 1,
+        "total": 1
+      }
+    },
+    "cases": [
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_feature",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-001",
+        "latency_ms": 39.9,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_feature",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-002",
+        "latency_ms": 46.8,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_feature",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-003",
+        "latency_ms": 24.5,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_feature",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-004",
+        "latency_ms": 621.7,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_feature",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-005",
+        "latency_ms": 20.3,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_comparison",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-006",
+        "latency_ms": 25.1,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_care",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-007",
+        "latency_ms": 25.4,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_care",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-008",
+        "latency_ms": 17.6,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-009",
+        "latency_ms": 811.9,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-010",
+        "latency_ms": 56.7,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-011",
+        "latency_ms": 28.1,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-012",
+        "latency_ms": 57.5,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-013",
+        "latency_ms": 31.9,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-014",
+        "latency_ms": 476.2,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "policy_typo",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-015",
+        "latency_ms": 651.2,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_hinglish",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-016",
+        "latency_ms": 54.7,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human",
+          "product_question"
+        ],
+        "category": "policy_troubleshooting",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-017",
+        "latency_ms": 600.3,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_with_order_id",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-018",
+        "latency_ms": 642.6,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "order_status",
+          "product_question"
+        ],
+        "category": "policy_with_order_id",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-019",
+        "latency_ms": 36.4,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "negation_trap",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-020",
+        "latency_ms": 737.3,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "greeting_plus_request",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-021",
+        "latency_ms": 23.8,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "greeting_plus_request",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-022",
+        "latency_ms": 249.8,
+        "llm_calls": 1,
+        "predicted": "product_question",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-023",
+        "latency_ms": 0.5,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-024",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-025",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-026",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-027",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-028",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-029",
+        "latency_ms": 112.7,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-030",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_hinglish",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-031",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_typo",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-032",
+        "latency_ms": 28.7,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "greeting_plus_request",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-033",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "negation_trap",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-034",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_without_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-035",
+        "latency_ms": 24.3,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_without_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-036",
+        "latency_ms": 27.1,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_without_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-037",
+        "latency_ms": 35.1,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_follow_up",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-038",
+        "latency_ms": 0.5,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "memory_resolved_order_follow_up",
+        "routing_source": "verified_session_memory"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_follow_up",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-039",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "memory_resolved_order_follow_up",
+        "routing_source": "verified_session_memory"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_follow_up",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-040",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "memory_resolved_order_follow_up",
+        "routing_source": "verified_session_memory"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_follow_up",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-041",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "memory_resolved_order_follow_up",
+        "routing_source": "verified_session_memory"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_follow_up",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-042",
+        "latency_ms": 20.6,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_follow_up",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-043",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "memory_resolved_order_follow_up",
+        "routing_source": "verified_session_memory"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_hinglish",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-044",
+        "latency_ms": 27.3,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "explicit_human",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-045",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "explicit_human",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-046",
+        "latency_ms": 0.4,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "explicit_human",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-047",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "explicit_human",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-048",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "explicit_human",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-049",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "complaint",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-050",
+        "latency_ms": 808.9,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "defect_review",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-051",
+        "latency_ms": 95.0,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "damaged_package",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-052",
+        "latency_ms": 0.4,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "lost_package",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-053",
+        "latency_ms": 696.6,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "ownership_issue",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-054",
+        "latency_ms": 464.1,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "safety_concern",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-055",
+        "latency_ms": 606.1,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "human_hinglish",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-056",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "escalate_to_human",
+        "reason": "explicit_human_request",
+        "routing_source": "rule_human_request"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "frustrated",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-057",
+        "latency_ms": 548.7,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human"
+        ],
+        "category": "explicit_human",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-058",
+        "latency_ms": 529.7,
+        "llm_calls": 1,
+        "predicted": "escalate_to_human",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "greeting",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-059",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "greeting",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-060",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "greeting",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-061",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "greeting",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-062",
+        "latency_ms": 0.1,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "greeting",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-063",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "thanks",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-064",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "thanks",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-065",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "thanks",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-066",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "goodbye",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-067",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "goodbye",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-068",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "goodbye",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-069",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "identity",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-070",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "capabilities",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-071",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "identity",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-072",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "wellbeing",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-073",
+        "latency_ms": 0.1,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk",
+          "unclear"
+        ],
+        "category": "capabilities",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-074",
+        "latency_ms": 0.1,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk",
+          "unclear"
+        ],
+        "category": "acknowledgement",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-075",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk"
+        ],
+        "category": "acknowledgement",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-076",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "smalltalk",
+          "unclear"
+        ],
+        "category": "greeting",
+        "correct": true,
+        "expected": "smalltalk",
+        "id": "rt-077",
+        "latency_ms": 0.1,
+        "llm_calls": 0,
+        "predicted": "smalltalk",
+        "reason": "closed_vocabulary_smalltalk",
+        "routing_source": "rule_smalltalk"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-078",
+        "latency_ms": 30.8,
+        "llm_calls": 0,
+        "predicted": "out_of_scope",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "out_of_scope",
+          "smalltalk"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-079",
+        "latency_ms": 20.7,
+        "llm_calls": 0,
+        "predicted": "out_of_scope",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-080",
+        "latency_ms": 706.4,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-081",
+        "latency_ms": 338.5,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-082",
+        "latency_ms": 524.8,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-083",
+        "latency_ms": 572.8,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-084",
+        "latency_ms": 341.4,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-085",
+        "latency_ms": 719.2,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-086",
+        "latency_ms": 547.7,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-087",
+        "latency_ms": 23.8,
+        "llm_calls": 0,
+        "predicted": "out_of_scope",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-088",
+        "latency_ms": 551.1,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-089",
+        "latency_ms": 455.4,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-090",
+        "latency_ms": 532.1,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "out_of_scope"
+        ],
+        "category": "out_of_scope",
+        "correct": true,
+        "expected": "out_of_scope",
+        "id": "rt-091",
+        "latency_ms": 218.5,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "gibberish",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-092",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "gibberish",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-093",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "punctuation_only",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-094",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "punctuation_only",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-095",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "smalltalk",
+          "unclear"
+        ],
+        "category": "filler",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-096",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "gibberish",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-097",
+        "latency_ms": 0.2,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "vague_fragment",
+        "correct": false,
+        "expected": "unclear",
+        "id": "rt-098",
+        "latency_ms": 654.4,
+        "llm_calls": 1,
+        "predicted": "rejected",
+        "reason": "low_confidence",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "vague_fragment",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-099",
+        "latency_ms": 0.5,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "gibberish",
+        "correct": false,
+        "expected": "unclear",
+        "id": "rt-100",
+        "latency_ms": 493.1,
+        "llm_calls": 1,
+        "predicted": "out_of_scope",
+        "reason": "accepted",
+        "routing_source": "classifier"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "gibberish",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-101",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "vague_fragment",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-102",
+        "latency_ms": 14.4,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "vague_fragment",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-103",
+        "latency_ms": 20.5,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "gibberish",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-104",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "unclear"
+        ],
+        "category": "punctuation_only",
+        "correct": true,
+        "expected": "unclear",
+        "id": "rt-105",
+        "latency_ms": 0.4,
+        "llm_calls": 0,
+        "predicted": "unclear",
+        "reason": "gibberish",
+        "routing_source": "rule_gibberish"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_unanswerable",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-106",
+        "latency_ms": 20.5,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "product_question"
+        ],
+        "category": "product_unanswerable",
+        "correct": true,
+        "expected": "product_question",
+        "id": "rt-107",
+        "latency_ms": 14.4,
+        "llm_calls": 0,
+        "predicted": "product_question",
+        "reason": "semantic_match",
+        "routing_source": "semantic_exemplars"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-108",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "order_status"
+        ],
+        "category": "order_with_id",
+        "correct": true,
+        "expected": "order_status",
+        "id": "rt-109",
+        "latency_ms": 0.1,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      },
+      {
+        "acceptable": [
+          "escalate_to_human",
+          "order_status"
+        ],
+        "category": "human_with_order_id",
+        "correct": true,
+        "expected": "escalate_to_human",
+        "id": "rt-110",
+        "latency_ms": 0.3,
+        "llm_calls": 0,
+        "predicted": "order_status",
+        "reason": "explicit_order_operation",
+        "routing_source": "deterministic_order_signal"
+      }
+    ],
+    "classifier_errors": 0,
+    "dead_end_rate": 0.00909090909090909,
+    "false_escalation_rate": 0.0,
+    "latency_ms": {
+      "llm_routed_p50": 551.1,
+      "llm_routed_p95": 808.9,
+      "mean": 146.52807363308966,
+      "p50": 14.429799979552627,
+      "p95": 696.5560999815352
+    },
+    "lenient_accuracy": 0.9818181818181818,
+    "llm_calls": 27,
+    "llm_calls_per_case": 0.24545454545454545,
+    "llm_model": "openai/gpt-oss-20b",
+    "metrics": {
+      "accuracy": 0.9545454545454546,
+      "confusion_matrix": {
+        "escalate_to_human": {
+          "escalate_to_human": 14,
+          "order_status": 1,
+          "out_of_scope": 0,
+          "product_question": 0,
+          "smalltalk": 0,
+          "unclear": 0
+        },
+        "order_status": {
+          "escalate_to_human": 0,
+          "order_status": 24,
+          "out_of_scope": 0,
+          "product_question": 0,
+          "smalltalk": 0,
+          "unclear": 0
+        },
+        "out_of_scope": {
+          "escalate_to_human": 0,
+          "order_status": 0,
+          "out_of_scope": 14,
+          "product_question": 0,
+          "smalltalk": 0,
+          "unclear": 0
+        },
+        "product_question": {
+          "escalate_to_human": 1,
+          "order_status": 1,
+          "out_of_scope": 0,
+          "product_question": 22,
+          "smalltalk": 0,
+          "unclear": 0
+        },
+        "smalltalk": {
+          "escalate_to_human": 0,
+          "order_status": 0,
+          "out_of_scope": 0,
+          "product_question": 0,
+          "smalltalk": 19,
+          "unclear": 0
+        },
+        "unclear": {
+          "escalate_to_human": 0,
+          "order_status": 0,
+          "out_of_scope": 1,
+          "product_question": 0,
+          "rejected": 1,
+          "smalltalk": 0,
+          "unclear": 12
+        }
+      },
+      "per_intent": {
+        "escalate_to_human": {
+          "f1": 0.9333333333333333,
+          "precision": 0.9333333333333333,
+          "recall": 0.9333333333333333,
+          "support": 15
+        },
+        "order_status": {
+          "f1": 0.9600000000000001,
+          "precision": 0.9230769230769231,
+          "recall": 1.0,
+          "support": 24
+        },
+        "out_of_scope": {
+          "f1": 0.9655172413793104,
+          "precision": 0.9333333333333333,
+          "recall": 1.0,
+          "support": 14
+        },
+        "product_question": {
+          "f1": 0.9565217391304348,
+          "precision": 1.0,
+          "recall": 0.9166666666666666,
+          "support": 24
+        },
+        "smalltalk": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 19
+        },
+        "unclear": {
+          "f1": 0.9600000000000001,
+          "precision": 1.0,
+          "recall": 0.9230769230769231,
+          "support": 14
+        }
+      },
+      "sample_count": 110
+    },
+    "mode": "live_groq_llm_tier",
+    "order_to_product_misroutes": 0,
+    "outcome_accuracy": 0.990909090909091,
+    "routing_sources": {
+      "classifier": 27,
+      "deterministic_order_signal": 13,
+      "rule_gibberish": 10,
+      "rule_human_request": 7,
+      "rule_smalltalk": 19,
+      "semantic_exemplars": 29,
+      "verified_session_memory": 5
+    }
+  },
+  "schema_version": "evaluation-v2"
+}

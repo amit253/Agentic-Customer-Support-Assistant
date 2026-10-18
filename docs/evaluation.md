@@ -97,3 +97,29 @@ were higher than the 141 calls shown.
 | Answerable acceptance | 0.594 | 0.720 |
 | Unanswerable rejection | 0.692 | 0.875 |
 | Evidence recall reaching the answerer | 0.516 | 0.620 |
+
+## Routing after the changes
+
+Same 110 held-out cases. Live runs used Groq `openai/gpt-oss-20b`.
+
+| Routing | Phase 0 live | Phase 1 live (LLM tier only) | Phase 2 offline (no LLM) | Phase 2 live (hybrid) |
+|---|---:|---:|---:|---:|
+| Strict accuracy | 0.509 | 0.909 | 0.736 | 0.955 |
+| Lenient accuracy | 0.527 | 0.945 | 0.755 | 0.982 |
+| Outcome accuracy (no route answered as unclear) | n/a | n/a | 0.773 | 0.991 |
+| Dead-end rate | 0.355 | 0.045 | 0.245 | 0.009 |
+| False escalation rate | 0.117 | 0.000 | 0.011 | 0.000 |
+| LLM classifier calls per case | 1.28 | 0.90 | 0.49 (unavailable) | 0.245 |
+| Classifier errors | 62 | 1 | n/a | 0 |
+| Routing latency p50 / p95 | 973 ms / 16.4 s | 577 / 885 ms | 6 / 14 ms | 9 / 821 ms |
+
+In the hybrid run the rules decided 54 of 110 messages, the semantic tier 29,
+and the LLM 27. With `reasoning_effort=low` for the router
+(`reports/phase2-hybrid-live-low-effort-evaluation.md`) accuracy was identical
+and LLM-routed latency fell from 659 / 964 ms to 551 / 809 ms (p50 / p95), so
+the router now defaults to low effort. Only routing was measured; the other
+adapters keep the provider default.
+
+The offline Phase 2 number was taken after one fix found on this held-out
+set: "are you a bot or a real person?" was caught by the human-request rule,
+so pure smalltalk is now checked first. That case is no longer unseen.

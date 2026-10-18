@@ -671,3 +671,46 @@ Live result for the LLM tier alone (`reports/phase1-llm-only-live-evaluation.md`
 same 110 cases): strict accuracy 0.509 -> 0.909, lenient 0.527 -> 0.945,
 dead-end rate 0.355 -> 0.045, false escalation 0.117 -> 0.000, classifier
 errors 62 -> 1, routing p95 16.4 s -> 0.89 s. No key rotation occurred.
+
+### 2026-10-18T16:28:28.1804462+05:30 - [CLAUDE] Phase 2 hybrid router
+
+Decision: route in tiers instead of sending every message to the LLM. Tier 0
+rules (one order ID plus an order operation, verified-memory follow-up,
+closed-vocabulary smalltalk, non-negated human request, gibberish), tier 1
+nearest labeled examples on MiniLM embeddings, tier 2 the Groq classifier,
+then a clarification fallback. The rules that used to live in the pipeline
+moved to `route_rules.py` unchanged in intent, with a few added order verbs
+("delivered", "returnable", "send back", "kab aayega").
+
+The semantic thresholds came from leave-one-out over the 137 training
+examples (`scripts/calibrate_semantic_router.py`), never from the held-out
+set: min score 0.30 and min margin 0.15 gave precision 1.00 at coverage 0.438.
+multilingual-e5-small was calibrated too but covered only 0.329 at the same
+precision, so routing keeps MiniLM. The overlap test caught three training
+examples that matched held-out messages ("Where is my order?", "What about my
+other order?", and a punctuation-only collision); the two real ones were
+reworded before calibration was rerun.
+
+Considered and rejected: running the input guard and the LLM router in
+parallel. It would save one round trip on the turns that reach the LLM but
+would let unchecked text reach the router LLM and contradict the existing
+"classifier never sees a blocked message" tests.
+
+Other changes: the router cache key includes the memory hint only when the
+message refers back ("it", "that one", "what about"), the classifier cache is
+thread-safe, and the input guard caches definitive decisions (never provider
+failures) and allows closed-vocabulary smalltalk without a provider call.
+
+Found on the held-out set and fixed: "are you a bot or a real person?" was
+routed to a human by the human-request rule; pure smalltalk is now checked
+first. Recorded so that case is not presented as unseen.
+
+Live result (`reports/phase2-hybrid-live-evaluation.md`): strict accuracy
+0.955, lenient 0.982, outcome 0.991, dead-end 0.009, false escalation 0,
+0.245 LLM calls per message, routing p50 9 ms / p95 821 ms. A second run with
+`reasoning_effort=low` gave the same accuracy with lower LLM latency, so the
+router (only) now defaults to low effort via `GROQ_ROUTER_REASONING_EFFORT`.
+Remaining misroutes: "the blue one" gets no route (answered as unclear) and
+"xkcd lorem ipsum dolor" goes to out_of_scope instead of unclear. "I need a
+human to approve a refund for NS-..." goes to the order tool because the order
+rule runs first; it is labeled acceptable but is reviewed in the red-team pass.

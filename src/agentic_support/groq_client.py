@@ -27,10 +27,15 @@ def _is_rate_limited(error: BaseException) -> bool:
     return getattr(error, "status_code", None) == 429
 
 
-def reasoning_options(settings: Settings, model_name: str) -> dict[str, str]:
-    """Return ``reasoning_effort`` only for models that support it."""
+def reasoning_options(
+    settings: Settings, model_name: str, *, effort: str | None = None
+) -> dict[str, str]:
+    """Return ``reasoning_effort`` only for models that support it.
 
-    effort = settings.groq_reasoning_effort
+    ``effort`` overrides the global setting for one adapter (the router).
+    """
+
+    effort = settings.groq_reasoning_effort if effort is None else effort
     if not effort or not model_name.startswith(_REASONING_MODEL_PREFIXES):
         return {}
     return {"reasoning_effort": effort}

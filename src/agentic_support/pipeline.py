@@ -25,7 +25,9 @@ from .handlers import (
 )
 from .logging_config import log_event
 from .memory import MemorySnapshot, MemoryTurn, SessionMemoryStore
+from .hybrid_routing import HybridRouter
 from .routing import GroqStructuredClassifier, RouteDecision, StructuredIntentRouter
+from .semantic_routing import SemanticRouter, build_semantic_router
 from .retrieval import GroundedRetriever
 from .tool_calling import GroqOrderToolCaller
 from .tools import DeterministicOrderTools
@@ -66,73 +68,6 @@ UNVERIFIED_ANSWER_REPLY = (
     "I couldn't verify every detail in that answer, so I won't guess. A human "
     "agent can help if you need more detail."
 )
-ORDER_ID_PATTERN = re.compile(r"\bNS-\d{2}-\d{4}-\d\b", re.I)
-ORDER_OPERATION_PATTERN = re.compile(
-    r"\b(?:where|status|track|tracking|delivery|deliver|arrive|"
-    r"cancel|refund|eligible|eligibility|check)\b|"
-    r"\b(?:can|may|am)\s+i\s+(?:return|send\s+back)\b|"
-    r"\breturn\s+(?:order|it|this|that)\b",
-    re.I,
-)
-PRODUCT_LOOKALIKE_PATTERN = re.compile(
-    r"\b(?:capacity|size|material|colour|color|care|feature|features|"
-    r"specification|specifications|policy|what\s+is|what's|how\s+does|"
-    r"does\s+it)\b",
-    re.I,
-)
-
-
-def _is_memory_order_follow_up(
-    message: str,
-    *,
-    active_order_id: str | None,
-) -> bool:
-    """Recognize only clear order pronoun follow-ups with verified memory."""
-
-    if active_order_id is None:
-        return False
-    if re.search(r"\bNS-\d{2}-\d{4}-\d\b", message, re.I):
-        return False
-    has_reference = re.search(
-        r"\b(?:it|that|this|the order|my order)\b", message, re.I
-    )
-    has_order_action = re.search(
-        r"\b(?:return|eligible|send back|status|where|track|deliver|arrive|"
-        r"cancel|refund|check)\b",
-        message,
-        re.I,
-    )
-    return has_reference is not None and has_order_action is not None
-
-
-def _is_explicit_order_operation(message: str) -> bool:
-    """Recognize an unambiguous operation on exactly one stated order.
-
-    Product questions may mention an order as background context, so an order
-    ID alone is not enough to bypass the LLM router. Only a clear status,
-    delivery, return, refund, cancellation, or tracking operation is resolved
-    locally. This keeps the real pipeline deterministic for the failure case
-    while preserving product-question routing for benign look-alikes.
-    """
-
-    if len(ORDER_ID_PATTERN.findall(message)) != 1:
-        return False
-    if not ORDER_OPERATION_PATTERN.search(message):
-        return False
-    if re.search(r"\breturn\s+policy\b", message, re.I):
-        return False
-    if PRODUCT_LOOKALIKE_PATTERN.search(message):
-        return bool(
-            re.search(
-                r"\b(?:return|eligible|eligibility|send\s+back|refund|cancel)\b",
-                message,
-                re.I,
-            )
-            and not re.search(r"\b(?:policy|what\s+is|what's)\b", message, re.I)
-        )
-    return True
-
-
 @dataclass(frozen=True, slots=True)
 class CheckedInput:
     """Input created only after the Step 4 normalization/shape checks."""
@@ -143,14 +78,6 @@ class CheckedInput:
     channel: Channel
     active_order_id: str | None = None
     last_intent: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class RoutingInput:
-    """Safe classifier text with verified session context when available."""
-
-    text: str
-    memory_hint: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -220,6 +147,7 @@ class SupportService:
         input_guard: InputGuard | None = None,
         output_guard: OutputClaimGuard | None = None,
         memory_store: SessionMemoryStore | None = None,
+        semantic_router: SemanticRouter | None = None,
     ) -> None:
         self.router = router
         self.registry = registry
@@ -227,6 +155,9 @@ class SupportService:
         self.input_guard = input_guard or InputGuard(RuleBasedSafetyClassifier())
         self.output_guard = output_guard or OutputClaimGuard()
         self.memory_store = memory_store or SessionMemoryStore()
+        self.hybrid_router = HybridRouter(
+            router, semantic_router=semantic_router, logger=self.logger
+        )
 
     def clear_session(self, session_id: str) -> None:
         """Clear the bounded memory for one authenticated/demo session."""
@@ -236,48 +167,13 @@ class SupportService:
     def _select_route(
         self, checked_input: CheckedInput, memory: MemorySnapshot
     ) -> tuple[RouteDecision, str]:
-        """Return the route decision and the source that produced it."""
+        """Return the route decision and the tier that produced it."""
 
-        if _is_explicit_order_operation(checked_input.text):
-            log_event(
-                self.logger,
-                "deterministic_order_route",
-                reason="explicit_order_operation",
-            )
-            return (
-                RouteDecision(
-                    intent="order_status",
-                    confidence=1.0,
-                    accepted=True,
-                    reason="explicit_order_operation",
-                ),
-                "deterministic_order_signal",
-            )
-        if _is_memory_order_follow_up(
+        return self.hybrid_router.route(
             checked_input.text,
             active_order_id=checked_input.active_order_id,
-        ):
-            log_event(
-                self.logger,
-                "memory_resolved_order_follow_up",
-                active_order_id=checked_input.active_order_id,
-            )
-            return (
-                RouteDecision(
-                    intent="order_status",
-                    confidence=1.0,
-                    accepted=True,
-                    reason="memory_resolved_order_follow_up",
-                ),
-                "verified_session_memory",
-            )
-        decision = self.router.route(
-            RoutingInput(
-                text=checked_input.text,
-                memory_hint=memory.routing_hint(),
-            )
+            memory_hint=memory.routing_hint(),
         )
-        return decision, "classifier"
 
     def preview_route(
         self, message: str, *, session_id: str = "unknown-session"
@@ -515,4 +411,5 @@ def build_live_support_service(
         ),
         input_guard=InputGuard(safety_classifier),
         output_guard=OutputClaimGuard(),
+        semantic_router=build_semantic_router(),
     )

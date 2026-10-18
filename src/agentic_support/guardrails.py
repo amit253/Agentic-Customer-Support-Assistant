@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import json
 import re
+import threading
+import time
+from collections import OrderedDict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
 from .config import Settings
+from .route_rules import is_pure_smalltalk
 from .groq_client import build_groq_chat_client, reasoning_options
 
 
@@ -187,16 +191,77 @@ class GroqSafetyClassifier:
 
 
 class InputGuard:
-    """Combine deterministic signals with a safety-classifier decision."""
+    """Combine deterministic signals with a safety-classifier decision.
 
-    def __init__(self, provider: SafetyClassifier) -> None:
+    Two shortcuts avoid a provider call without weakening the check:
+
+    * A message made entirely of closed-vocabulary smalltalk ("hi",
+      "thanks, bye") is allowed directly. Every word comes from a fixed
+      list, so it cannot carry an instruction.
+    * Definitive provider decisions are cached by normalized text for a few
+      minutes. Provider failures and uncertain results are never cached, so
+      a transient outage is re-checked on the next turn.
+    """
+
+    def __init__(
+        self,
+        provider: SafetyClassifier,
+        *,
+        cache_size: int = 512,
+        cache_ttl_seconds: float = 600.0,
+        clock=time.monotonic,
+    ) -> None:
         self.provider = provider
+        self._cache: OrderedDict[str, tuple[float, InputSafetyDecision]] = OrderedDict()
+        self._cache_size = cache_size
+        self._cache_ttl = cache_ttl_seconds
+        self._clock = clock
+        self._lock = threading.Lock()
+        self.cache_hits = 0
+
+    def _cached(self, key: str) -> InputSafetyDecision | None:
+        with self._lock:
+            entry = self._cache.get(key)
+            if entry is None:
+                return None
+            if entry[0] <= self._clock():
+                del self._cache[key]
+                return None
+            self._cache.move_to_end(key)
+            self.cache_hits += 1
+            return entry[1]
+
+    def _remember(self, key: str, decision: InputSafetyDecision) -> None:
+        with self._lock:
+            self._cache[key] = (self._clock() + self._cache_ttl, decision)
+            self._cache.move_to_end(key)
+            while len(self._cache) > self._cache_size:
+                self._cache.popitem(last=False)
 
     def check(self, request: GuardedInputLike) -> InputSafetyDecision:
         signals = find_rule_signals(request.text)
+        if not signals and is_pure_smalltalk(request.text):
+            return InputSafetyDecision(
+                allowed=True,
+                fail_closed=False,
+                reason="closed_vocabulary_smalltalk",
+                confidence=1.0,
+            )
+        key = " ".join(request.text.casefold().split())
+        cached = self._cached(key)
+        if cached is not None:
+            return cached
+        decision = self._check_with_provider(request.text, signals)
+        if not decision.fail_closed:
+            self._remember(key, decision)
+        return decision
+
+    def _check_with_provider(
+        self, text: str, signals: tuple[str, ...]
+    ) -> InputSafetyDecision:
         try:
             safe, confidence, reason_code = _parse_provider_result(
-                self.provider.classify(request.text, signals)
+                self.provider.classify(text, signals)
             )
         except Exception:
             return InputSafetyDecision(
