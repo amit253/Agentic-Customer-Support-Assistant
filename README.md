@@ -110,9 +110,10 @@ python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1 --se
 ```
 
 Streamlit will print a local URL such as `http://127.0.0.1:8502`. The single
-conversation view accepts text through `st.chat_input` and browser-recorded
-voice through `st.audio_input`; both use the same guarded service path. Each
-voice turn shows its transcript, playable response audio, and trace ID.
+conversation view accepts text through the message box and browser-recorded
+voice through the microphone control beside it; both use the same guarded
+service path. Voice turns show their transcript and playable response audio.
+Trace IDs and safe metadata stay in the collapsed sidebar panel.
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are

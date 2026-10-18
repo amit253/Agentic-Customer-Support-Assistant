@@ -12,6 +12,7 @@ the real-time barge-in scenarios remain in the CLI evidence path.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from uuid import uuid4
@@ -63,13 +64,6 @@ def safe_json(value: object) -> object:
     return json.loads(json.dumps(value, default=str))
 
 
-def show_provider_error(error: Exception) -> None:
-    st.error(
-        "The live request could not be completed. Check the local .env and "
-        f"retry. ({type(error).__name__})"
-    )
-
-
 def _conversation() -> list[dict[str, object]]:
     return st.session_state.setdefault("conversation", [])
 
@@ -80,48 +74,44 @@ def _append_turn(turn: dict[str, object]) -> None:
 
 def _render_conversation() -> None:
     turns = _conversation()
-    if not turns:
-        st.info("Start with a text message or record a voice message below.")
-        return
-
     for turn in turns:
         with st.chat_message("user"):
             if turn["kind"] == "voice":
                 st.audio(turn["audio_bytes"], format="audio/wav")
                 if turn.get("transcript"):
-                    st.caption(f"Transcript: {turn['transcript']}")
+                    st.markdown(f"_{turn['transcript']}_")
             else:
                 st.write(turn["user_text"])
 
         with st.chat_message("assistant"):
-            status = str(turn["status"])
-            if status == "ok":
-                st.success(turn["assistant_text"])
-            elif status in {"failed_closed", "handoff", "failed"}:
-                st.warning(turn["assistant_text"])
-            else:
-                st.info(turn["assistant_text"])
+            st.markdown(str(turn["assistant_text"]))
 
             output_path = turn.get("output_path")
             if output_path and Path(str(output_path)).exists():
                 st.audio(Path(str(output_path)).read_bytes(), format="audio/wav")
 
+
+def _render_trace_details() -> None:
+    turns = _conversation()
+    if not turns:
+        return
+    with st.sidebar.expander("Trace details", expanded=False):
+        for index, turn in enumerate(turns, start=1):
             st.caption(
-                f"Trace ID: `{turn['trace_id']}` · status: `{status}`"
+                f"Turn {index}: {turn['status']} · `{turn['trace_id']}`"
             )
-            with st.expander("Debug metadata"):
-                st.json(
-                    safe_json(
-                        {
-                            "intent": turn.get("intent"),
-                            "handler": turn.get("handler"),
-                            "metadata": turn.get("metadata", {}),
-                            "error_code": turn.get("error_code"),
-                            "latency_ms": turn.get("latency_ms"),
-                            "stt_attempts": turn.get("stt_attempts"),
-                        }
-                    )
+            st.json(
+                safe_json(
+                    {
+                        "intent": turn.get("intent"),
+                        "handler": turn.get("handler"),
+                        "metadata": turn.get("metadata", {}),
+                        "error_code": turn.get("error_code"),
+                        "latency_ms": turn.get("latency_ms"),
+                        "stt_attempts": turn.get("stt_attempts"),
+                    }
                 )
+            )
 
 
 def _handle_text(message: str, session_id: str) -> None:
@@ -206,36 +196,45 @@ def _handle_voice(audio_bytes: bytes, session_id: str) -> None:
         )
 
 
-def render_voice_input(session_id: str) -> None:
-    st.subheader("Voice input")
-    st.caption(
-        "Record, preview, and send one voice turn. This is batch voice input; "
-        "the real-time barge-in demo remains available in the CLI runbook. "
-        "The first voice request may take a little longer while the local "
-        "embedding model is prepared."
-    )
-    recorded_audio = st.audio_input(
-        "Record a voice message",
-        sample_rate=16000,
-        key="browser_voice_input",
-    )
-    if recorded_audio is not None:
-        audio_bytes = recorded_audio.getvalue()
-        st.audio(audio_bytes, format="audio/wav")
-        if st.button("Send recorded voice", type="primary"):
-            _handle_voice(audio_bytes, session_id)
+def _render_checked_recordings(session_id: str) -> None:
+    clip_label = st.selectbox("Recording", list(VOICE_CLIPS))
+    input_path = VOICE_CLIPS[clip_label]
+    if input_path.exists():
+        if st.button("Send checked recording", key="send_checked_recording"):
+            _handle_voice(input_path.read_bytes(), session_id)
             st.rerun()
+    else:
+        st.error(f"Recording is missing: {input_path}")
 
-    with st.expander("Use a checked recording instead"):
-        clip_label = st.selectbox("Recording", list(VOICE_CLIPS))
-        input_path = VOICE_CLIPS[clip_label]
-        if input_path.exists():
-            st.audio(input_path.read_bytes(), format="audio/wav")
-            if st.button("Send checked recording", key="send_checked_recording"):
-                _handle_voice(input_path.read_bytes(), session_id)
-                st.rerun()
-        else:
-            st.error(f"Recording is missing: {input_path}")
+
+def _render_composer(session_id: str) -> None:
+    """Render the text composer with a compact adjacent microphone control."""
+
+    text_column, voice_column = st.columns([8, 1])
+    with text_column:
+        prompt = st.chat_input("Message Northstar Support...")
+    with voice_column:
+        recorded_audio = st.audio_input(
+            "🎙️",
+            sample_rate=16000,
+            label_visibility="collapsed",
+            key="browser_voice_input",
+        )
+
+    if prompt and prompt.strip():
+        _handle_text(prompt.strip(), session_id)
+        st.rerun()
+
+    if recorded_audio is None:
+        return
+
+    audio_bytes = recorded_audio.getvalue()
+    digest = hashlib.sha256(audio_bytes).hexdigest()
+    if digest == st.session_state.get("last_processed_voice_digest"):
+        return
+    st.session_state["last_processed_voice_digest"] = digest
+    _handle_voice(audio_bytes, session_id)
+    st.rerun()
 
 
 def main() -> None:
@@ -245,7 +244,7 @@ def main() -> None:
         layout="centered",
     )
     st.title("Northstar Gear Support")
-    st.caption("A small GPT-style local demo for text and recorded voice")
+    st.caption("Text and voice support in one simple conversation")
 
     try:
         settings = Settings.from_environment()
@@ -260,22 +259,24 @@ def main() -> None:
         st.session_state["conversation"] = []
         st.rerun()
 
+    st.info(
+        "Type a message below or use the microphone button beside the text box. "
+        "Voice replies include playable audio."
+    )
     with st.expander("How this demo works"):
         st.markdown(
             "Both input types use the same path: input validation → safety "
             "guardrail → Groq router → RAG/tool/handoff handler → output-claim "
             "guard. Voice adds Groq Whisper STT before the service and local "
-            "Windows TTS after it. Every turn displays a trace ID."
+            "Windows TTS after it. Trace IDs and safe metadata are available "
+            "in the sidebar."
         )
 
     _render_conversation()
-    st.divider()
-    render_voice_input(session_id)
-
-    prompt = st.chat_input("Type a customer message and press Enter...")
-    if prompt and prompt.strip():
-        _handle_text(prompt.strip(), session_id)
-        st.rerun()
+    _render_trace_details()
+    with st.sidebar.expander("Developer test recordings"):
+        _render_checked_recordings(session_id)
+    _render_composer(session_id)
 
 
 if __name__ == "__main__":

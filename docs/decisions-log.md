@@ -532,3 +532,14 @@ grounded vector index was built. The model completed caching locally and an
 independent pipeline build succeeded. The demo was restarted on `127.0.0.1:8502`
 and the cache spinner/caption now explain that this one-time local warm-up can
 take longer; the provider key remains unread and undisplayed.
+
+### 2026-10-18T12:56:16.2064665+05:30 - [USER/CODEX] Simpler conversation composer
+
+The user requested a cleaner GPT-like demo. Static guidance remains above the
+conversation, chat messages now contain only the user content, assistant text,
+and voice audio, and trace/debug metadata moved to a collapsed sidebar panel.
+The native Streamlit microphone control is placed beside the text composer and
+submits a newly recorded clip automatically. Native Streamlit does not support
+embedding an arbitrary widget literally inside `st.chat_input`, so adjacent
+placement is the supported equivalent. Voice responses continue to include
+playable TTS output.
