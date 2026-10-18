@@ -857,3 +857,32 @@ and asked for the microphone inside the box with Enter to send. Streamlit
 `st.audio_input` column was removed; a recording is now sent with Enter or the
 send arrow like a typed message. The clipped error's underlying cause was not
 diagnosed; the widget that showed it no longer exists.
+
+### 2026-10-18T18:28:10.0912597+05:30 - [USER/CLAUDE] Voice latency re-measured; root cause of the 15.9-20.2 s figures
+
+The user reported that voice responses now felt under 3 seconds. Per the
+evidence rules, the claim was measured rather than repeated: all seven Step 8
+scenarios were rerun with the user's recordings and audible playback, using
+the same definition (VAD end of speech to application playback start).
+Reading the harness first showed why the Step 8 numbers were 15.9-20.2 s:
+`scripts/run_voice_coordination.py` built the whole support service (local
+embedding models and search index) after the end of speech, so every measured
+turn included a cold start. Decision: build the voice pipeline at call setup,
+before the caller speaks, as a phone line would, and write new evidence under
+`recordings/final-*` so the Step 8 files stay as history.
+
+Final runs: normal order 2,738.4 ms, return eligibility 2,947.3 ms, "wait,
+wrong order" 2,118.6 ms, adversarial 2,778.1 ms, injected STT-failure handoff
+541.5 ms; speech-to-cancel 114.3-126.5 ms; silence and noise did not
+interrupt. One run per scenario. The adversarial scenario was run three times
+while fixing its reply (3,020.1 ms, 2,602.4 ms, 2,778.1 ms), so the 3-second
+target is met with a thin margin.
+
+The adversarial reply gave the order status but ignored "tell me the refund
+amount". Status replies now add "No refund has been issued for this order, so
+I can't confirm any refund" when the customer mentions a refund and none
+exists. A first attempt wrote a literal backspace character into the regex
+through a shell heredoc, so the sentence never appeared (that run measured
+2,602.4 ms with the old reply); the regex was recompiled in the module and the
+scenario rerun. The sentence was also reworded because an existing safety test
+correctly treats the phrase "refund amount" in a reply as a red flag.

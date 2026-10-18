@@ -1,0 +1,67 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T12:34:35.143046+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 76,
+      "observed_at": "2026-10-18T12:34:36.643298+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T12:34:36.757658+00:00",
+      "speech_detection_to_cancel_ms": 114.29180001141503,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 403,
+      "observed_at": "2026-10-18T12:34:43.181909+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T12:34:43.187234+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T12:34:43.181909+00:00",
+    "end_of_speech_to_first_audio_ms": 2738.365,
+    "error_code": null,
+    "first_audio_at": "2026-10-18T12:34:45.920274+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\final-normal_speech-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": "order_status_handler",
+    "support_intent": "order_status",
+    "support_message": "Your CityHaul 20 backpack (order NS-26-4006-8) is on its way. The current delivery estimate is October 22, 2026; that is an estimate, not a guarantee.",
+    "support_metadata": {
+      "active_product": "kb-003-cityhaul-20",
+      "confidence": 1.0,
+      "memory_resolved": false,
+      "route_reason": "explicit_order_operation",
+      "routing_source": "deterministic_order_signal",
+      "tool_name": "get_order_status"
+    },
+    "support_status": "ok",
+    "transcript": "Where is order NS-26-4006-8?",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "pipeline_ready_before_speech_at": "2026-10-18T12:34:35.002826+00:00",
+  "playback_device_used": true,
+  "scenario": "normal_speech",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 114.29180001141503,
+  "started_at": "2026-10-18T12:34:06.399689+00:00",
+  "turn_id": "turn-0001"
+}

@@ -1,0 +1,70 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T12:36:34.236892+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 74,
+      "observed_at": "2026-10-18T12:36:35.697130+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T12:36:35.818674+00:00",
+      "speech_detection_to_cancel_ms": 121.48239999078214,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 220,
+      "observed_at": "2026-10-18T12:36:38.616945+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T12:36:38.622176+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T12:36:38.616945+00:00",
+    "end_of_speech_to_first_audio_ms": 2118.6189999999997,
+    "error_code": null,
+    "first_audio_at": "2026-10-18T12:36:40.735564+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\final-interruption-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": "order_status_handler",
+    "support_intent": "order_status",
+    "support_message": "Which order should I check? I can see: NS-26-2044-8 (CityHaul 20 backpack); NS-26-4006-8 (CityHaul 20 backpack); NS-26-6008-2 (Custom Latitude Pack).",
+    "support_metadata": {
+      "confidence": 0.534,
+      "route_reason": "semantic_match",
+      "routing_source": "semantic_exemplars",
+      "suggestions": [
+        "Where is order NS-26-2044-8?",
+        "Where is order NS-26-4006-8?",
+        "Where is order NS-26-6008-2?"
+      ],
+      "tool_error": "missing_or_ambiguous_order_id"
+    },
+    "support_status": "ok",
+    "transcript": "Wait, wrong order.",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "pipeline_ready_before_speech_at": "2026-10-18T12:36:34.107827+00:00",
+  "playback_device_used": true,
+  "scenario": "interruption",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 121.48239999078214,
+  "started_at": "2026-10-18T12:36:06.486114+00:00",
+  "turn_id": "turn-0001"
+}

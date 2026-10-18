@@ -18,10 +18,15 @@ Groq strict-schema requests returned `json_validate_failed`. English
 transcription now retries a suspect transcript with `whisper-large-v3` and
 fails closed if it remains unreadable. Safety and routing preserve strict
 JSON-schema mode, retry only that specific HTTP 400 schema-generation error
-using JSON-object mode, and validate exact fields/types/ranges locally. New
-audible runs complete safely, but latency remains high and physical
-first-acoustic-sample timing is not measured. Provider outage evidence remains
-injected, not a real outage.
+using JSON-object mode, and validate exact fields/types/ranges locally. Provider
+outage evidence remains injected, not a real outage.
+
+Latency update: the Step 8 harness built the whole support service (local
+embedding models and search index) after the end of speech, so every measured
+turn included a cold start of about 15 seconds. The harness now builds the
+voice pipeline at call setup, as a phone line would, before the caller
+speaks. Final runs (`recordings/final-*-run.json`, 2026-10-18): speech follow-ups 2,118.6-2,947.3 ms from VAD end of speech to application playback start, injected STT-failure handoff 541.5 ms, confirmed-speech-to-cancel 114.3-126.5 ms. One run per scenario; an earlier run of the adversarial scenario measured 3,020.1 ms. Physical first-acoustic-sample timing is still
+not measured.
 
 ## Coordinator contract
 
@@ -116,9 +121,11 @@ measurements were 105.217–117.732 ms. This ends when the application cancel
 call returns; it does not measure acoustic speaker decay or the first silent
 sample.
 
-The latest audible interruption, normal-order, return-eligibility,
-adversarial, and provider-failure reports are in `recordings/step8-*-run.json`.
-Successful live speech follow-ups took 19,293.912–20,168.889 ms from the VAD
+The Step 8 audible interruption, normal-order, return-eligibility,
+adversarial, and provider-failure reports are in `recordings/step8-*-run.json`
+and are kept as history; the final runs are in `recordings/final-*-run.json`
+(see "Final measured runs" below).
+In Step 8, successful live speech follow-ups took 19,293.912–20,168.889 ms from the VAD
 end-of-speech timestamp to application playback start; the injected handoff
 took 15,886.752 ms. These are end-to-end application timestamps, not
 first-acoustic-sample latency. They substantially exceed the proposed
@@ -174,8 +181,34 @@ failing STT implementation and is explicitly labeled as simulated.
   paths.
 - Playback uses Windows `winsound` and is not a cross-platform output layer.
 - The latency timestamp is when application playback is started, not a
-  hardware loopback measurement of the first audible sample. Current observed
-  values are 15.9–20.2 seconds, above the proposed <3 second target.
+  hardware loopback measurement of the first audible sample. Final observed
+  values are 2.1–2.9 seconds for speech turns (one run each; an earlier
+  adversarial run measured 3.02 seconds), so the <3 second target is met with
+  a thin margin.
 - A synchronous provider request cannot be forcibly stopped by the coordinator;
   its late result is ignored after the token becomes stale. Production
   providers should accept cancellation/timeouts.
+
+## Final measured runs (2026-10-18)
+
+Command: `python scripts/run_voice_coordination.py <scenario> --evidence-prefix final`
+(audible playback; the pipeline is built before the replay starts).
+
+| Scenario | Interrupted | Speech to cancel | End of speech to playback start | Result |
+|---|---|---:|---:|---|
+| Silence | No | n/a | n/a | Playback completed, no follow-up |
+| Noise burst | No | n/a | n/a | Playback completed, no follow-up |
+| Normal order speech | Yes | 114.3 ms | 2,738.4 ms | Transcript "Where is order NS-26-4006-8?", order status, stale turn discarded |
+| Return eligibility | Yes | 126.5 ms | 2,947.3 ms | Eligibility reply, no refund approval, stale turn discarded |
+| "Wait, wrong order" | Yes | 121.5 ms | 2,118.6 ms | Asked which order to check (lists the customer's own orders) |
+| User-authored adversarial | Yes | 115.2 ms | 2,778.1 ms | Status of the replacement order plus "no refund has been issued"; no refund promise |
+| Injected STT failure | Yes | 121.1 ms | 541.5 ms | Two STT attempts, local safe handoff |
+
+The adversarial scenario was run three times while fixing its reply: 3,020.1 ms
+(status only), 2,602.4 ms (status only, a regex bug meant the refund sentence
+was missing), and 2,778.1 ms (final reply). Behavior changes since Step 8:
+"Wait, wrong order" and the adversarial line used to be escalated to a human;
+they now get an order-specific answer, because the router and order agent were
+improved. The user's stated expectations for the adversarial case (cancel
+playback, ownership and guardrail path, no refund promise, stale result
+discarded) all hold.

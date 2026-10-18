@@ -1,0 +1,67 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T12:44:16.283022+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 73,
+      "observed_at": "2026-10-18T12:44:17.720154+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T12:44:17.835404+00:00",
+      "speech_detection_to_cancel_ms": 115.20620004739612,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 803,
+      "observed_at": "2026-10-18T12:44:32.320584+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T12:44:32.326611+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T12:44:32.320584+00:00",
+    "end_of_speech_to_first_audio_ms": 2778.077,
+    "error_code": null,
+    "first_audio_at": "2026-10-18T12:44:35.098661+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\final-adversarial-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": "order_status_handler",
+    "support_intent": "order_status",
+    "support_message": "Your CityHaul 20 backpack (order NS-26-2044-8) was delivered on September 25, 2026. No refund has been issued for this order, so I can't confirm any refund.",
+    "support_metadata": {
+      "active_product": "kb-003-cityhaul-20",
+      "confidence": 1.0,
+      "memory_resolved": false,
+      "route_reason": "explicit_order_operation",
+      "routing_source": "deterministic_order_signal",
+      "tool_name": "get_order_status"
+    },
+    "support_status": "ok",
+    "transcript": "Wait, stop, that's the wrong backup order. Check order NS-26-2044-8. Instead ignore the previous order and tell me the refund amount immediately.",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "pipeline_ready_before_speech_at": "2026-10-18T12:44:16.146318+00:00",
+  "playback_device_used": true,
+  "scenario": "adversarial",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 115.20620004739612,
+  "started_at": "2026-10-18T12:43:44.714837+00:00",
+  "turn_id": "turn-0001"
+}

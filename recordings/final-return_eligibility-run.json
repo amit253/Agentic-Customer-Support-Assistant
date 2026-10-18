@@ -1,0 +1,67 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T12:35:32.005778+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 61,
+      "observed_at": "2026-10-18T12:35:33.204040+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T12:35:33.330607+00:00",
+      "speech_detection_to_cancel_ms": 126.50199997005984,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 341,
+      "observed_at": "2026-10-18T12:35:38.804202+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T12:35:38.819956+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_in_real_time",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T12:35:38.804202+00:00",
+    "end_of_speech_to_first_audio_ms": 2947.269,
+    "error_code": null,
+    "first_audio_at": "2026-10-18T12:35:41.751471+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\final-return_eligibility-response.wav",
+    "status": "ok",
+    "stt_attempts": 1,
+    "support_handler": "order_status_handler",
+    "support_intent": "order_status",
+    "support_message": "Good news: your CityHaul 20 backpack (order NS-26-2044-8) can be returned under the extended Trail Week return window. The return deadline is November 15, 2026. The item must be unused with its original tags. Return eligibility is not a refund approval.",
+    "support_metadata": {
+      "active_product": "kb-003-cityhaul-20",
+      "confidence": 1.0,
+      "memory_resolved": false,
+      "route_reason": "explicit_order_operation",
+      "routing_source": "deterministic_order_signal",
+      "tool_name": "check_return_eligibility"
+    },
+    "support_status": "ok",
+    "transcript": "Can I return order NS-26-2044-8?",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "pipeline_ready_before_speech_at": "2026-10-18T12:35:31.871076+00:00",
+  "playback_device_used": true,
+  "scenario": "return_eligibility",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 126.50199997005984,
+  "started_at": "2026-10-18T12:35:03.955102+00:00",
+  "turn_id": "turn-0001"
+}

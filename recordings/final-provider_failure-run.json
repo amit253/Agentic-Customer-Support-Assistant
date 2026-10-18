@@ -1,0 +1,59 @@
+{
+  "events": [
+    {
+      "audio_path": "recordings\\step7-normal-order-response.wav",
+      "event": "assistant_playback_started",
+      "observed_at": "2026-10-18T12:38:30.288274+00:00",
+      "playback_device_used": true,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_started",
+      "frame_index": 61,
+      "observed_at": "2026-10-18T12:38:31.488224+00:00"
+    },
+    {
+      "cancelled": true,
+      "event": "barge_in_cancelled_playback",
+      "observed_at": "2026-10-18T12:38:31.609425+00:00",
+      "speech_detection_to_cancel_ms": 121.11150001874194,
+      "turn_id": "turn-0001"
+    },
+    {
+      "event": "speech_ended",
+      "frame_index": 341,
+      "observed_at": "2026-10-18T12:38:37.087986+00:00"
+    },
+    {
+      "event": "stale_result_discarded",
+      "observed_at": "2026-10-18T12:38:37.093083+00:00",
+      "turn_id": "turn-0001"
+    }
+  ],
+  "evidence_type": "recorded_user_audio_replayed_with_simulated_provider_failure",
+  "followup": {
+    "end_of_speech_at": "2026-10-18T12:38:37.087986+00:00",
+    "end_of_speech_to_first_audio_ms": 541.453,
+    "error_code": "stt_provider_failed_safe_handoff",
+    "first_audio_at": "2026-10-18T12:38:37.629439+00:00",
+    "output_path": "C:\\Users\\ADMIN\\Documents\\Learning-To-Prod\\recordings\\final-provider-failure-handoff.wav",
+    "status": "handoff",
+    "stt_attempts": 2,
+    "support_message": "I'm having trouble processing the audio right now. Please try again or request human support.",
+    "support_metadata": {
+      "reason": "stt_provider_failed"
+    },
+    "support_status": "failed_closed",
+    "turn_id": "turn-0002"
+  },
+  "input_source": "recorded_wav_replayed_as_microphone_frames",
+  "interruption_detected": true,
+  "old_turn_result_discarded": true,
+  "pipeline_ready_before_speech_at": "2026-10-18T12:38:30.145064+00:00",
+  "playback_device_used": true,
+  "scenario": "provider_failure",
+  "schema_version": "step8-voice-run-v1",
+  "speech_detection_to_cancel_ms": 121.11150001874194,
+  "started_at": "2026-10-18T12:38:02.504872+00:00",
+  "turn_id": "turn-0001"
+}

@@ -231,7 +231,9 @@ def _pipeline_for(
     )
 
 
-def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
+def _run_scenario(
+    scenario: str, *, play_audio: bool, evidence_prefix: str = "step8"
+) -> dict[str, object]:
     scenario_started_at = datetime.now(UTC)
     settings = Settings.from_environment()
     coordinator = VoiceTurnCoordinator()
@@ -251,6 +253,16 @@ def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
         raise FileNotFoundError(
             f"record the {scenario} clip at {input_audio.relative_to(ROOT)} first"
         )
+
+    # Build the voice pipeline at call setup, before the caller speaks, as a
+    # phone line would. The Step 8 runs built it after end of speech, so their
+    # 15.9-20.2 s latency included loading the local models on every turn.
+    pipeline, provider = (
+        _pipeline_for(settings, failure_demo=failure_demo)
+        if input_audio is not None
+        else (None, None)
+    )
+    setup_completed_at = datetime.now(UTC)
 
     first_token = coordinator.start_turn()
     if not coordinator.result_ready(first_token):
@@ -284,13 +296,12 @@ def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
                 "observed_at": datetime.now(UTC).isoformat(),
             }
         )
-        pipeline, provider = _pipeline_for(settings, failure_demo=True)
         result = pipeline.process(
             input_audio,
             session_id="demo-session-omar",
             end_of_speech_at=ended_events[-1].observed_at,
-            output_path=ROOT / "recordings" / "step8-provider-failure-handoff.wav",
-            trace_id="step8-provider-failure",
+            output_path=ROOT / "recordings" / f"{evidence_prefix}-provider-failure-handoff.wav",
+            trace_id=f"{evidence_prefix}-provider-failure",
         )
         assert isinstance(provider, SimulatedProviderFailure)
         if not coordinator.result_ready(followup_token):
@@ -339,13 +350,12 @@ def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
                 "observed_at": datetime.now(UTC).isoformat(),
             }
         )
-        pipeline, _ = _pipeline_for(settings, failure_demo=False)
         result = pipeline.process(
             input_audio,
             session_id="demo-session-omar",
-            trace_id=f"step8-{scenario}",
+            trace_id=f"{evidence_prefix}-{scenario}",
             end_of_speech_at=ended_events[-1].observed_at,
-            output_path=ROOT / "recordings" / f"step8-{scenario}-response.wav",
+            output_path=ROOT / "recordings" / f"{evidence_prefix}-{scenario}-response.wav",
         )
         accepted = coordinator.result_ready(child_token)
         if not accepted:
@@ -397,6 +407,7 @@ def _run_scenario(scenario: str, *, play_audio: bool) -> dict[str, object]:
         ),
         "playback_device_used": play_audio,
         "started_at": scenario_started_at.isoformat(),
+        "pipeline_ready_before_speech_at": setup_completed_at.isoformat(),
         "turn_id": first_token.turn_id,
         "interruption_detected": cancelled,
         "speech_detection_to_cancel_ms": interruption_latency_ms,
@@ -414,13 +425,22 @@ def main() -> None:
         choices=(*SCENARIOS, "provider_failure"),
     )
     parser.add_argument(
+        "--evidence-prefix",
+        default="step8",
+        help="file prefix for recordings/<prefix>-<scenario>-run.json and response audio",
+    )
+    parser.add_argument(
         "--no-playback",
         action="store_true",
         help="run the timed coordinator without sending audio to the Windows device",
     )
     args = parser.parse_args()
-    result = _run_scenario(args.scenario, play_audio=not args.no_playback)
-    output_path = ROOT / "recordings" / f"step8-{args.scenario}-run.json"
+    result = _run_scenario(
+        args.scenario,
+        play_audio=not args.no_playback,
+        evidence_prefix=args.evidence_prefix,
+    )
+    output_path = ROOT / "recordings" / f"{args.evidence_prefix}-{args.scenario}-run.json"
     output_path.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

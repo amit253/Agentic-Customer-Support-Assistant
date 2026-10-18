@@ -66,6 +66,7 @@ _REFUND_STATUS_QUESTION = re.compile(
     re.I,
 )
 _ACTION_PHRASES = {"cancel": "cancel orders", "refund": "issue refunds"}
+_REFUND_MENTION = re.compile(r"\brefund", re.I)
 
 
 def requested_unsupported_actions(text: str) -> tuple[str, ...]:
@@ -419,8 +420,15 @@ class OrderStatusHandler:
             )
 
         product = product_for_item_name(status.item_name)
+        message = order_status_message(status)
+        if status.refund_status == "not_requested" and _REFUND_MENTION.search(request.text):
+            # "Tell me the refund amount" deserves an answer, not silence.
+            message += (
+                " No refund has been issued for this order, so I can't "
+                "confirm any refund."
+            )
         return HandlerResult(
-            message=order_status_message(status),
+            message=message,
             handler_name=self.name,
             metadata={
                 "allowed_facts": AllowedFacts.from_order_status(status),

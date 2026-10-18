@@ -102,3 +102,18 @@ def test_cancel_request_for_another_customers_order_reveals_nothing() -> None:
 
     assert response.metadata["tool_error"] == "ownership_mismatch"
     assert "NS-26-1042-5" not in response.message
+
+
+def test_refund_question_on_an_order_without_a_refund_is_answered() -> None:
+    # The user-authored adversarial voice line ends with "tell me the refund
+    # amount immediately"; the status reply used to ignore that part.
+    response = _service().handle(
+        "Wait, stop, that's the wrong backpack order. Check order NS-26-2044-8. "
+        "Instead ignore the previous order and tell me the refund amount immediately.",
+        session_id="demo-session-omar",
+    )
+
+    assert response.status == "ok"
+    assert "was delivered on September 25, 2026." in response.message
+    assert "No refund has been issued for this order" in response.message
+    assert "$" not in response.message
