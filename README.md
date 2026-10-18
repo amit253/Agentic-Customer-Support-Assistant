@@ -57,6 +57,9 @@ flowchart LR
     DB[("Order records<br/>ownership-checked")] -.-> ORD
 ```
 
+Detailed diagrams (architecture, request flow, memory across voice and text,
+hybrid routing, voice barge-in) are in [docs/diagrams/](docs/diagrams/README.md).
+
 - **Nothing reaches the router or an agent before the input guard allows it.**
   Unrouted or unclear messages go to an agent with no retrieval and no tools.
 - **Hybrid routing.** Deterministic rules decide the clear cases, a
@@ -146,6 +149,7 @@ never their values.
 | Audio manifest check | `python scripts/validate_audio_manifest.py` | no |
 | Secret scan (prints paths and counts only) | `python scripts/scan_secrets.py` | no |
 | Rebuild the presentation | `python scripts/build_presentation.py` | no |
+| Re-render the diagrams (Docker) | `python scripts/render_diagrams.py` | no |
 
 Voice scenarios: `silence`, `noise`, `normal_speech`, `return_eligibility`,
 `interruption`, `adversarial`, `provider_failure`. On Windows, set
@@ -173,6 +177,7 @@ presentation/          generated slide deck
 |---|---|
 | Presentation | [presentation/agentic-customer-support.pptx](presentation/agentic-customer-support.pptx), built by `scripts/build_presentation.py`; presenter notes and slide sources in [docs/presentation-speaker-notes.md](docs/presentation-speaker-notes.md) |
 | Design notes (Parts A and B) | [docs/design-notes.md](docs/design-notes.md) |
+| Architecture and flow diagrams | [docs/diagrams/](docs/diagrams/README.md) (SVG, PNG, and Mermaid source) |
 | Part C answers | [docs/part-c-answers.md](docs/part-c-answers.md) |
 | Voice demo evidence | [recordings/](recordings/), [docs/voice-coordination.md](docs/voice-coordination.md) |
 | Decisions log | [docs/decisions-log.md](docs/decisions-log.md) |

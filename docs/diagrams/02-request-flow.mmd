@@ -1,0 +1,55 @@
+---
+title: One support turn, text or voice - request flow
+---
+sequenceDiagram
+    actor U as Customer
+    participant V as Voice pipeline
+    participant S as SupportService
+    participant G as InputGuard
+    participant R as HybridRouter
+    participant A as Agent
+    participant T as Tools / retrieval
+    participant O as OutputClaimGuard
+    participant M as Session memory
+
+    alt Voice call
+        U->>V: Speaks (may interrupt the assistant)
+        Note over V: WebRTC + Silero confirm speech and cancel playback, then Groq Whisper STT (one retry)
+        V->>S: handle(transcript, channel="voice")
+    else Text chat
+        U->>S: handle(message, channel="text")
+    end
+    Note over S: Validate input: Unicode, size, control characters
+    S->>G: check(text)
+    alt Unsafe, or safety check unavailable
+        G-->>S: refused
+        S->>M: record refused turn (never sets verified slots)
+        S-->>U: Safe refusal
+    else Allowed
+        G-->>S: allowed
+        S->>M: snapshot (verified slots only)
+        S->>R: route(text, verified hint)
+        Note over R: Tier 0 rules → Tier 1 labeled examples → Tier 2 Groq LLM
+        R-->>S: intent + routing source (or clarify)
+        S->>A: handle(checked input)
+        alt product_question
+            A->>T: Hybrid retrieval (e5 + BM25, gate on best candidate)
+            T-->>A: Supporting chunks
+            Note over A: Groq answer with citations, or "insufficient evidence"
+        else order_status
+            A->>T: Groq native tool choice → read-only tool with ownership check
+            T-->>A: Verified order facts
+        else smalltalk, out_of_scope, unclear, escalate_to_human
+            Note over A: Fixed template reply, or handoff with reference and summary
+        end
+        A-->>S: Reply + allowed facts
+        S->>O: validate(reply, allowed facts)
+        alt Unverified date, amount, order ID or promise
+            O-->>S: blocked
+            S-->>U: "I couldn't verify every detail in that answer"
+        else Verified
+            O-->>S: approved
+            S->>M: record turn, update verified slots
+            S-->>U: Text reply, or TTS playback on a call
+        end
+    end

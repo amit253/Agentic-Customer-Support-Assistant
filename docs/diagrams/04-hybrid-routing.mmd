@@ -1,0 +1,47 @@
+---
+title: Hybrid routing - first confident tier wins
+---
+flowchart TB
+    classDef decision fill:#FFFFFF,stroke:#1F7A80,stroke-width:1.5px,color:#12333B
+    classDef intent fill:#ECF3F3,stroke:#1F7A80,stroke-width:1.5px,color:#12333B
+    classDef llm fill:#EAF1FA,stroke:#3D6FA6,stroke-width:1.5px,color:#12333B
+    classDef clarify fill:#FFF6E8,stroke:#E8A33D,stroke-width:1.5px,color:#12333B
+
+    IN(["Message already allowed by InputGuard"])
+
+    subgraph TIER0["Tier 0 · deterministic rules · decided 54 of 110 held-out messages"]
+        direction TB
+        Q1("Exactly one order ID and an order operation?"):::decision
+        Q2("Pronoun follow-up and a verified active order?"):::decision
+        Q3("Made entirely of closed-vocabulary smalltalk?"):::decision
+        Q4("Explicit, non-negated request for a person?"):::decision
+        Q5("Gibberish or punctuation only?"):::decision
+        Q1 -- no --> Q2 -- no --> Q3 -- no --> Q4 -- no --> Q5
+    end
+
+    subgraph TIER1["Tier 1 · labeled examples · 29 of 110"]
+        SEM("MiniLM nearest examples: best intent at least 0.15 ahead of the runner-up?"):::decision
+    end
+
+    subgraph TIER2["Tier 2 · Groq LLM · 27 of 110"]
+        LLM["Strict-schema classifier<br/>six intents · cached · low reasoning effort<br/>retries only transient errors"]:::llm
+    end
+
+    ORD["order_status"]:::intent
+    SMALL["smalltalk"]:::intent
+    HUM["escalate_to_human"]:::intent
+    UNC["unclear"]:::intent
+    PICK["the matched intent"]:::intent
+    CL["Clarifying question<br/>from the conversation agent"]:::clarify
+
+    IN --> Q1
+    Q1 -- yes --> ORD
+    Q2 -- yes --> ORD
+    Q3 -- yes --> SMALL
+    Q4 -- yes --> HUM
+    Q5 -- yes --> UNC
+    Q5 -- no --> SEM
+    SEM -- yes --> PICK
+    SEM -- no --> LLM
+    LLM -- "confidence ≥ 0.65" --> PICK
+    LLM -- "low confidence or provider error" --> CL

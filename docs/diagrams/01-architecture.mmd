@@ -1,0 +1,91 @@
+---
+title: Agentic Customer Support Assistant - system architecture
+---
+flowchart TB
+    classDef guard fill:#FFF6E8,stroke:#E8A33D,stroke-width:1.5px,color:#12333B
+    classDef llm fill:#EAF1FA,stroke:#3D6FA6,stroke-width:1.5px,color:#12333B
+    classDef store fill:#ECF3F3,stroke:#1F7A80,stroke-width:1.5px,color:#12333B
+    classDef agent fill:#FFFFFF,stroke:#1F7A80,stroke-width:2px,color:#12333B
+    classDef fail fill:#FBEDEA,stroke:#B54633,stroke-width:1.5px,color:#12333B
+    classDef ok fill:#EAF5EE,stroke:#2E7D4F,stroke-width:1.5px,color:#12333B
+
+    subgraph IN["1 · Inbound transports"]
+        direction LR
+        TXT["Text chat<br/>Streamlit UI"]
+        MIC["Voice call<br/>recorded WAV or browser mic"]
+        VAD["Two-stage VAD<br/>WebRTC candidate → Silero confirm"]
+        STT["Groq Whisper STT<br/>retry once, then spoken safe handoff"]:::llm
+        MIC --> VAD --> STT
+    end
+
+    subgraph SVC["2 · SupportService · pipeline.py · one guarded path for every channel"]
+        direction TB
+        VAL["Validate input<br/>NFKC · size · control characters"]:::guard
+        GUARD["InputGuard · guardrails.py<br/>rule signals + Groq safety classifier<br/>decision cache · closed-vocabulary smalltalk fast path"]:::guard
+        subgraph ROUTE["HybridRouter · hybrid_routing.py"]
+            direction LR
+            T0["Tier 0 · rules<br/>order ID + operation · verified follow-up<br/>smalltalk · human request · gibberish"]
+            T1["Tier 1 · labeled examples<br/>MiniLM nearest neighbours<br/>answers only with a 0.15 margin"]
+            T2["Tier 2 · Groq LLM<br/>strict schema · 6 intents · cached"]:::llm
+            T3["Clarify fallback<br/>→ conversation agent"]
+            T0 -- defer --> T1 -- defer --> T2 -- low confidence --> T3
+        end
+        VAL --> GUARD -- allowed --> ROUTE
+    end
+
+    REF["Safe refusal or<br/>'can't check that safely right now'"]:::fail
+    GUARD -- unsafe or unavailable --> REF
+
+    subgraph AG["3 · Agents · handlers.py"]
+        direction LR
+        RAG["RAG agent<br/>product_question"]:::agent
+        ORD["Order agent<br/>order_status"]:::agent
+        HUM["Handoff agent<br/>escalate_to_human"]:::agent
+        CONV["Conversation agent<br/>smalltalk · out_of_scope · unclear<br/>fixed templates, no tools"]:::agent
+    end
+
+    subgraph GR["4 · Grounding and tools"]
+        direction LR
+        KB[("Knowledge base<br/>12 Northstar docs")]:::store
+        RET["HybridRetriever<br/>e5 + BM25 → reciprocal-rank fusion<br/>gate on the best candidate"]
+        ANS["Groq answerer<br/>cite chunks or declare<br/>insufficient evidence"]:::llm
+        TOOL["Groq native tool choice<br/>one allow-listed call"]:::llm
+        OWN["Read-only order tools<br/>ID must match · ownership checked<br/>list_orders for 'my other order'"]
+        DB[("Order records<br/>fictional")]:::store
+        KB --> RET --> ANS
+        TOOL --> OWN
+        DB --- OWN
+    end
+
+    MEM[("Session memory · memory.py<br/>verified slots → router hint<br/>full transcript → handoff summary only")]:::store
+
+    subgraph OUT["5 · Output validation"]
+        direction LR
+        OG["OutputClaimGuard · facts.py<br/>order IDs, dates, amounts must be verified<br/>promise phrases blocked"]:::guard
+        OKR["Verified SupportResponse"]:::ok
+        FB["'I couldn't verify every detail'"]:::fail
+        OG -- verified --> OKR
+        OG -- unverified claim --> FB
+    end
+
+    subgraph VOUT["6 · Reply and interruption"]
+        direction LR
+        TREPLY["Text reply<br/>with routing caption"]
+        TTS["Local TTS<br/>Windows System.Speech"]
+        PLAY["Playback with a turn ID"]
+        BARGE["Barge-in: cancel playback<br/>discard stale turn results"]:::guard
+        TTS --> PLAY -. caller speaks .-> BARGE
+    end
+
+    IN --> VAL
+    ROUTE --> RAG & ORD & HUM & CONV
+    RAG --> RET
+    ORD --> TOOL
+    ANS --> OG
+    OWN --> OG
+    HUM --> OG
+    CONV --> OG
+    ROUTE -. reads verified slots .-> MEM
+    HUM -. reads handoff summary .-> MEM
+    OKR --> TREPLY
+    OKR --> TTS

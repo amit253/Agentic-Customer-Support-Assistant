@@ -928,3 +928,23 @@ evaluated, with the selected one marked. The README results table follows the
 same final-results format; the full before/after record stays in
 `docs/evaluation.md` and this log. Visual QA rendered all 18 slides and the
 OOXML validator passed.
+
+### 2026-10-18T20:15:26.5645230+05:30 - [USER/CLAUDE] Architecture and flow diagrams
+
+The user supplied three Mermaid diagrams (an architecture flowchart, a request
+sequence, and a memory sequence) as the style to follow. They described an
+earlier version of the system: MiniLM-only retrieval, a single LLM router, and
+memory that placed the prior turn in the prompt, which the current design
+explicitly does not do. Decision: redraw all three from the current code and
+add two more useful for the defense (hybrid routing decision cascade, voice
+barge-in timeline), in `docs/diagrams/` with editable `.mmd` sources, SVG and
+PNG renders, and `scripts/render_diagrams.py`, which renders through the
+pinned `minlag/mermaid-cli:12.0.0` Docker image with the Windows fonts mounted
+(nothing installed on the host). The palette matches the presentation.
+
+Rendering and review found and fixed: a sequence-diagram parse error caused by
+semicolons in message text (Mermaid treats them as statement separators);
+auto-numbered step circles overlapping self-message labels (replaced with
+notes); an architecture layout twice as tall as needed because a subgraph's
+direction is ignored when an inner node links outside it; and diamond decision
+shapes that squeezed the routing questions to three words per line.

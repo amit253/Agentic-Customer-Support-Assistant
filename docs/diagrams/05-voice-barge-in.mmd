@@ -1,0 +1,31 @@
+---
+title: Voice line - barge-in without dropped or duplicated turns
+---
+sequenceDiagram
+    actor U as Caller
+    participant P as Playback
+    participant VAD as WebRTC + Silero VAD
+    participant C as Turn coordinator
+    participant STT as Groq Whisper
+    participant S as SupportService + local TTS
+
+    C->>P: start_playback(turn 1)
+    U->>VAD: Short noise burst
+    VAD-->>C: WebRTC candidate rejected by Silero
+    Note over P,C: No interruption, playback continues
+    U->>VAD: "Wait, wrong order"
+    VAD->>C: Speech confirmed
+    C->>P: cancel() about 114-127 ms after confirmation
+    Note over C: Start turn 2, turn 1 becomes stale
+    VAD->>C: End of speech
+    C->>STT: Transcribe (one retry on failure)
+    alt STT fails twice
+        STT-->>C: Provider error
+        C->>S: Speak a local safe handoff
+    else Transcript returned
+        STT-->>C: "Wait, wrong order."
+        C->>S: handle(transcript, channel="voice") → reply audio
+    end
+    S-->>C: Result for turn 2
+    Note over C: Accept only the current turn, discard any late turn-1 result
+    C->>P: Play turn 2 reply (2.1-2.9 s after end of speech)

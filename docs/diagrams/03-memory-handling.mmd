@@ -1,0 +1,45 @@
+---
+title: Memory across voice and text - one session, two trust levels
+---
+sequenceDiagram
+    actor U as Customer (demo: Omar)
+    participant IN as Transport (voice / text)
+    participant S as SupportService
+    participant M as Session memory (process-local)
+    participant R as HybridRouter
+    participant OT as Order tools
+
+    rect rgb(246, 250, 250)
+        Note over U,OT: Turn 1 · voice
+        U->>IN: "Where is order NS-26-2044-8?" (audio)
+        IN->>S: handle(transcript, session="demo-session-omar", channel="voice")
+        S->>M: snapshot → no verified slots yet
+        S->>R: route → Tier 0 rule: one order ID + an order operation
+        S->>OT: get_order_status(NS-26-2044-8, session)
+        OT-->>S: delivered September 25, 2026 · owner verified
+        S->>M: append voice turn · active_order = NS-26-2044-8 · active_product = CityHaul 20
+        S-->>U: "Your CityHaul 20 backpack (order NS-26-2044-8) was delivered on September 25, 2026." (TTS)
+    end
+
+    rect rgb(255, 250, 240)
+        Note over U,OT: Turn 2 · text, same session
+        U->>IN: "Can I return it?"
+        IN->>S: handle(text, session="demo-session-omar", channel="text")
+        S->>M: snapshot → active_order = NS-26-2044-8
+        S->>R: route → Tier 0 rule: pronoun + order action + verified order (no LLM call)
+        S->>OT: check_return_eligibility(NS-26-2044-8, session)
+        OT-->>S: eligible · Trail Week window · deadline November 15, 2026
+        S->>M: append text turn
+        S-->>U: "Good news: … can be returned … The return deadline is November 15, 2026. Return eligibility is not a refund approval."
+    end
+
+    rect rgb(246, 250, 250)
+        Note over U,OT: Turn 3 · text
+        U->>IN: "Talk to a human"
+        IN->>S: handle(text, same session)
+        S->>R: route → Tier 0 rule: explicit request for a person
+        S->>M: handoff_summary() → verified slots + last six voice and text turns
+        S-->>U: "I've passed this conversation to a human support agent. Your reference is HO-…"
+    end
+
+    Note over S,M: Only verified slots ever reach an LLM. The transcript feeds the handoff summary and is never placed in a prompt.
