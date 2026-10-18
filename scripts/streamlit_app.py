@@ -2,7 +2,7 @@
 
 Run from the repository root with::
 
-    python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1
+    python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1 --server.port 8502
 
 The app uses the same live SupportService and VoicePipeline as the CLI demos.
 It is intentionally local-only: credentials are loaded by the application from

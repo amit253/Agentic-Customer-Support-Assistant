@@ -106,7 +106,7 @@ Install the optional demo dependency and start it from the repository root:
 
 ```powershell
 python -m pip install -e ".[dev,demo]"
-python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1
+python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1 --server.port 8502
 ```
 
 Streamlit will print a local URL such as `http://localhost:8501`. The Text
