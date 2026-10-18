@@ -191,9 +191,9 @@ class ProductQuestionHandler:
         cited_chunks = [
             available_chunks[chunk_id] for chunk_id in answer.cited_chunk_ids
         ]
-        citation_text = ", ".join(
-            f"[{chunk_id}]" for chunk_id in answer.cited_chunk_ids
-        )
+        # Customers see article titles; chunk IDs stay in metadata for tracing.
+        cited_titles = tuple(dict.fromkeys(chunk.title for chunk in cited_chunks))
+        citation_text = "; ".join(cited_titles)
         cited_products = {
             chunk.doc_id for chunk in cited_chunks if product_for_doc(chunk.doc_id)
         }
@@ -208,6 +208,7 @@ class ProductQuestionHandler:
                 "chunk_ids": tuple(hit.chunk.chunk_id for hit in retrieval.hits),
                 "source_paths": tuple(hit.chunk.source_path for hit in retrieval.hits),
                 "cited_chunk_ids": answer.cited_chunk_ids,
+                "cited_sources": cited_titles,
                 "allowed_facts": AllowedFacts.from_retrieval(cited_chunks),
             },
         )

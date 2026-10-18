@@ -218,7 +218,9 @@ def test_product_answer_is_guarded_and_cites_only_retrieved_chunks() -> None:
     response = service.handle("What is the backpack capacity and price?")
 
     assert response.status == "ok"
-    assert "Sources: [kb-test#chunk-000]" in response.message
+    assert "Sources: Test product facts" in response.message
+    assert "kb-test#chunk-000" not in response.message
+    assert response.metadata["cited_sources"] == ("Test product facts",)
     assert response.metadata["cited_chunk_ids"] == ("kb-test#chunk-000",)
 
 

@@ -783,3 +783,25 @@ wording bug before it shipped: a returned order would have said "has been
 returned to us on <delivery date>". Five older tests asserted the old wording
 and were updated to assert the same facts in the new wording; the "another
 order" test now asserts that the active order is never silently reused.
+
+### 2026-10-18T16:45:14.4254554+05:30 - [CLAUDE] Phase 5 demo UI
+
+Findings from the review: the conversation list was not tied to the selected
+demo customer, so switching customers showed one customer's chat beside
+another's memory; text turns had no progress indicator; replies exposed
+internal codes and chunk IDs; escalation was a dead end.
+
+Decisions: one conversation per demo customer; a spinner instead of token
+streaming, because the output guard must validate the complete reply before
+anything is shown; sources rendered as article titles (chunk IDs stay in
+metadata); a caption under each reply saying which path answered it and how
+it was routed; quick-reply suggestions from handler metadata; the handoff
+reference plus "What the human agent receives" summary; thumbs feedback
+written with the trace ID to the ignored `.tmp/feedback/feedback.jsonl` so
+poor answers can become evaluation cases; models load once at start with an
+explanation. A suggestion-click loop (the pill widget keeps its value across
+reruns) was caught in review before running and fixed by handling the click
+immediately and keying the widget by turn count.
+
+Verification: `scripts/run_ui_check.py` drove the real app headlessly against
+the live service; the transcript is in `reports/phase5-ui-live-check.md`.
