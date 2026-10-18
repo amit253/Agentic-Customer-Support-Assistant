@@ -543,3 +543,16 @@ submits a newly recorded clip automatically. Native Streamlit does not support
 embedding an arbitrary widget literally inside `st.chat_input`, so adjacent
 placement is the supported equivalent. Voice responses continue to include
 playable TTS output.
+
+### 2026-10-18T13:08:47.2916335+05:30 - [USER/CODEX] Bounded cross-channel session memory
+
+The user reported that follow-up questions did not relate to earlier turns and
+provided a sequence diagram showing a session/memory store between inbound
+transport and `SupportService`. The demo now uses a bounded, thread-safe,
+process-local `SessionMemoryStore` shared by text and voice. Only a successful
+ownership-checked order tool result promotes an order ID to active memory; the
+router receives that ID and the last intent as data-only context. Ambiguous
+references still require an explicit order ID, audio bytes are never stored in
+memory, and the UI clear action clears the service memory for that session.
+Durable PostgreSQL/Redis-style memory remains a production recommendation, not
+a claim about the local assignment demo.

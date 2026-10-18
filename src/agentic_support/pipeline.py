@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Literal
 
@@ -23,6 +23,7 @@ from .handlers import (
     build_default_registry,
 )
 from .logging_config import log_event
+from .memory import MemoryTurn, SessionMemoryStore
 from .routing import GroqStructuredClassifier, RouteDecision, StructuredIntentRouter
 from .retrieval import GroundedRetriever
 from .tool_calling import GroqOrderToolCaller
@@ -43,6 +44,16 @@ class CheckedInput:
     trace_id: str
     session_id: str
     channel: Channel
+    active_order_id: str | None = None
+    last_intent: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RoutingInput:
+    """Safe classifier text with verified session context when available."""
+
+    text: str
+    memory_hint: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,12 +122,19 @@ class SupportService:
         logger: logging.Logger | None = None,
         input_guard: InputGuard | None = None,
         output_guard: OutputClaimGuard | None = None,
+        memory_store: SessionMemoryStore | None = None,
     ) -> None:
         self.router = router
         self.registry = registry
         self.logger = logger or logging.getLogger("agentic_support.pipeline")
         self.input_guard = input_guard or InputGuard(RuleBasedSafetyClassifier())
         self.output_guard = output_guard or OutputClaimGuard()
+        self.memory_store = memory_store or SessionMemoryStore()
+
+    def clear_session(self, session_id: str) -> None:
+        """Clear the bounded memory for one authenticated/demo session."""
+
+        self.memory_store.clear(session_id)
 
     def handle(
         self,
@@ -160,7 +178,18 @@ class SupportService:
                     metadata={"reason": safety_decision.reason},
                 )
 
-            decision = self.router.route(checked_input)
+            memory = self.memory_store.snapshot(session_id)
+            checked_input = replace(
+                checked_input,
+                active_order_id=memory.active_order_id,
+                last_intent=memory.last_intent,
+            )
+            decision = self.router.route(
+                RoutingInput(
+                    text=checked_input.text,
+                    memory_hint=memory.routing_hint(),
+                )
+            )
             if not decision.accepted or decision.intent is None:
                 log_event(
                     self.logger,
@@ -230,8 +259,7 @@ class SupportService:
                 for key, value in result.metadata.items()
                 if key != "allowed_facts"
             }
-
-            return SupportResponse(
+            response = SupportResponse(
                 trace_id=active_trace_id,
                 status="ok",
                 message=result.message,
@@ -242,6 +270,25 @@ class SupportService:
                     "confidence": decision.confidence,
                 },
             )
+            verified_order_id = None
+            if result.handler_name == "order_status_handler":
+                order_ids = allowed_facts.order_ids
+                if len(order_ids) == 1:
+                    verified_order_id = next(iter(order_ids))
+            self.memory_store.append(
+                session_id,
+                MemoryTurn(
+                    trace_id=active_trace_id,
+                    channel=checked_input.channel,
+                    user_text=checked_input.text,
+                    assistant_text=response.message,
+                    status=response.status,
+                    intent=response.intent,
+                    handler_name=response.handler_name,
+                ),
+                verified_order_id=verified_order_id,
+            )
+            return response
 
 
 def build_live_support_service(

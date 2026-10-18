@@ -88,12 +88,27 @@ and local exact-key, type, and range checks keep malformed output fail-closed.
 hits, misses, retries, errors, and hit rate. The current cache is bounded but
 process-local; it does not share results across workers.
 
+### Session memory and follow-ups
+
+**IMPLEMENTED+TESTED for the local demo.** `SessionMemoryStore` keeps a
+bounded, thread-safe, process-local text-only history shared by the text and
+voice `SupportService` paths. Only the last intent and order IDs returned by a
+successful, ownership-checked order tool become routing context. A follow-up
+such as “Can I return it?” can therefore reuse the verified active order;
+ambiguous references such as “another order” still require an explicit ID.
+Audio bytes and raw untrusted memory instructions are not sent as context.
+
+This is not durable production memory. A multi-worker deployment still needs
+server-verified tenant/session keys and a retained PostgreSQL/Redis-style store
+with access control, encryption, retention, and idempotency.
+
 ### Scaling to 10,000 concurrent sessions
 
-**PROPOSED, NOT IMPLEMENTED.** Keep application workers stateless and store
-authenticated session identity, conversation state, handoff data, and
-idempotency keys in a durable shared store (for example PostgreSQL plus
-Redis). Do not infer identity from a model-generated tool argument. Partition
+**PROPOSED, NOT IMPLEMENTED at production scale.** Keep application workers
+stateless and store authenticated session identity, conversation state,
+handoff data, and idempotency keys in a durable shared store (for example
+PostgreSQL plus Redis). Do not infer identity from a model-generated tool
+argument. Partition
 or index session history by tenant/session, apply retention controls, and
 encrypt sensitive state.
 

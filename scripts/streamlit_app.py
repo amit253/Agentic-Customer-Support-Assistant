@@ -55,7 +55,11 @@ def load_support_service() -> tuple[Settings, SupportService]:
 def load_voice_pipeline() -> tuple[Settings, VoicePipeline]:
     settings = Settings.from_environment()
     settings.require_groq_credentials()
-    return settings, build_live_voice_pipeline(settings)
+    _, support_service = load_support_service()
+    return settings, build_live_voice_pipeline(
+        settings,
+        support_service=support_service,
+    )
 
 
 def safe_json(value: object) -> object:
@@ -257,6 +261,11 @@ def main() -> None:
     session_id = SESSION_OPTIONS[session_label]
     if st.sidebar.button("Clear conversation"):
         st.session_state["conversation"] = []
+        try:
+            _, support_service = load_support_service()
+            support_service.clear_session(session_id)
+        except Exception:
+            pass
         st.rerun()
 
     st.info(

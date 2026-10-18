@@ -114,6 +114,8 @@ conversation view accepts text through the message box and browser-recorded
 voice through the microphone control beside it; both use the same guarded
 service path. Voice turns show their transcript and playable response audio.
 Trace IDs and safe metadata stay in the collapsed sidebar panel.
+Follow-up behavior and the bounded memory limits are documented in
+[`docs/memory-handling.md`](docs/memory-handling.md).
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are

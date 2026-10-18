@@ -20,6 +20,7 @@ class CheckedInputLike(Protocol):
     text: str
     trace_id: str
     session_id: str
+    active_order_id: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,6 +119,17 @@ class OrderStatusHandler:
             raise OrderToolError("order_tools_unavailable")
 
         order_ids = re.findall(r"\bNS-\d{2}-\d{4}-\d\b", request.text)
+        active_order_id = getattr(request, "active_order_id", None)
+        memory_resolved = False
+        if not order_ids and active_order_id:
+            if re.search(r"\b(?:other|another|different)\b", request.text, re.I):
+                return HandlerResult(
+                    message="Please provide one Northstar order ID so I can check it safely.",
+                    handler_name=self.name,
+                    metadata={"tool_error": "ambiguous_memory_reference"},
+                )
+            order_ids = [active_order_id]
+            memory_resolved = True
         if len(order_ids) != 1:
             return HandlerResult(
                 message="Please provide one Northstar order ID so I can check it safely.",
@@ -131,7 +143,7 @@ class OrderStatusHandler:
                 handler_name=self.name,
                 metadata={"tool_error": "unknown_session"},
             )
-        if self._tool_caller is None:
+        if self._tool_caller is None or memory_resolved:
             order_id = order_ids[0]
             tool_name = (
                 "check_return_eligibility"
@@ -162,6 +174,7 @@ class OrderStatusHandler:
                     metadata={
                         "allowed_facts": AllowedFacts.from_return_eligibility(result),
                         "tool_name": "check_return_eligibility",
+                        "memory_resolved": memory_resolved,
                     },
                 )
             if tool_name != "get_order_status":
@@ -192,6 +205,7 @@ class OrderStatusHandler:
             metadata={
                 "allowed_facts": AllowedFacts.from_order_status(result),
                 "tool_name": "get_order_status",
+                "memory_resolved": memory_resolved,
             },
         )
 

@@ -480,12 +480,17 @@ class VoicePipeline:
             )
 
 
-def build_live_voice_pipeline(settings: Settings | None = None) -> VoicePipeline:
+def build_live_voice_pipeline(
+    settings: Settings | None = None,
+    *,
+    support_service: SupportService | None = None,
+) -> VoicePipeline:
     """Build Groq STT, shared support, and local Windows TTS for voice turns."""
 
     active_settings = settings or Settings.from_environment()
     return VoicePipeline(
-        support_service=build_live_support_service(active_settings),
+        support_service=support_service
+        or build_live_support_service(active_settings),
         stt=GroqSpeechToText(active_settings),
         tts=WindowsSpeechSynthesizer(),
     )

@@ -5,9 +5,13 @@ production chat, human handoff, or distributed control plane exists.
 
 ## Voice-to-text or human-support transfer
 
-**PROPOSED; NOT IMPLEMENTED.** The current voice and text transports can call
-the same `SupportService`, but this repository does not implement a shared
-persistent conversation/session store or a live voice-to-text transfer.
+**PARTIALLY IMPLEMENTED for the local demo; durable transfer is proposed.**
+The current voice and text transports call the same cached `SupportService` and
+share a bounded process-local `SessionMemoryStore`, so a verified order can be
+used by a text follow-up after a voice turn. This repository does not implement
+a shared persistent conversation/session store or a live voice-to-text
+transfer. The demo session-to-customer mapping is fictional fixture data, not
+authentication.
 The demo session-to-customer mapping is fictional fixture data, not
 authentication.
 
