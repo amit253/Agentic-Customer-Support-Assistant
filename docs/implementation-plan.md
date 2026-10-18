@@ -163,10 +163,11 @@ is accepted as a successful turn.
 **Dependencies:** Steps 5-8.
 
 **Status:** The latest full default keyless suite passed 89 tests with two
-live-provider tests skipped and two third-party deprecation warnings.
-Focused voice/VAD/safety/routing regressions passed 35 tests; the current
-labeled corpus reported zero false interruptions and zero missed speech.
-Exact commands and results are in [step9-test-report.md](./step9-test-report.md).
+live-provider tests skipped by design and two third-party deprecation warnings.
+The separate opt-in live Groq check passed both provider-path tests. Focused
+voice/VAD/safety/routing regressions passed 35 tests; the current labeled
+corpus reported zero false interruptions and zero missed speech. Exact
+commands and results are in [step9-test-report.md](./step9-test-report.md).
 
 **Work:** run unit, integration, security, and voice tests; fix critical
 issues; keep optional advanced tests explicitly labeled `[REC]`.
@@ -246,7 +247,8 @@ and findings.
 **Status (audit completed 2026-10-18; blockers listed):** The initial audit
 found the A2 and A4 gaps; both now have implementation, focused keyless tests,
 and separate live smoke evidence. The final full keyless suite passed 89
-tests, skipped two opt-in live tests, and emitted two warnings. The focused
+tests, skipped two opt-in live tests by design, and emitted two warnings; the
+separate opt-in live Groq check passed both provider-path tests. The focused
 voice/VAD/safety/routing group passed 35
 tests with zero false interruptions and zero missed speech in its labeled
 corpus. The audio manifest validated six entries with zero errors (five

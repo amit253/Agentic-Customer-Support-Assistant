@@ -494,3 +494,11 @@ personal information and that the Groq credential remains only in the ignored
 `.env`. The local Python 3.14 environment was installed with the project
 extras, and the fresh keyless suite passed 89 tests with two live-provider
 tests skipped.
+
+### 2026-10-18T11:02:50.5135367+05:30 - [CODEX] Final live-provider recheck
+
+With the user's local `.env` left unread and unprinted, the two explicitly
+opt-in live Groq tests were rerun through the configured Python environment:
+both passed, with 19 non-live tests deselected and two third-party retrieval
+warnings. The tests did not print or persist the credential or generated
+answer text. The default keyless suite remains the reproducible baseline.

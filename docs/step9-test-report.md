@@ -33,7 +33,7 @@ not production accuracy estimates.
 |---|---|---|
 | Grounded-answer, native-tool, and guardrail regressions | `$env:PYTHONPATH='src'; Remove-Item Env:RUN_LIVE_GROQ_TESTS -ErrorAction SilentlyContinue; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest tests\test_native_llm_paths.py tests\test_step5_call_path.py tests\test_guardrails.py` | **28 passed, 2 skipped**; live-only tests were intentionally gated; 0.38 s |
 | Full default keyless suite | `$env:PYTHONPATH='src'; Remove-Item Env:RUN_LIVE_GROQ_TESTS -ErrorAction SilentlyContinue; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest` | **81 passed, 2 skipped**, 2 third-party deprecation warnings, 20.55 s |
-| Separate live Groq paths | `$env:PYTHONPATH='src'; $env:RUN_LIVE_GROQ_TESTS='1'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest -q -m live tests\test_native_llm_paths.py` | **2 passed, 17 deselected**, 2 third-party deprecation warnings, 21.28 s |
+| Separate live Groq paths | `$env:PYTHONPATH='src'; $env:RUN_LIVE_GROQ_TESTS='1'; & 'C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe' -m pytest tests\test_native_llm_paths.py -m live -q` | **2 passed, 19 deselected**, 2 third-party deprecation warnings, 25.69 s |
 
 The live product check confirmed a nonempty answer, citations limited to
 retrieved chunks, and acceptance by the output-claim guard using facts from
