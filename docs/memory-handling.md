@@ -9,9 +9,12 @@ turns. Both transports share the same cached `SupportService`, which owns one
 1. Validate and safety-check the current user message first.
 2. Load the session snapshot: at most 12 text-only turns and a small verified
    routing hint.
-3. Resolve a clear order follow-up locally when it contains a pronoun and an
-   order action such as “Can I return it?”; this avoids an unnecessary LLM
-   classifier call. Other messages go to the router with only
+3. Resolve a clear order operation locally when it contains exactly one
+   explicit order ID, or a pronoun and an order action such as “Can I return
+   it?”; this avoids an unnecessary LLM classifier call and prevents a live
+   classifier from misrouting return requests as product questions. Product
+   look-alikes such as “What is the capacity ... in order NS-...” still go to
+   the product route. Other messages go to the router with only
    `active_verified_order_id` and `last_intent` as memory context. The context
    is data, never an instruction.
 4. Reuse a follow-up order reference only when a previous order tool result

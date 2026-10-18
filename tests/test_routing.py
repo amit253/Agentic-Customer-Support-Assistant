@@ -179,6 +179,9 @@ def test_groq_adapter_validates_json_from_fake_sdk_client() -> None:
     assert captured["temperature"] == 0
     assert captured["response_format"] == ROUTER_RESPONSE_FORMAT
     assert captured["max_tokens"] == 300
+    system_prompt = captured["messages"][0]["content"]
+    assert "exactly one Northstar order ID" in system_prompt
+    assert "Never choose product_question for an order return or status request" in system_prompt
 
 
 def test_groq_adapter_falls_back_to_json_object_on_generation_failure() -> None:

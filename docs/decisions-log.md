@@ -567,3 +567,14 @@ session has an order ID previously returned by the ownership-checked order
 tool. This avoids an extra LLM classifier call, records
 `routing_source=verified_session_memory`, and leaves ambiguous or explicit
 new-order messages on the normal classifier path.
+
+### 2026-10-18 - [CODEX] Explicit order-operation routing
+
+The live demo also misrouted an explicit request such as “Can I return order
+NS-26-2044-8?” to product retrieval. The pipeline now deterministically
+recognizes exactly one order ID plus a clear order operation (status, delivery,
+tracking, return, eligibility, refund, or cancellation) after input safety
+checks. Product look-alikes that merely mention an order ID remain classifier
+routed. The Groq router prompt was versioned to `router-v2` with the same
+priority rules, so provider routing and local behavior agree while output and
+tool authorization remain unchanged.

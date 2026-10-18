@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from agentic_support.handlers import build_default_registry
+from agentic_support.handlers import HandlerRegistry, HandlerResult, build_default_registry
 from agentic_support.memory import MemoryTurn, SessionMemoryStore
 from agentic_support.pipeline import SupportService
 from agentic_support.routing import StructuredIntentRouter
@@ -49,12 +49,64 @@ def test_verified_order_memory_resolves_text_follow_up() -> None:
     assert "eligible" in second.message
     assert second.metadata["memory_resolved"] is True
     assert second.metadata["routing_source"] == "verified_session_memory"
-    assert classifier.direct_calls == ["Where is order NS-26-2044-8?"]
+    assert classifier.direct_calls == []
     assert classifier.context_calls == []
     snapshot = service.memory_store.snapshot("demo-session-omar")
     assert snapshot.turns[0].channel == "voice"
     assert snapshot.turns[0].user_text == "Where is order NS-26-2044-8?"
     assert "Order NS-26-2044-8 status: delivered." in snapshot.turns[0].assistant_text
+
+
+def test_explicit_order_return_bypasses_misrouting_classifier() -> None:
+    class BrokenClassifier:
+        def classify(self, message: str) -> dict[str, object]:
+            raise AssertionError("explicit order operation should be deterministic")
+
+    service = SupportService(
+        router=StructuredIntentRouter(BrokenClassifier()),
+        registry=build_default_registry(order_tools=DeterministicOrderTools()),
+    )
+
+    response = service.handle(
+        "Can I return order NS-26-2044-8?",
+        session_id="demo-session-omar",
+    )
+
+    assert response.status == "ok"
+    assert "Return eligibility for NS-26-2044-8" in response.message
+    assert response.metadata["routing_source"] == "deterministic_order_signal"
+
+
+def test_order_id_in_product_question_does_not_force_order_route() -> None:
+    class ProductClassifier:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def classify(self, message: str) -> dict[str, object]:
+            self.calls.append(message)
+            return {"intent": "product_question", "confidence": 0.99}
+
+    class ProductHandler:
+        def handle(self, request: object, decision: object) -> HandlerResult:
+            return HandlerResult(
+                message="Product answer from the registered product handler.",
+                handler_name="product_question_handler",
+            )
+
+    classifier = ProductClassifier()
+    service = SupportService(
+        router=StructuredIntentRouter(classifier),
+        registry=HandlerRegistry({"product_question": ProductHandler()}),
+    )
+
+    response = service.handle(
+        "What is the capacity of the backpack in order NS-26-2044-8?",
+        session_id="demo-session-omar",
+    )
+
+    assert response.status == "ok"
+    assert response.handler_name == "product_question_handler"
+    assert classifier.calls
 
 
 def test_ambiguous_memory_reference_still_requires_an_order_id() -> None:

@@ -34,6 +34,20 @@ from .tracing import trace_context
 MAX_INPUT_CHARS = 2000
 Channel = Literal["text", "voice"]
 ResponseStatus = Literal["ok", "rejected", "failed_closed"]
+ORDER_ID_PATTERN = re.compile(r"\bNS-\d{2}-\d{4}-\d\b", re.I)
+ORDER_OPERATION_PATTERN = re.compile(
+    r"\b(?:where|status|track|tracking|delivery|deliver|arrive|"
+    r"cancel|refund|eligible|eligibility|check)\b|"
+    r"\b(?:can|may|am)\s+i\s+(?:return|send\s+back)\b|"
+    r"\breturn\s+(?:order|it|this|that)\b",
+    re.I,
+)
+PRODUCT_LOOKALIKE_PATTERN = re.compile(
+    r"\b(?:capacity|size|material|colour|color|care|feature|features|"
+    r"specification|specifications|policy|what\s+is|what's|how\s+does|"
+    r"does\s+it)\b",
+    re.I,
+)
 
 
 def _is_memory_order_follow_up(
@@ -52,11 +66,39 @@ def _is_memory_order_follow_up(
     )
     has_order_action = re.search(
         r"\b(?:return|eligible|send back|status|where|track|deliver|arrive|"
-        r"cancel|refund)\b",
+        r"cancel|refund|check)\b",
         message,
         re.I,
     )
     return has_reference is not None and has_order_action is not None
+
+
+def _is_explicit_order_operation(message: str) -> bool:
+    """Recognize an unambiguous operation on exactly one stated order.
+
+    Product questions may mention an order as background context, so an order
+    ID alone is not enough to bypass the LLM router. Only a clear status,
+    delivery, return, refund, cancellation, or tracking operation is resolved
+    locally. This keeps the real pipeline deterministic for the failure case
+    while preserving product-question routing for benign look-alikes.
+    """
+
+    if len(ORDER_ID_PATTERN.findall(message)) != 1:
+        return False
+    if not ORDER_OPERATION_PATTERN.search(message):
+        return False
+    if re.search(r"\breturn\s+policy\b", message, re.I):
+        return False
+    if PRODUCT_LOOKALIKE_PATTERN.search(message):
+        return bool(
+            re.search(
+                r"\b(?:return|eligible|eligibility|send\s+back|refund|cancel)\b",
+                message,
+                re.I,
+            )
+            and not re.search(r"\b(?:policy|what\s+is|what's)\b", message, re.I)
+        )
+    return True
 
 
 @dataclass(frozen=True, slots=True)
@@ -207,7 +249,20 @@ class SupportService:
                 active_order_id=memory.active_order_id,
                 last_intent=memory.last_intent,
             )
-            if _is_memory_order_follow_up(
+            if _is_explicit_order_operation(checked_input.text):
+                decision = RouteDecision(
+                    intent="order_status",
+                    confidence=1.0,
+                    accepted=True,
+                    reason="explicit_order_operation",
+                )
+                routing_source = "deterministic_order_signal"
+                log_event(
+                    self.logger,
+                    "deterministic_order_route",
+                    reason="explicit_order_operation",
+                )
+            elif _is_memory_order_follow_up(
                 checked_input.text,
                 active_order_id=checked_input.active_order_id,
             ):
