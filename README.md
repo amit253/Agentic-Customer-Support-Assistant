@@ -27,7 +27,7 @@ Measured on held-out sets that were never used for tuning. Live runs used Groq
 | Expected evidence reaching the answerer | **0.922** | `reports/final-retrieval-offline-evaluation.md` |
 | Voice: end of speech to playback start, speech turns | **2.1–2.9 s** | `recordings/final-*-run.json` |
 | Voice: barge-in cancel after confirmed speech | **114–127 ms** | same |
-| Keyless test suite | **221 passed**, 2 live skipped, 1 known-limit xfail | `python -m pytest` |
+| Keyless test suite | **214 passed**, 2 live skipped, 1 known-limit xfail | `python -m pytest` |
 
 How each design choice was evaluated, including approaches that were tried
 and dropped, is in [docs/evaluation.md](docs/evaluation.md) and
