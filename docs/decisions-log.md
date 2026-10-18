@@ -578,3 +578,53 @@ checks. Product look-alikes that merely mention an order ID remain classifier
 routed. The Groq router prompt was versioned to `router-v2` with the same
 priority rules, so provider routing and local behavior agree while output and
 tool authorization remain unchanged.
+
+### 2026-10-18T16:01:49.2977635+05:30 - [USER/CLAUDE] Improvement programme on main
+
+The user asked for a senior review of routing, out-of-scope handling, retrieval,
+memory, and UI, then asked for the resulting plan to be implemented on the
+current `main` commit, phase by phase. A live probe of the running service
+(18 messages, `openai/gpt-oss-20b`) found that greetings, thanks, gibberish,
+and off-topic messages failed closed with "I could not classify that request
+safely", while "what's the weather in Mumbai today?" and "who are you?" were
+escalated to a human. Calling the classifier directly showed the cause: the
+strict JSON schema only allowed three intents, so Groq returned
+`400 json_validate_failed`, the code retried with a JSON-object fallback that
+also failed, and the router retried the whole sequence. A comparison question
+crashed the RAG handler because the answerer honestly returned empty citations,
+which the validator treated as an error.
+
+### 2026-10-18T16:01:49.2977635+05:30 - [CLAUDE] Phase 0 measurement before changes
+
+Decision: measure before changing routing or retrieval. New held-out sets:
+`evals/routing_eval.jsonl` (110 cases incl. smalltalk, out-of-scope, unclear,
+Hinglish, typos, negated-human and greeting-plus-request traps) and
+`evals/retrieval_eval.jsonl` (45 cases, 13 unanswerable near-misses), plus
+`evals/retrieval_dev.jsonl` for threshold tuning only. The evaluation runner
+now measures the real routing stack through `SupportService.preview_route()`
+instead of a separate keyword heuristic, and reports retrieval ranking before
+the evidence threshold separately from the threshold decision. The router now
+logs the class, HTTP status, and provider code of classifier failures (never
+message text); the failure cause was previously swallowed.
+
+Live baseline of the unchanged system (`reports/phase0-baseline-live-evaluation.md`):
+strict accuracy 0.509, dead-end rate 0.355, false-escalation rate 0.117,
+62 classifier errors, routing latency p50 973 ms / p95 16.4 s. On its original
+three intents the LLM was strong (product recall 0.96, order 1.00, escalation
+0.93); the losses are the missing intents. Retrieval on the held-out set
+(`reports/phase0-baseline-offline-evaluation.md`): hit@1 0.781, MRR 0.857,
+answerable acceptance 0.594, unanswerable rejection 0.692, evidence recall
+0.516. Correction to my own earlier review: on the 12-case seed set MiniLM
+ranking was perfect (MRR 1.0) and all loss came from the 0.45 threshold; on
+the harder held-out set ranking is also imperfect, so retrieval changes are
+justified by data rather than by the threshold alone.
+
+Groq headers for the configured key reported 1,000 requests/day and 8,000
+tokens/minute, so live runs are throttled (`--live-delay 3`).
+
+Honesty note: the evaluation sets, the routing rules, and the semantic
+examples were all written by the same agent in this session, and some eval
+messages match the earlier live-probe messages. A test prevents any example
+message from appearing verbatim in the held-out routing set, but the rules
+were written with knowledge of the eval categories. Live results should be
+read as evidence on this author-written set, not as an unbiased estimate.

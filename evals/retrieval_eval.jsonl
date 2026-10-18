@@ -1,0 +1,45 @@
+{"id":"rv-001","query":"Does the Trailmark 28 have a hip belt?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"product_feature"}
+{"id":"rv-002","query":"Is the Trailmark made from recycled material?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"product_feature"}
+{"id":"rv-003","query":"How does the Trailmark 28 open?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"product_feature"}
+{"id":"rv-004","query":"Will my laptop fit in the CityHaul?","expected_doc_ids":["kb-003-cityhaul-20"],"case_type":"product_feature"}
+{"id":"rv-005","query":"Are the CityHaul zippers weatherproof?","expected_doc_ids":["kb-003-cityhaul-20"],"case_type":"product_feature"}
+{"id":"rv-006","query":"Which is larger, the Trailmark 28 or the CityHaul 20?","expected_doc_ids":["kb-002-trailmark-28","kb-003-cityhaul-20"],"case_type":"comparison"}
+{"id":"rv-007","query":"Can I get my initials stitched on a pack?","expected_doc_ids":["kb-004-custom-latitude-pack"],"case_type":"product_feature"}
+{"id":"rv-008","query":"I ordered a pack with a custom patch and no longer want it, can I send it back?","expected_doc_ids":["kb-004-custom-latitude-pack","kb-007-final-sale-and-warranty"],"case_type":"multi_policy"}
+{"id":"rv-009","query":"How many days do I have to return an unused bag?","expected_doc_ids":["kb-005-standard-returns"],"case_type":"policy"}
+{"id":"rv-010","query":"Do returned items need the original tags?","expected_doc_ids":["kb-005-standard-returns"],"case_type":"policy"}
+{"id":"rv-011","query":"I bought a bag on September 12, 2026. When is my return deadline?","expected_doc_ids":["kb-006-trail-week-returns"],"case_type":"date_qualified"}
+{"id":"rv-012","query":"Does the Trail Week extension apply to embroidered items?","expected_doc_ids":["kb-006-trail-week-returns"],"case_type":"policy"}
+{"id":"rv-013","query":"Does Trail Week mean my refund is approved?","expected_doc_ids":["kb-006-trail-week-returns"],"case_type":"policy"}
+{"id":"rv-014","query":"My bag has a factory defect, what happens?","expected_doc_ids":["kb-007-final-sale-and-warranty"],"case_type":"warranty"}
+{"id":"rv-015","query":"Is a warranty claim the same as getting my money back?","expected_doc_ids":["kb-007-final-sale-and-warranty"],"case_type":"warranty"}
+{"id":"rv-016","query":"How long does the limited warranty last?","expected_doc_ids":["kb-007-final-sale-and-warranty"],"case_type":"warranty"}
+{"id":"rv-017","query":"Who pays import taxes when shipping abroad?","expected_doc_ids":["kb-008-international-shipping-and-duties"],"case_type":"shipping"}
+{"id":"rv-018","query":"Will I get my outbound shipping fee back if I return an item?","expected_doc_ids":["kb-008-international-shipping-and-duties"],"case_type":"shipping"}
+{"id":"rv-019","query":"Can you estimate my refund based on the item price?","expected_doc_ids":["kb-008-international-shipping-and-duties"],"case_type":"refund_amount"}
+{"id":"rv-020","query":"Is the delivery date shown on my order a guarantee?","expected_doc_ids":["kb-009-domestic-shipping"],"case_type":"shipping"}
+{"id":"rv-021","query":"Where do I find the confirmed status of a specific order?","expected_doc_ids":["kb-009-domestic-shipping"],"case_type":"shipping"}
+{"id":"rv-022","query":"My package is late, what do you need from me?","expected_doc_ids":["kb-010-delivery-troubleshooting"],"case_type":"troubleshooting"}
+{"id":"rv-023","query":"The bag arrived damaged, do I need to send photos?","expected_doc_ids":["kb-010-delivery-troubleshooting"],"case_type":"troubleshooting"}
+{"id":"rv-024","query":"Can I put the backpack in the dryer?","expected_doc_ids":["kb-011-gear-care"],"case_type":"care"}
+{"id":"rv-025","query":"Is bleach safe on the coated fabric?","expected_doc_ids":["kb-011-gear-care"],"case_type":"care"}
+{"id":"rv-026","query":"Does cleaning the bag the wrong way affect my warranty?","expected_doc_ids":["kb-011-gear-care"],"case_type":"care"}
+{"id":"rv-027","query":"When will a human specialist take over my case?","expected_doc_ids":["kb-012-human-escalation"],"case_type":"escalation"}
+{"id":"rv-028","query":"What issues get escalated to a person?","expected_doc_ids":["kb-012-human-escalation"],"case_type":"escalation"}
+{"id":"rv-029","query":"What kinds of things can Northstar support help me with?","expected_doc_ids":["kb-001-northstar-overview"],"case_type":"overview"}
+{"id":"rv-030","query":"Can the assistant approve my refund?","expected_doc_ids":["kb-001-northstar-overview"],"case_type":"overview"}
+{"id":"rv-031","query":"trailmark 28 me laptop sleeve hai kya?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"hinglish"}
+{"id":"rv-032","query":"cityhaul kitne liter ka hai?","expected_doc_ids":["kb-003-cityhaul-20"],"case_type":"hinglish"}
+{"id":"rv-033","query":"How much does the Trailmark 28 cost?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-034","query":"What colours does the CityHaul 20 come in?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-035","query":"How much does the Trailmark 28 weigh?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-036","query":"Do you offer express overnight shipping?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-037","query":"Do you ship to Brazil?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-038","query":"Can I pay with PayPal?","expected_doc_ids":[],"case_type":"unanswerable"}
+{"id":"rv-039","query":"Do you have a student discount code?","expected_doc_ids":[],"case_type":"unanswerable"}
+{"id":"rv-040","query":"Where is your nearest physical store?","expected_doc_ids":[],"case_type":"unanswerable"}
+{"id":"rv-041","query":"Can I exchange my bag for a different size?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-042","query":"Is the Trailmark 28 allowed as airline carry-on?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-043","query":"Do you sell gift cards?","expected_doc_ids":[],"case_type":"unanswerable"}
+{"id":"rv-044","query":"What are your customer service phone hours?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rv-045","query":"How many days does domestic delivery usually take?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}

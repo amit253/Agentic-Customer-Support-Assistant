@@ -1,0 +1,110 @@
+{"id":"rt-001","session_id":"demo-session-nadia","text":"What features does the Trailmark 28 have?","expected_intent":"product_question","category":"product_feature"}
+{"id":"rt-002","session_id":"demo-session-omar","text":"how many litres is the cityhaul 20","expected_intent":"product_question","category":"product_feature"}
+{"id":"rt-003","session_id":"demo-session-nadia","text":"Does the Trailmark have a padded sleeve for a laptop?","expected_intent":"product_question","category":"product_feature"}
+{"id":"rt-004","session_id":"demo-session-omar","text":"Is the CityHaul weather resistant?","expected_intent":"product_question","category":"product_feature"}
+{"id":"rt-005","session_id":"demo-session-nadia","text":"Can I put my initials on the Latitude Pack?","expected_intent":"product_question","category":"product_feature"}
+{"id":"rt-006","session_id":"demo-session-omar","text":"Which bag is bigger, the Trailmark 28 or the CityHaul 20?","expected_intent":"product_question","category":"product_comparison"}
+{"id":"rt-007","session_id":"demo-session-nadia","text":"How do I wash my backpack without damaging the coating?","expected_intent":"product_question","category":"product_care"}
+{"id":"rt-008","session_id":"demo-session-priya","text":"can i tumble dry the pack?","expected_intent":"product_question","category":"product_care"}
+{"id":"rt-009","session_id":"demo-session-omar","text":"What is your return policy for unused items?","expected_intent":"product_question","category":"policy"}
+{"id":"rt-010","session_id":"demo-session-nadia","text":"Are embroidered bags final sale?","expected_intent":"product_question","category":"policy"}
+{"id":"rt-011","session_id":"demo-session-omar","text":"Do you refund customs duties on international orders?","expected_intent":"product_question","category":"policy"}
+{"id":"rt-012","session_id":"demo-session-nadia","text":"How long is the warranty on manufacturing defects?","expected_intent":"product_question","category":"policy"}
+{"id":"rt-013","session_id":"demo-session-omar","text":"What does the Trail Week promotion change about returns?","expected_intent":"product_question","category":"policy"}
+{"id":"rt-014","session_id":"demo-session-priya","text":"Are delivery estimates guaranteed?","expected_intent":"product_question","category":"policy"}
+{"id":"rt-015","session_id":"demo-session-nadia","text":"wat is the retrun window for a normal bag","expected_intent":"product_question","category":"policy_typo"}
+{"id":"rt-016","session_id":"demo-session-omar","text":"trailmark 28 me laptop sleeve hai kya?","expected_intent":"product_question","category":"product_hinglish"}
+{"id":"rt-017","session_id":"demo-session-nadia","text":"What should I do if my package arrives damaged?","expected_intent":"product_question","acceptable_intents":["product_question","escalate_to_human"],"category":"policy_troubleshooting"}
+{"id":"rt-018","session_id":"demo-session-omar","text":"Is the CityHaul 20 in my order NS-26-4006-8 waterproof?","expected_intent":"product_question","category":"product_with_order_id"}
+{"id":"rt-019","session_id":"demo-session-nadia","text":"What is the return policy that applies to things like order NS-26-1042-5?","expected_intent":"product_question","acceptable_intents":["product_question","order_status"],"category":"policy_with_order_id"}
+{"id":"rt-020","session_id":"demo-session-omar","text":"I don't need an agent, what's the Trailmark capacity?","expected_intent":"product_question","category":"negation_trap"}
+{"id":"rt-021","session_id":"demo-session-nadia","text":"hello what is the capacity of the cityhaul","expected_intent":"product_question","category":"greeting_plus_request"}
+{"id":"rt-022","session_id":"demo-session-omar","text":"Thanks! Also, does warranty cover a broken zipper?","expected_intent":"product_question","category":"greeting_plus_request"}
+{"id":"rt-023","session_id":"demo-session-nadia","text":"Where is order NS-26-1042-5?","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-024","session_id":"demo-session-omar","text":"track NS-26-4006-8 please","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-025","session_id":"demo-session-omar","text":"Has NS-26-2044-8 been delivered yet?","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-026","session_id":"demo-session-priya","text":"Did you issue the refund for NS-26-3005-6?","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-027","session_id":"demo-session-nadia","text":"Is NS-26-5007-0 eligible for a return?","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-028","session_id":"demo-session-omar","text":"I'd like to send back NS-26-2044-8","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-029","session_id":"demo-session-omar","text":"when does NS-26-4006-8 get here","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-030","session_id":"demo-session-nadia","text":"Can I cancel NS-26-5007-0?","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-031","session_id":"demo-session-omar","text":"mera order NS-26-4006-8 kab aayega?","expected_intent":"order_status","category":"order_hinglish"}
+{"id":"rt-032","session_id":"demo-session-nadia","text":"wheres my ordr NS-26-1042-5","expected_intent":"order_status","category":"order_typo"}
+{"id":"rt-033","session_id":"demo-session-omar","text":"hi, can I return order NS-26-2044-8?","expected_intent":"order_status","category":"greeting_plus_request"}
+{"id":"rt-034","session_id":"demo-session-nadia","text":"Don't connect me to a human, just tell me where NS-26-1042-5 is","expected_intent":"order_status","category":"negation_trap"}
+{"id":"rt-035","session_id":"demo-session-omar","text":"Where is my order?","expected_intent":"order_status","category":"order_without_id"}
+{"id":"rt-036","session_id":"demo-session-nadia","text":"has my package shipped yet","expected_intent":"order_status","category":"order_without_id"}
+{"id":"rt-037","session_id":"demo-session-priya","text":"I want to check on my refund","expected_intent":"order_status","category":"order_without_id"}
+{"id":"rt-038","session_id":"demo-session-omar","text":"Can I return it?","expected_intent":"order_status","memory":{"active_order_id":"NS-26-2044-8","last_intent":"order_status"},"category":"order_follow_up"}
+{"id":"rt-039","session_id":"demo-session-omar","text":"when will it arrive?","expected_intent":"order_status","memory":{"active_order_id":"NS-26-4006-8","last_intent":"order_status"},"category":"order_follow_up"}
+{"id":"rt-040","session_id":"demo-session-nadia","text":"is that one still returnable?","expected_intent":"order_status","memory":{"active_order_id":"NS-26-1042-5","last_intent":"order_status"},"category":"order_follow_up"}
+{"id":"rt-041","session_id":"demo-session-priya","text":"and was the money sent back for it?","expected_intent":"order_status","memory":{"active_order_id":"NS-26-3005-6","last_intent":"order_status"},"category":"order_follow_up"}
+{"id":"rt-042","session_id":"demo-session-omar","text":"what about my other order?","expected_intent":"order_status","memory":{"active_order_id":"NS-26-2044-8","last_intent":"order_status"},"category":"order_follow_up"}
+{"id":"rt-043","session_id":"demo-session-nadia","text":"ok and has it been delivered","expected_intent":"order_status","memory":{"active_order_id":"NS-26-5007-0","last_intent":"order_status"},"category":"order_follow_up"}
+{"id":"rt-044","session_id":"demo-session-omar","text":"namaste, mera order kab aayega?","expected_intent":"order_status","category":"order_hinglish"}
+{"id":"rt-045","session_id":"demo-session-nadia","text":"Please connect me to a human agent.","expected_intent":"escalate_to_human","category":"explicit_human"}
+{"id":"rt-046","session_id":"demo-session-omar","text":"I want to speak to a real person","expected_intent":"escalate_to_human","category":"explicit_human"}
+{"id":"rt-047","session_id":"demo-session-priya","text":"can i talk to someone from your team","expected_intent":"escalate_to_human","category":"explicit_human"}
+{"id":"rt-048","session_id":"demo-session-nadia","text":"Get me a supervisor.","expected_intent":"escalate_to_human","category":"explicit_human"}
+{"id":"rt-049","session_id":"demo-session-omar","text":"representative","expected_intent":"escalate_to_human","category":"explicit_human"}
+{"id":"rt-050","session_id":"demo-session-nadia","text":"This is the third time I've asked and nobody has fixed my problem.","expected_intent":"escalate_to_human","category":"complaint"}
+{"id":"rt-051","session_id":"demo-session-omar","text":"My backpack strap ripped on day two, I want this reviewed by a specialist.","expected_intent":"escalate_to_human","category":"defect_review"}
+{"id":"rt-052","session_id":"demo-session-priya","text":"The box arrived crushed and the bag is torn, I need someone to look at it.","expected_intent":"escalate_to_human","category":"damaged_package"}
+{"id":"rt-053","session_id":"demo-session-nadia","text":"My parcel is lost and I need help from a person.","expected_intent":"escalate_to_human","category":"lost_package"}
+{"id":"rt-054","session_id":"demo-session-unverified","text":"Someone else placed an order using my account, I need this sorted out by staff.","expected_intent":"escalate_to_human","category":"ownership_issue"}
+{"id":"rt-055","session_id":"demo-session-omar","text":"The hip belt buckle snapped and cut my hand, this is a safety issue.","expected_intent":"escalate_to_human","category":"safety_concern"}
+{"id":"rt-056","session_id":"demo-session-nadia","text":"mujhe kisi insaan se baat karni hai","expected_intent":"escalate_to_human","category":"human_hinglish"}
+{"id":"rt-057","session_id":"demo-session-omar","text":"This bot is useless, transfer me now!","expected_intent":"escalate_to_human","category":"frustrated"}
+{"id":"rt-058","session_id":"demo-session-priya","text":"Can a human call me back about my warranty claim?","expected_intent":"escalate_to_human","category":"explicit_human"}
+{"id":"rt-059","session_id":"demo-session-nadia","text":"hi","expected_intent":"smalltalk","category":"greeting"}
+{"id":"rt-060","session_id":"demo-session-omar","text":"Hello there!","expected_intent":"smalltalk","category":"greeting"}
+{"id":"rt-061","session_id":"demo-session-priya","text":"good morning","expected_intent":"smalltalk","category":"greeting"}
+{"id":"rt-062","session_id":"demo-session-nadia","text":"hey","expected_intent":"smalltalk","category":"greeting"}
+{"id":"rt-063","session_id":"demo-session-omar","text":"namaste","expected_intent":"smalltalk","category":"greeting"}
+{"id":"rt-064","session_id":"demo-session-nadia","text":"thanks a lot!","expected_intent":"smalltalk","category":"thanks"}
+{"id":"rt-065","session_id":"demo-session-omar","text":"thank you, that was helpful","expected_intent":"smalltalk","category":"thanks"}
+{"id":"rt-066","session_id":"demo-session-priya","text":"cheers mate","expected_intent":"smalltalk","category":"thanks"}
+{"id":"rt-067","session_id":"demo-session-nadia","text":"ok thanks bye","expected_intent":"smalltalk","category":"goodbye"}
+{"id":"rt-068","session_id":"demo-session-omar","text":"see you later","expected_intent":"smalltalk","category":"goodbye"}
+{"id":"rt-069","session_id":"demo-session-priya","text":"that's all for today","expected_intent":"smalltalk","category":"goodbye"}
+{"id":"rt-070","session_id":"demo-session-nadia","text":"who are you?","expected_intent":"smalltalk","category":"identity"}
+{"id":"rt-071","session_id":"demo-session-omar","text":"what can you help me with?","expected_intent":"smalltalk","category":"capabilities"}
+{"id":"rt-072","session_id":"demo-session-priya","text":"are you a bot or a real person?","expected_intent":"smalltalk","category":"identity"}
+{"id":"rt-073","session_id":"demo-session-nadia","text":"how are you doing today?","expected_intent":"smalltalk","category":"wellbeing"}
+{"id":"rt-074","session_id":"demo-session-omar","text":"help","expected_intent":"smalltalk","acceptable_intents":["smalltalk","unclear"],"category":"capabilities"}
+{"id":"rt-075","session_id":"demo-session-nadia","text":"ok","expected_intent":"smalltalk","acceptable_intents":["smalltalk","unclear"],"category":"acknowledgement"}
+{"id":"rt-076","session_id":"demo-session-priya","text":"great, got it","expected_intent":"smalltalk","category":"acknowledgement"}
+{"id":"rt-077","session_id":"demo-session-omar","text":"hi there, I need some help","expected_intent":"smalltalk","acceptable_intents":["smalltalk","unclear"],"category":"greeting"}
+{"id":"rt-078","session_id":"demo-session-nadia","text":"what's the weather in Mumbai today?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-079","session_id":"demo-session-omar","text":"tell me a joke","expected_intent":"out_of_scope","acceptable_intents":["out_of_scope","smalltalk"],"category":"out_of_scope"}
+{"id":"rt-080","session_id":"demo-session-priya","text":"Write a Python function that reverses a string.","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-081","session_id":"demo-session-nadia","text":"Who won the cricket match yesterday?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-082","session_id":"demo-session-omar","text":"What is the share price of Tesla?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-083","session_id":"demo-session-priya","text":"Give me a recipe for paneer butter masala","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-084","session_id":"demo-session-nadia","text":"Who should I vote for in the next election?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-085","session_id":"demo-session-omar","text":"Translate 'good night' into French","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-086","session_id":"demo-session-priya","text":"what is 17 times 23","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-087","session_id":"demo-session-nadia","text":"Can you recommend a good movie for tonight?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-088","session_id":"demo-session-omar","text":"Book me a flight to Goa next week","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-089","session_id":"demo-session-priya","text":"Write a poem about mountains","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-090","session_id":"demo-session-nadia","text":"What is the capital of Australia?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-091","session_id":"demo-session-omar","text":"Can you fix my laptop's wifi?","expected_intent":"out_of_scope","category":"out_of_scope"}
+{"id":"rt-092","session_id":"demo-session-nadia","text":"asdkjh qwe zzz","expected_intent":"unclear","category":"gibberish"}
+{"id":"rt-093","session_id":"demo-session-omar","text":"jjjjjjjjj","expected_intent":"unclear","category":"gibberish"}
+{"id":"rt-094","session_id":"demo-session-priya","text":"???","expected_intent":"unclear","category":"punctuation_only"}
+{"id":"rt-095","session_id":"demo-session-nadia","text":"...","expected_intent":"unclear","category":"punctuation_only"}
+{"id":"rt-096","session_id":"demo-session-omar","text":"hmm","expected_intent":"unclear","acceptable_intents":["unclear","smalltalk"],"category":"filler"}
+{"id":"rt-097","session_id":"demo-session-priya","text":"qwertyuiop","expected_intent":"unclear","category":"gibberish"}
+{"id":"rt-098","session_id":"demo-session-nadia","text":"the blue one","expected_intent":"unclear","category":"vague_fragment"}
+{"id":"rt-099","session_id":"demo-session-omar","text":"12345","expected_intent":"unclear","category":"vague_fragment"}
+{"id":"rt-100","session_id":"demo-session-priya","text":"xkcd lorem ipsum dolor","expected_intent":"unclear","category":"gibberish"}
+{"id":"rt-101","session_id":"demo-session-nadia","text":"zxcv bnm","expected_intent":"unclear","category":"gibberish"}
+{"id":"rt-102","session_id":"demo-session-omar","text":"it","expected_intent":"unclear","category":"vague_fragment"}
+{"id":"rt-103","session_id":"demo-session-priya","text":"and then","expected_intent":"unclear","category":"vague_fragment"}
+{"id":"rt-104","session_id":"demo-session-nadia","text":"sdfsdf sdfsdf","expected_intent":"unclear","category":"gibberish"}
+{"id":"rt-105","session_id":"demo-session-omar","text":"!!!!!!","expected_intent":"unclear","category":"punctuation_only"}
+{"id":"rt-106","session_id":"demo-session-nadia","text":"Does the Trailmark 28 come with a rain cover?","expected_intent":"product_question","category":"product_unanswerable"}
+{"id":"rt-107","session_id":"demo-session-omar","text":"How much does the CityHaul 20 cost?","expected_intent":"product_question","category":"product_unanswerable"}
+{"id":"rt-108","session_id":"demo-session-priya","text":"refund for NS-26-3005-6 how much was it","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-109","session_id":"demo-session-nadia","text":"Is my Latitude Pack order NS-26-1043-6 returnable?","expected_intent":"order_status","category":"order_with_id"}
+{"id":"rt-110","session_id":"demo-session-omar","text":"I need a human to approve a refund for NS-26-2044-8","expected_intent":"escalate_to_human","acceptable_intents":["escalate_to_human","order_status"],"category":"human_with_order_id"}

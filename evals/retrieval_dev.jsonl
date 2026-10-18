@@ -1,0 +1,21 @@
+{"id":"rd-001","query":"What size is the Trailmark backpack in litres?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"product_feature"}
+{"id":"rd-002","query":"Does the CityHaul have a laptop compartment?","expected_doc_ids":["kb-003-cityhaul-20"],"case_type":"product_feature"}
+{"id":"rd-003","query":"Can the Latitude Pack be personalised?","expected_doc_ids":["kb-004-custom-latitude-pack"],"case_type":"product_feature"}
+{"id":"rd-004","query":"What's the deadline to return an unused standard item?","expected_doc_ids":["kb-005-standard-returns"],"case_type":"policy"}
+{"id":"rd-005","query":"When does the Trail Week return window end?","expected_doc_ids":["kb-006-trail-week-returns"],"case_type":"policy"}
+{"id":"rd-006","query":"Are personalized items refundable if I change my mind?","expected_doc_ids":["kb-007-final-sale-and-warranty","kb-004-custom-latitude-pack"],"case_type":"multi_policy"}
+{"id":"rd-007","query":"Are customs charges refundable?","expected_doc_ids":["kb-008-international-shipping-and-duties"],"case_type":"shipping"}
+{"id":"rd-008","query":"Can support promise me a delivery date?","expected_doc_ids":["kb-009-domestic-shipping","kb-001-northstar-overview"],"case_type":"multi_policy"}
+{"id":"rd-009","query":"My parcel seems lost, what's the process?","expected_doc_ids":["kb-010-delivery-troubleshooting"],"case_type":"troubleshooting"}
+{"id":"rd-010","query":"How should I dry my pack after washing?","expected_doc_ids":["kb-011-gear-care"],"case_type":"care"}
+{"id":"rd-011","query":"Will a manufacturing defect be escalated to a human?","expected_doc_ids":["kb-012-human-escalation","kb-007-final-sale-and-warranty"],"case_type":"multi_policy"}
+{"id":"rd-012","query":"What can't the support assistant do?","expected_doc_ids":["kb-001-northstar-overview"],"case_type":"overview"}
+{"id":"rd-013","query":"Compare the CityHaul and the Trailmark for carrying a laptop","expected_doc_ids":["kb-002-trailmark-28","kb-003-cityhaul-20"],"case_type":"comparison"}
+{"id":"rd-014","query":"Is the Trailmark hip belt removable?","expected_doc_ids":["kb-002-trailmark-28"],"case_type":"product_feature"}
+{"id":"rd-015","query":"What's the price of the Custom Latitude Pack?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rd-016","query":"Do you ship to Antarctica?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rd-017","query":"Can I pay in instalments?","expected_doc_ids":[],"case_type":"unanswerable"}
+{"id":"rd-018","query":"Is there a loyalty points program?","expected_doc_ids":[],"case_type":"unanswerable"}
+{"id":"rd-019","query":"What is the CityHaul's height in centimetres?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rd-020","query":"Do you sell replacement straps?","expected_doc_ids":[],"case_type":"unanswerable_near_miss"}
+{"id":"rd-021","query":"What's your office address?","expected_doc_ids":[],"case_type":"unanswerable"}

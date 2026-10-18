@@ -23,7 +23,7 @@ from .handlers import (
     build_default_registry,
 )
 from .logging_config import log_event
-from .memory import MemoryTurn, SessionMemoryStore
+from .memory import MemorySnapshot, MemoryTurn, SessionMemoryStore
 from .routing import GroqStructuredClassifier, RouteDecision, StructuredIntentRouter
 from .retrieval import GroundedRetriever
 from .tool_calling import GroqOrderToolCaller
@@ -201,6 +201,86 @@ class SupportService:
 
         self.memory_store.clear(session_id)
 
+    def _select_route(
+        self, checked_input: CheckedInput, memory: MemorySnapshot
+    ) -> tuple[RouteDecision, str]:
+        """Return the route decision and the source that produced it."""
+
+        if _is_explicit_order_operation(checked_input.text):
+            log_event(
+                self.logger,
+                "deterministic_order_route",
+                reason="explicit_order_operation",
+            )
+            return (
+                RouteDecision(
+                    intent="order_status",
+                    confidence=1.0,
+                    accepted=True,
+                    reason="explicit_order_operation",
+                ),
+                "deterministic_order_signal",
+            )
+        if _is_memory_order_follow_up(
+            checked_input.text,
+            active_order_id=checked_input.active_order_id,
+        ):
+            log_event(
+                self.logger,
+                "memory_resolved_order_follow_up",
+                active_order_id=checked_input.active_order_id,
+            )
+            return (
+                RouteDecision(
+                    intent="order_status",
+                    confidence=1.0,
+                    accepted=True,
+                    reason="memory_resolved_order_follow_up",
+                ),
+                "verified_session_memory",
+            )
+        decision = self.router.route(
+            RoutingInput(
+                text=checked_input.text,
+                memory_hint=memory.routing_hint(),
+            )
+        )
+        return decision, "classifier"
+
+    def preview_route(
+        self, message: str, *, session_id: str = "unknown-session"
+    ) -> tuple[RouteDecision, str]:
+        """Return the routing decision for evaluation without running handlers.
+
+        This skips the input guard and handlers on purpose: evaluation scripts
+        use it to measure routing alone. Production traffic must use
+        ``handle()``, which is the only path that dispatches to a handler.
+        """
+
+        checked_input, reason = validate_input(
+            message,
+            trace_id="route-preview",
+            session_id=session_id,
+            channel="text",
+        )
+        if checked_input is None:
+            return (
+                RouteDecision(
+                    intent=None,
+                    confidence=0.0,
+                    accepted=False,
+                    reason=reason or "invalid_input",
+                ),
+                "input_validation",
+            )
+        memory = self.memory_store.snapshot(session_id)
+        checked_input = replace(
+            checked_input,
+            active_order_id=memory.active_order_id,
+            last_intent=memory.last_intent,
+        )
+        return self._select_route(checked_input, memory)
+
     def handle(
         self,
         message: object,
@@ -249,43 +329,7 @@ class SupportService:
                 active_order_id=memory.active_order_id,
                 last_intent=memory.last_intent,
             )
-            if _is_explicit_order_operation(checked_input.text):
-                decision = RouteDecision(
-                    intent="order_status",
-                    confidence=1.0,
-                    accepted=True,
-                    reason="explicit_order_operation",
-                )
-                routing_source = "deterministic_order_signal"
-                log_event(
-                    self.logger,
-                    "deterministic_order_route",
-                    reason="explicit_order_operation",
-                )
-            elif _is_memory_order_follow_up(
-                checked_input.text,
-                active_order_id=checked_input.active_order_id,
-            ):
-                decision = RouteDecision(
-                    intent="order_status",
-                    confidence=1.0,
-                    accepted=True,
-                    reason="memory_resolved_order_follow_up",
-                )
-                routing_source = "verified_session_memory"
-                log_event(
-                    self.logger,
-                    "memory_resolved_order_follow_up",
-                    active_order_id=checked_input.active_order_id,
-                )
-            else:
-                decision = self.router.route(
-                    RoutingInput(
-                        text=checked_input.text,
-                        memory_hint=memory.routing_hint(),
-                    )
-                )
-                routing_source = "classifier"
+            decision, routing_source = self._select_route(checked_input, memory)
             if not decision.accepted or decision.intent is None:
                 log_event(
                     self.logger,

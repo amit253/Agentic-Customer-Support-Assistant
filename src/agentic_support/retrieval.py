@@ -125,6 +125,10 @@ class DenseVectorIndex:
     def dimension(self) -> int:
         return int(self._vectors.shape[1])
 
+    @property
+    def size(self) -> int:
+        return len(self._chunks)
+
     def search(self, query_vector: np.ndarray, top_k: int) -> tuple[RetrievalHit, ...]:
         if top_k < 1:
             raise ValueError("top_k must be at least one")
@@ -316,6 +320,13 @@ class GroundedRetriever:
             index=DenseVectorIndex(chunks, vectors),
             min_similarity=min_similarity,
         )
+
+    def rank_all(self, query: str) -> tuple[RetrievalHit, ...]:
+        """Score every chunk without the evidence threshold (evaluation only)."""
+
+        normalized_query = re.sub(r"\s+", " ", query).strip()
+        query_vector = self.embedder.encode([normalized_query])[0]
+        return self.index.search(query_vector, top_k=self.index.size)
 
     def retrieve(self, query: str, *, top_k: int = 4) -> RetrievalResponse:
         normalized_query = re.sub(r"\s+", " ", query).strip()

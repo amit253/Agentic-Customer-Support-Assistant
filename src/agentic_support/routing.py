@@ -57,6 +57,29 @@ def _is_json_validation_failure(error: Exception) -> bool:
     return isinstance(payload, Mapping) and payload.get("code") == "json_validate_failed"
 
 
+def describe_provider_error(error: BaseException) -> dict[str, object]:
+    """Return safe diagnostic fields for a provider failure.
+
+    Only the exception class names, HTTP status, and provider error code are
+    reported. Message text is excluded because provider errors can echo the
+    request payload, which contains customer text.
+    """
+
+    root = error.__cause__ or error
+    body = getattr(root, "body", None)
+    provider_code = None
+    if isinstance(body, Mapping):
+        payload = body.get("error", body)
+        if isinstance(payload, Mapping):
+            provider_code = payload.get("code")
+    return {
+        "error_type": type(error).__name__,
+        "cause_type": type(root).__name__,
+        "status_code": getattr(root, "status_code", None),
+        "provider_code": provider_code,
+    }
+
+
 class ClassifierProviderError(RuntimeError):
     """Raised when the classifier provider cannot produce a response."""
 
@@ -381,8 +404,14 @@ class StructuredIntentRouter:
                     min_confidence=self.min_confidence,
                 )
                 last_decision = decision
-            except Exception:
+            except Exception as exc:
                 self.cache.record_classifier_error()
+                log_event(
+                    self.logger,
+                    "classifier_error",
+                    attempt=attempt + 1,
+                    **describe_provider_error(exc),
+                )
                 last_decision = RouteDecision(
                     intent=None,
                     confidence=0.0,
