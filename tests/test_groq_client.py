@@ -57,13 +57,34 @@ def test_non_rate_limit_errors_are_not_hidden_by_rotation() -> None:
     assert second.calls == 0
 
 
-def test_all_keys_rate_limited_raises_the_last_rate_limit() -> None:
+def test_all_keys_rate_limited_waits_once_then_succeeds() -> None:
+    waits: list[float] = []
     client = RotatingChatClient(
-        [FakeKeyClient("a", [RateLimitError()]), FakeKeyClient("b", [RateLimitError()])]
+        [FakeKeyClient("a", [RateLimitError()]), FakeKeyClient("b", [RateLimitError()])],
+        sleeper=waits.append,
+    )
+
+    result = client.chat.completions.create(model="m", messages=[])
+
+    assert result in {"answer from a", "answer from b"}
+    assert waits == [1.0]
+    assert client.rate_limit_waits == 1
+
+
+def test_persistent_rate_limit_is_raised_after_one_bounded_wait() -> None:
+    waits: list[float] = []
+
+    class LongRetry(RateLimitError):
+        response = SimpleNamespace(headers={"retry-after": "120"})
+
+    client = RotatingChatClient(
+        [FakeKeyClient("a", [LongRetry(), LongRetry()]), FakeKeyClient("b", [LongRetry(), LongRetry()])],
+        sleeper=waits.append,
     )
 
     with pytest.raises(RateLimitError):
         client.chat.completions.create(model="m", messages=[])
+    assert waits == [8.0]  # capped, never the provider's 120 seconds
 
 
 def test_reasoning_effort_is_sent_only_to_models_that_support_it() -> None:

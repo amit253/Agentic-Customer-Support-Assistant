@@ -1,73 +1,114 @@
 # Retrieval Design
 
-Status: Step 3 implemented and tested. This document describes the actual
-retrieval path; answer generation and agents are future steps.
+Status: hybrid retrieval implemented (Phase 3). The original MiniLM retriever
+(`GroundedRetriever`) is kept for comparison and for keyless tests.
 
-## Embedding model
+## What changed and why
 
-The implementation uses the local Sentence Transformers model
-`sentence-transformers/all-MiniLM-L6-v2`. The verified runtime produced
-384-dimensional vectors and normalized them before indexing. The model is
-downloaded to the local model cache by the package runtime, not committed to
-the repository.
+The first retriever used `all-MiniLM-L6-v2` embeddings and kept every chunk
+whose cosine similarity was at least 0.45. On the 12-case seed set its
+ranking was perfect and all losses came from that threshold. A harder,
+held-out set (`evals/retrieval_eval.jsonl`: 32 answerable questions including
+comparisons, multi-document policy questions, and Hinglish, plus 13
+unanswerable near-misses such as price, colour, and weight) showed two
+problems: ranking was imperfect (hit@1 0.781) and only 51.6% of the expected
+documents reached the answer generator.
 
-This model was selected because it is small enough for a local development
-demo, supports semantic paraphrases, and does not require a Groq API key or a
-paid embedding service. The model name is configurable in the retriever
-factory.
+`scripts/compare_retrievers.py` compared nine configurations. Thresholds were
+tuned only on the dev set (`retrieval_seed.jsonl` + `retrieval_dev.jsonl`,
+33 cases) and then applied unchanged to the held-out set. See
+`reports/retrieval-comparison.md` for the full table.
 
-## Vector index
+| Held-out (45 cases) | MRR | Accept answerable | Reject unanswerable | Evidence recall |
+|---|---:|---:|---:|---:|
+| Original: MiniLM, 0.45 per-chunk threshold | 0.857 | 0.594 | 0.692 | 0.516 |
+| Same model, threshold re-tuned on dev | 0.857 | 0.844 | 0.615 | 0.781 |
+| MiniLM + BM25 fusion | 0.907 | 0.812 | 0.615 | 0.797 |
+| + ms-marco cross-encoder reranker | 0.885 | 0.562 | 0.769 | 0.562 |
+| **multilingual-e5-small + BM25 fusion (chosen)** | **0.912** | **0.938** | 0.615 | **0.891** |
 
-The index is an exact dense NumPy matrix. Each row is a normalized chunk
-embedding, and a query is normalized and scored with a matrix-vector inner
-product. Because both sides are normalized, this is cosine similarity.
+Read with care: 45 cases, so one case moves acceptance by about 3 points.
+Adding a deterministic tie-break to the fusion step moved the chosen
+configuration's dev-tuned thresholds from 0.821 / 0.6158 to 0.8311 / 0.6233
+and its held-out evidence recall from 0.922 to 0.891; thresholds on sets this
+small are sensitive and should be re-tuned whenever the corpus changes.
 
-There are currently only 12 source documents, so an exact scan is simpler and
-more inspectable than introducing approximate-nearest-neighbor infrastructure.
-The index preserves deterministic ordering with a stable descending score sort.
-If the corpus grows substantially, this interface can be replaced by FAISS or
-another managed vector index without changing document/chunk contracts.
+## Production retriever
 
-## Ingestion and chunking
+`HybridRetriever` with `PRODUCTION_CONFIG` (`hybrid_retrieval.py`):
 
-Markdown files are loaded in stable path order. Each file must contain simple
-frontmatter with `doc_id` and `title`. The body is whitespace-normalized and
-split at word boundaries into 480-character chunks with an 80-character
-overlap. Each chunk receives an ID such as
-`kb-005-standard-returns#chunk-000` and retains:
+1. **Dense**: `intfloat/multilingual-e5-small` with the model's required
+   `query:` / `passage:` prefixes. Multilingual, so romanized Hindi questions
+   such as "cityhaul kitne liter ka hai?" are matched; the same property is
+   the main reason to prefer it for an Indian-language product.
+2. **BM25** over title + chunk text, for exact names and policy terms
+   ("Trail Week", "CityHaul") that embeddings blur.
+3. **Reciprocal-rank fusion** (k = 60) merges the two rankings without
+   comparing their incompatible score scales; ties are broken by cosine.
+4. **Evidence gate on the best candidate only** (cosine >= 0.8311). If it
+   passes, up to four candidates with cosine >= 0.6233 go to the answerer.
+   The old per-chunk cutoff dropped the second product in comparison
+   questions; gating on the top candidate keeps both.
 
-- source document ID;
-- title;
-- repository-relative source path;
-- chunk index;
-- exact chunk text.
+Both thresholds came from the dev set; e5 similarity scores are compressed
+(roughly 0.7 to 0.9), which is why they are much higher than MiniLM's.
 
-This provenance is returned with every retrieval hit so later answer
-generation can cite the passages it actually received.
+## Tried and dropped: cross-encoder reranking
 
-## Insufficient evidence
+Three rerankers were tested (`ms-marco-MiniLM-L-6-v2` with three different
+embedders, and the multilingual `mmarco-mMiniLMv2-L12-H384-v1`). Because all
+configurations see every one of the 12 chunks, the reranker alone decides the
+final order, so the three ms-marco runs produced identical results. Their
+probability scores were close to 0 or 1, so a gate tuned on dev (0.948) did
+not transfer: held-out acceptance fell to 0.562. They also added roughly half
+a second per query on CPU. Reranking is worth revisiting with a corpus large
+enough that the first stage must choose 20 of thousands of chunks.
 
-The retriever applies a configured minimum cosine-similarity threshold of
-`0.45`. This value was selected from the measured Step 3 cases: the required
-paraphrase scored `0.5043`, the two conflicting policy sources scored `0.6234`
-and `0.4828`, the irrelevant query scored `0.1746`, and the unanswerable
-refund query's best candidate scored `0.4399`. Empty queries and queries with no chunk above the threshold return no
-hits and an explicit reason. The retriever never invents an answer and does
-not silently fall back to keyword search.
+## Two gates, not one
 
-For an ambiguous or intentionally conflicting question, the retriever returns
-multiple relevant chunks. The later RAG answer layer must surface the conflict
-or escalate; it must not silently choose one policy.
+No configuration rejects unanswerable near-misses well (best 0.769, chosen
+0.615): "How much does the Trailmark 28 cost?" is semantically close to the
+Trailmark document even though that document has no price. The retrieval gate
+is therefore tuned for recall, and the answer generator is the second gate:
+it must set `insufficient_evidence` (or return no citations) when the passages
+do not answer the question, and the handler then returns the fixed "not
+enough verified information" reply. The output claim guard is a third check
+on any dates, amounts, or order IDs in the final text.
+
+## Ingestion and provenance
+
+Unchanged: Markdown files with `doc_id` / `title` frontmatter, whitespace
+normalized, 480-character chunks with 80-character overlap and stable IDs such
+as `kb-005-standard-returns#chunk-000`. With 12 short documents each document
+is one chunk. Hits keep document ID, title, path, and chunk index; customers
+see article titles as sources, and chunk IDs remain in response metadata.
 
 ## Tests
 
-The Step 3 tests run the real local embedding model and cover:
+`tests/test_hybrid_retrieval.py` covers BM25 tokenization, a keyword match
+lifting a document the embeddings miss, top-candidate gating, comparison
+questions keeping both products, and empty queries, using a fake embedder.
+`tests/test_retrieval.py` still exercises the real MiniLM model.
 
-- deterministic ingestion and chunk IDs;
-- semantic paraphrase retrieval;
-- irrelevant-query rejection;
-- conflicting standard/Trail Week policy retrieval;
-- unanswerable refund questions;
-- source document and chunk provenance.
+## End-to-end check with the live answerer
 
-No Groq key is used by these tests.
+`python scripts/run_evaluation.py --label phase3-rag-live --sections rag --live-delay 3`
+runs every held-out retrieval question through the production retriever, the
+Groq answerer, and the output guard (`reports/phase3-rag-live-evaluation.md`):
+
+| Live, 45 held-out questions | Value |
+|---|---:|
+| Answerable questions answered | 0.906 |
+| Answerable answers citing an expected document | 0.875 |
+| Unanswerable near-misses declined | 1.000 (13 / 13) |
+| Declines by retrieval gate / by answerer (all cases) | 10 / 6 |
+| Handler errors | 0 |
+| Correct answers blocked by the output guard | 1 |
+
+The answerer caught every near-miss the retrieval gate let through, which is
+the point of the two-gate design. The blocked answer was "No, Trail Week does
+not mean your refund is approved": the guard's promise pattern does not
+understand negation (see the red-team report). Two answerable questions
+("Can I put the backpack in the dryer?", "When will a human specialist take
+over my case?") were rejected by the retrieval gate; that is the recall cost
+of the threshold.

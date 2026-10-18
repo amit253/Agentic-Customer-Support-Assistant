@@ -1,0 +1,2126 @@
+{
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.3"
+  },
+  "generated_at": "2026-10-18T11:01:08.758931+00:00",
+  "label": "phase3-retrieval-offline",
+  "retrieval": {
+    "dev": {
+      "answerable_count": 25,
+      "cases": [
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "paraphrase",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-001",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-004-custom-latitude-pack"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8975
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-002-trailmark-28"
+          ],
+          "case_type": "paraphrase",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-002",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-002-trailmark-28",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8825
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-002-trailmark-28"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-003",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-002-trailmark-28",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8493
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-005-standard-returns"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-004",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.8558
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-003-cityhaul-20",
+            "kb-001-northstar-overview"
+          ],
+          "case_type": "date-qualified-exception",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-005",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-003-cityhaul-20",
+            "kb-001-northstar-overview",
+            "kb-002-trailmark-28"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8769
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-008-international-shipping-and-duties",
+            "kb-003-cityhaul-20"
+          ],
+          "case_type": "multi-policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-006-trail-week-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-006",
+          "ndcg_at_5": 0.6934,
+          "ranked_doc_ids_top5": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-008-international-shipping-and-duties",
+            "kb-003-cityhaul-20",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.8513
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-012-human-escalation",
+            "kb-011-gear-care"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-007",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-012-human-escalation",
+            "kb-011-gear-care",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8451
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "unsupported-promise",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-009-domestic-shipping"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-008",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8855
+        },
+        {
+          "accepted": 0.0,
+          "accepted_doc_ids": [],
+          "case_type": "troubleshooting",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-010-delivery-troubleshooting"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-009",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting",
+            "kb-004-custom-latitude-pack",
+            "kb-012-human-escalation",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting",
+            "kb-007-final-sale-and-warranty",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "product-care",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-011-gear-care"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-010",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting",
+            "kb-007-final-sale-and-warranty",
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8507
+        },
+        {
+          "accepted": 0.0,
+          "accepted_doc_ids": [],
+          "case_type": "escalation",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-012-human-escalation"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "retrieval-011",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "retrieval-012",
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-006-trail-week-returns",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-011-gear-care",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-001",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-011-gear-care",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.9137
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-002",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8787
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-004-custom-latitude-pack"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-003",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.9033
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-003-cityhaul-20"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-005-standard-returns"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rd-004",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-003-cityhaul-20",
+            "kb-009-domestic-shipping"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.889
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-006-trail-week-returns"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rd-005",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.8311
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-008-international-shipping-and-duties",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "multi_policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-006",
+          "ndcg_at_5": 0.9197,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-008-international-shipping-and-duties",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8743
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-008-international-shipping-and-duties",
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "case_type": "shipping",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-008-international-shipping-and-duties"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-007",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8791
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-010-delivery-troubleshooting",
+            "kb-009-domestic-shipping",
+            "kb-001-northstar-overview",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "multi_policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-009-domestic-shipping",
+            "kb-001-northstar-overview"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rd-008",
+          "ndcg_at_5": 0.6934,
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-009-domestic-shipping",
+            "kb-001-northstar-overview",
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.8745
+        },
+        {
+          "accepted": 0.0,
+          "accepted_doc_ids": [],
+          "case_type": "troubleshooting",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-010-delivery-troubleshooting"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rd-009",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-010-delivery-troubleshooting",
+            "kb-009-domestic-shipping",
+            "kb-012-human-escalation",
+            "kb-005-standard-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-011-gear-care",
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "case_type": "care",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-011-gear-care"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-010",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-011-gear-care",
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting",
+            "kb-002-trailmark-28"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8582
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-012-human-escalation",
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "case_type": "multi_policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-012-human-escalation",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-011",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-012-human-escalation",
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8625
+        },
+        {
+          "accepted": 0.0,
+          "accepted_doc_ids": [],
+          "case_type": "overview",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-001-northstar-overview"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rd-012",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-008-international-shipping-and-duties",
+            "kb-011-gear-care"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "comparison",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-013",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8624
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rd-014",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-006-trail-week-returns",
+            "kb-004-custom-latitude-pack"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8759
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-004-custom-latitude-pack",
+            "kb-008-international-shipping-and-duties",
+            "kb-011-gear-care",
+            "kb-009-domestic-shipping"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rd-015",
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-008-international-shipping-and-duties",
+            "kb-011-gear-care",
+            "kb-009-domestic-shipping",
+            "kb-003-cityhaul-20"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.8808
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rd-016",
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-001-northstar-overview",
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rd-017",
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-010-delivery-troubleshooting",
+            "kb-009-domestic-shipping",
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rd-018",
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-007-final-sale-and-warranty",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-009-domestic-shipping",
+            "kb-002-trailmark-28",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rd-019",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-009-domestic-shipping",
+            "kb-002-trailmark-28",
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.8648
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rd-020",
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting",
+            "kb-012-human-escalation",
+            "kb-004-custom-latitude-pack",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rd-021",
+          "ranked_doc_ids_top5": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-005-standard-returns",
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        }
+      ],
+      "end_to_end": {
+        "evidence_recall": 0.84,
+        "gated_mrr": 0.74
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.84,
+        "balanced_accuracy": 0.7949999999999999,
+        "unanswerable_rejection_rate": 0.75
+      },
+      "ranking": {
+        "hit_at_1": 0.68,
+        "hit_at_3": 1.0,
+        "mrr": 0.84,
+        "ndcg_at_5": 0.8836860847124589,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0
+      },
+      "unanswerable_count": 8
+    },
+    "held_out": {
+      "answerable_count": 32,
+      "cases": [
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-001",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8867
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack",
+            "kb-003-cityhaul-20"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-002",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack",
+            "kb-003-cityhaul-20",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8673
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-003",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8744
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-004",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8759
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-005",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8506
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "comparison",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-006",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.863
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "product_feature",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-004-custom-latitude-pack"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-007",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8336
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-004-custom-latitude-pack",
+            "kb-006-trail-week-returns",
+            "kb-011-gear-care",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "case_type": "multi_policy",
+          "evidence_recall": 0.5,
+          "expected_doc_ids": [
+            "kb-004-custom-latitude-pack",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-008",
+          "ndcg_at_5": 0.6131,
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-006-trail-week-returns",
+            "kb-011-gear-care",
+            "kb-008-international-shipping-and-duties",
+            "kb-002-trailmark-28"
+          ],
+          "recall_at_3": 0.5,
+          "recall_at_5": 0.5,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8522
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-002-trailmark-28"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-005-standard-returns"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-009",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.879
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties",
+            "kb-002-trailmark-28",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-005-standard-returns"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-010",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties",
+            "kb-002-trailmark-28",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8396
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-002-trailmark-28"
+          ],
+          "case_type": "date_qualified",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-006-trail-week-returns"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-011",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8879
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-003-cityhaul-20"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-006-trail-week-returns"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-012",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-007-final-sale-and-warranty",
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8361
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-003-cityhaul-20",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "case_type": "policy",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-006-trail-week-returns"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rv-013",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-003-cityhaul-20",
+            "kb-008-international-shipping-and-duties",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.8625
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-012-human-escalation"
+          ],
+          "case_type": "warranty",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-014",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8419
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-011-gear-care"
+          ],
+          "case_type": "warranty",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-015",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-011-gear-care",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8575
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-011-gear-care"
+          ],
+          "case_type": "warranty",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-007-final-sale-and-warranty"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-016",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-011-gear-care",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8465
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-008-international-shipping-and-duties",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "case_type": "shipping",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-008-international-shipping-and-duties"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-017",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-007-final-sale-and-warranty",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8497
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-008-international-shipping-and-duties",
+            "kb-007-final-sale-and-warranty",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "shipping",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-008-international-shipping-and-duties"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-018",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-007-final-sale-and-warranty",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8752
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-008-international-shipping-and-duties",
+            "kb-007-final-sale-and-warranty",
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "case_type": "refund_amount",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-008-international-shipping-and-duties"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-019",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-007-final-sale-and-warranty",
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8627
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "shipping",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-009-domestic-shipping"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-020",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8695
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "shipping",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-009-domestic-shipping"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-021",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-009-domestic-shipping",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-006-trail-week-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8778
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-010-delivery-troubleshooting",
+            "kb-012-human-escalation",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "troubleshooting",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-010-delivery-troubleshooting"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-022",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-012-human-escalation",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8598
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-010-delivery-troubleshooting",
+            "kb-012-human-escalation",
+            "kb-008-international-shipping-and-duties",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "troubleshooting",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-010-delivery-troubleshooting"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-023",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-012-human-escalation",
+            "kb-008-international-shipping-and-duties",
+            "kb-005-standard-returns",
+            "kb-009-domestic-shipping"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8761
+        },
+        {
+          "accepted": 0.0,
+          "accepted_doc_ids": [],
+          "case_type": "care",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-011-gear-care"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rv-024",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-011-gear-care",
+            "kb-003-cityhaul-20",
+            "kb-010-delivery-troubleshooting",
+            "kb-004-custom-latitude-pack"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting",
+            "kb-003-cityhaul-20"
+          ],
+          "case_type": "care",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-011-gear-care"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-025",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty",
+            "kb-010-delivery-troubleshooting",
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8388
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-007-final-sale-and-warranty",
+            "kb-011-gear-care",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview"
+          ],
+          "case_type": "care",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-011-gear-care"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rv-026",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-011-gear-care",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": true,
+          "top_score": 0.8392
+        },
+        {
+          "accepted": 0.0,
+          "accepted_doc_ids": [],
+          "case_type": "escalation",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-012-human-escalation"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 1.0,
+          "id": "rv-027",
+          "ndcg_at_5": 0.6309,
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-012-human-escalation",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.5,
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting",
+            "kb-009-domestic-shipping",
+            "kb-001-northstar-overview"
+          ],
+          "case_type": "escalation",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-012-human-escalation"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-028",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting",
+            "kb-009-domestic-shipping",
+            "kb-001-northstar-overview",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8576
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-001-northstar-overview",
+            "kb-008-international-shipping-and-duties",
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "case_type": "overview",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-001-northstar-overview"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-029",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-001-northstar-overview",
+            "kb-008-international-shipping-and-duties",
+            "kb-011-gear-care",
+            "kb-010-delivery-troubleshooting",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8926
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-008-international-shipping-and-duties",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns",
+            "kb-012-human-escalation"
+          ],
+          "case_type": "overview",
+          "evidence_recall": 0.0,
+          "expected_doc_ids": [
+            "kb-001-northstar-overview"
+          ],
+          "hit_at_1": 0.0,
+          "hit_at_3": 0.0,
+          "id": "rv-030",
+          "ndcg_at_5": 0.3869,
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns",
+            "kb-012-human-escalation",
+            "kb-001-northstar-overview"
+          ],
+          "recall_at_3": 0.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 0.2,
+          "sufficient_evidence": true,
+          "top_score": 0.8437
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-011-gear-care"
+          ],
+          "case_type": "hinglish",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-002-trailmark-28"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-031",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8901
+        },
+        {
+          "accepted": 1.0,
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "case_type": "hinglish",
+          "evidence_recall": 1.0,
+          "expected_doc_ids": [
+            "kb-003-cityhaul-20"
+          ],
+          "hit_at_1": 1.0,
+          "hit_at_3": 1.0,
+          "id": "rv-032",
+          "ndcg_at_5": 1.0,
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "recall_at_3": 1.0,
+          "recall_at_5": 1.0,
+          "reciprocal_rank": 1.0,
+          "sufficient_evidence": true,
+          "top_score": 0.8586
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rv-033",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.8867
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-003-cityhaul-20",
+            "kb-008-international-shipping-and-duties",
+            "kb-006-trail-week-returns",
+            "kb-002-trailmark-28"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rv-034",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-008-international-shipping-and-duties",
+            "kb-006-trail-week-returns",
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.8842
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rv-035",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-006-trail-week-returns",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.8987
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-036",
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-006-trail-week-returns",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-037",
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-010-delivery-troubleshooting",
+            "kb-001-northstar-overview",
+            "kb-009-domestic-shipping",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-038",
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-008-international-shipping-and-duties",
+            "kb-004-custom-latitude-pack",
+            "kb-009-domestic-shipping",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-039",
+          "ranked_doc_ids_top5": [
+            "kb-008-international-shipping-and-duties",
+            "kb-010-delivery-troubleshooting",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-040",
+          "ranked_doc_ids_top5": [
+            "kb-007-final-sale-and-warranty",
+            "kb-004-custom-latitude-pack",
+            "kb-001-northstar-overview",
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-041",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rv-042",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-005-standard-returns",
+            "kb-003-cityhaul-20",
+            "kb-006-trail-week-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.876
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-043",
+          "ranked_doc_ids_top5": [
+            "kb-010-delivery-troubleshooting",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack",
+            "kb-008-international-shipping-and-duties",
+            "kb-012-human-escalation"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": true,
+          "expected_doc_ids": [],
+          "id": "rv-044",
+          "ranked_doc_ids_top5": [
+            "kb-004-custom-latitude-pack",
+            "kb-012-human-escalation",
+            "kb-008-international-shipping-and-duties",
+            "kb-002-trailmark-28",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "sufficient_evidence": false,
+          "top_score": null
+        },
+        {
+          "accepted_doc_ids": [
+            "kb-009-domestic-shipping",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns"
+          ],
+          "case_type": "unanswerable_near_miss",
+          "correctly_rejected": false,
+          "expected_doc_ids": [],
+          "id": "rv-045",
+          "ranked_doc_ids_top5": [
+            "kb-009-domestic-shipping",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns",
+            "kb-001-northstar-overview"
+          ],
+          "sufficient_evidence": true,
+          "top_score": 0.8438
+        }
+      ],
+      "end_to_end": {
+        "evidence_recall": 0.890625,
+        "gated_mrr": 0.88125
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.9375,
+        "balanced_accuracy": 0.7764423076923077,
+        "unanswerable_rejection_rate": 0.6153846153846154
+      },
+      "ranking": {
+        "hit_at_1": 0.84375,
+        "hit_at_3": 0.96875,
+        "mrr": 0.9125,
+        "ndcg_at_5": 0.9226162191964322,
+        "recall_at_3": 0.953125,
+        "recall_at_5": 0.984375
+      },
+      "unanswerable_count": 13
+    },
+    "retriever": {
+      "bm25": true,
+      "chunk_count": 12,
+      "embedding_model": "intfloat/multilingual-e5-small",
+      "gate_threshold": 0.8311,
+      "reranker_model": null,
+      "support_threshold": 0.6233,
+      "type": "HybridRetriever"
+    }
+  },
+  "schema_version": "evaluation-v2"
+}

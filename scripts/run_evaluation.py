@@ -27,7 +27,8 @@ from agentic_support.guardrails import InputGuard, RuleBasedSafetyClassifier
 from agentic_support.handlers import HandlerRegistry
 from agentic_support.memory import MemoryTurn
 from agentic_support.pipeline import SupportService
-from agentic_support.retrieval import GroundedRetriever, RetrievalHit
+from agentic_support.hybrid_retrieval import build_production_retriever
+from agentic_support.retrieval import RetrievalHit
 from agentic_support.routing import GroqStructuredClassifier, StructuredIntentRouter
 from agentic_support.semantic_routing import build_semantic_router
 
@@ -45,6 +46,7 @@ ROUTE_LABELS = (
 )
 REJECTED = "rejected"
 SECTIONS = ("routing", "retrieval", "guardrails", "cache")
+LIVE_ONLY_SECTIONS = ("rag",)
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -456,7 +458,9 @@ def evaluate_retrieval_set(
 
 
 def build_evaluation_retriever() -> Any:
-    return GroundedRetriever.from_directory(ROOT / "knowledge_base")
+    """Evaluate the same calibrated retriever the live service uses."""
+
+    return build_production_retriever(ROOT / "knowledge_base")
 
 
 def evaluate_retrieval(
@@ -480,6 +484,78 @@ def describe_retriever(retriever: Any) -> dict[str, Any]:
         "vector_dimension": retriever.index.dimension,
         "chunk_count": retriever.index.size,
         "min_similarity": retriever.min_similarity,
+    }
+
+
+def evaluate_rag_live(
+    cases: list[dict[str, Any]], settings: Settings, *, delay_seconds: float = 2.0
+) -> dict[str, Any]:
+    """End-to-end product answers with the live answerer (explicit opt-in).
+
+    Measures the two gates together: the retrieval evidence gate and the
+    answerer's insufficient-evidence signal, followed by the output guard.
+    """
+
+    from agentic_support.grounded_answers import GroqGroundedAnswerer
+    from agentic_support.handlers import ProductQuestionHandler
+    from agentic_support.routing import RouteDecision
+
+    handler = ProductQuestionHandler(
+        build_evaluation_retriever(), GroqGroundedAnswerer(settings)
+    )
+    guard = OutputClaimGuard()
+    decision = RouteDecision("product_question", 1.0, True, "evaluation")
+    results = []
+    for index, case in enumerate(cases):
+        request = SimpleNamespace(
+            text=case["query"], trace_id=f"rag-{case['id']}", session_id="evaluation",
+            active_order_id=None, active_product=None,
+        )
+        start = time.perf_counter()
+        try:
+            result = handler.handle(request, decision)
+            facts = result.metadata.get("allowed_facts", AllowedFacts())
+            guard_ok = guard.validate(result.message, facts).allowed
+            cited = list(result.metadata.get("cited_chunk_ids") or ())
+            outcome = "answered" if cited else "declined"
+            reason = result.metadata.get("retrieval_reason")
+            text = result.message[:200]
+        except Exception as error:  # evaluation boundary
+            from agentic_support.routing import describe_provider_error
+
+            fields = describe_provider_error(error)
+            outcome, cited, guard_ok, text = "error", [], False, ""
+            reason = f"{error}|{fields['cause_type']}|{fields['status_code']}"
+        expected = set(case["expected_doc_ids"])
+        cited_docs = {chunk_id.split("#", 1)[0] for chunk_id in cited}
+        results.append(
+            {
+                "id": case["id"],
+                "answerable": bool(expected),
+                "outcome": outcome,
+                "decline_reason": reason,
+                "cites_expected_doc": bool(expected & cited_docs),
+                "output_guard_passed": guard_ok,
+                "latency_ms": round((time.perf_counter() - start) * 1000, 1),
+                "reply_preview": text,
+            }
+        )
+        if delay_seconds and index + 1 < len(cases):
+            time.sleep(delay_seconds)
+    answerable = [r for r in results if r["answerable"]]
+    unanswerable = [r for r in results if not r["answerable"]]
+    return {
+        "mode": "live_groq_answerer",
+        "model": settings.groq_router_model,
+        "answerable_answered_rate": safe_ratio(sum(r["outcome"] == "answered" for r in answerable), len(answerable)),
+        "answerable_cites_expected_rate": safe_ratio(sum(r["cites_expected_doc"] for r in answerable), len(answerable)),
+        "unanswerable_declined_rate": safe_ratio(sum(r["outcome"] == "declined" for r in unanswerable), len(unanswerable)),
+        "declined_by_retrieval_gate": sum(r["decline_reason"] == "best_candidate_below_evidence_gate" for r in results),
+        "declined_by_answerer": sum(r["decline_reason"] == "answerer_reported_insufficient_evidence" for r in results),
+        "errors": sum(r["outcome"] == "error" for r in results),
+        "output_guard_blocks": sum(r["outcome"] == "answered" and not r["output_guard_passed"] for r in results),
+        "latency_ms_p50": percentile([r["latency_ms"] for r in results], 0.5),
+        "cases": results,
     }
 
 
@@ -630,6 +706,24 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| Output (allowed-facts guard) | {_fmt(output_metrics['precision'])} | {_fmt(output_metrics['recall'])} |",
             "",
         ]
+    rag = report.get("rag")
+    if rag:
+        lines += [
+            "## End-to-end product answers (live)",
+            "",
+            f"Mode: `{rag['mode']}`; model: `{rag['model']}`.",
+            "",
+            "| Metric | Value |",
+            "|---|---:|",
+            f"| Answerable questions answered | {_fmt(rag['answerable_answered_rate'])} |",
+            f"| Answerable answers citing an expected document | {_fmt(rag['answerable_cites_expected_rate'])} |",
+            f"| Unanswerable questions declined | {_fmt(rag['unanswerable_declined_rate'])} |",
+            f"| Declined by retrieval gate / by answerer | {rag['declined_by_retrieval_gate']} / {rag['declined_by_answerer']} |",
+            f"| Handler errors | {rag['errors']} |",
+            f"| Answers blocked by output guard | {rag['output_guard_blocks']} |",
+            f"| Latency p50 (ms) | {_fmt(rag['latency_ms_p50'])} |",
+            "",
+        ]
     cache = report.get("classifier_cache")
     if cache:
         lines += [
@@ -689,6 +783,12 @@ def run(
         report["output_guardrail"] = evaluate_output_guardrail(
             load_jsonl(evals / "output_guardrail_eval.jsonl")
         )
+    if "rag" in sections:
+        report["rag"] = evaluate_rag_live(
+            load_jsonl(evals / "retrieval_eval.jsonl"),
+            Settings.from_environment(),
+            delay_seconds=live_delay_seconds,
+        )
     if "cache" in sections:
         report["classifier_cache"] = evaluate_cache(load_jsonl(evals / "routing_seed.jsonl"))
 
@@ -725,13 +825,14 @@ def main() -> None:
     parser.add_argument(
         "--sections",
         default=",".join(SECTIONS),
-        help="comma-separated subset of: " + ", ".join(SECTIONS),
+        help="comma-separated subset of: " + ", ".join(SECTIONS + LIVE_ONLY_SECTIONS)
+        + " (rag calls Groq and is never run by default)",
     )
     parser.add_argument("--routing-mode", choices=("offline", "live"), default="offline")
     parser.add_argument("--live-delay", type=float, default=2.0)
     args = parser.parse_args()
     sections = tuple(item.strip() for item in args.sections.split(",") if item.strip())
-    unknown = set(sections) - set(SECTIONS)
+    unknown = set(sections) - set(SECTIONS) - set(LIVE_ONLY_SECTIONS)
     if unknown:
         parser.error(f"unknown sections: {sorted(unknown)}")
     report = run(

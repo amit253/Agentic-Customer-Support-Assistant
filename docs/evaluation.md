@@ -123,3 +123,22 @@ adapters keep the provider default.
 The offline Phase 2 number was taken after one fix found on this held-out
 set: "are you a bot or a real person?" was caught by the human-request rule,
 so pure smalltalk is now checked first. That case is no longer unseen.
+
+## Retrieval after the changes
+
+`reports/phase3-retrieval-offline-evaluation.md` (production retriever:
+multilingual-e5-small + BM25 fusion, top-candidate gate) versus the Phase 0
+baseline on the same held-out set:
+
+| Held-out retrieval (32 + 13) | Phase 0 (MiniLM, 0.45) | Phase 3 (hybrid) |
+|---|---:|---:|
+| hit@1 | 0.781 | 0.844 |
+| MRR | 0.857 | 0.912 |
+| recall@3 | 0.906 | 0.953 |
+| Answerable acceptance | 0.594 | 0.938 |
+| Unanswerable rejection (retrieval gate only) | 0.692 | 0.615 |
+| Evidence recall reaching the answerer | 0.516 | 0.891 |
+
+The retrieval gate now rejects fewer near-misses on its own; the live
+answerer declined all 13 of them end to end (`reports/phase3-rag-live-evaluation.md`,
+see `docs/retrieval-design.md`).

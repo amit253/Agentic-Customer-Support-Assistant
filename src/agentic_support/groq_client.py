@@ -10,7 +10,8 @@ current one is rate limited. Key values are never logged; only the key index.
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 from threading import Lock
 from types import SimpleNamespace
 from typing import Any
@@ -19,12 +20,27 @@ from .config import Settings
 from .logging_config import log_event
 
 
+# When every key is rate limited, wait at most this long for the provider's
+# retry-after before one more round. A bounded wait is better for a support
+# turn than an immediate failure, and the cap keeps a turn from hanging.
+MAX_RATE_LIMIT_WAIT_SECONDS = 8.0
+
 # Models that accept Groq's ``reasoning_effort`` parameter.
 _REASONING_MODEL_PREFIXES = ("openai/gpt-oss",)
 
 
 def _is_rate_limited(error: BaseException) -> bool:
     return getattr(error, "status_code", None) == 429
+
+
+def _retry_after_seconds(error: BaseException) -> float:
+    """Read the provider's retry-after header, defaulting to one second."""
+
+    headers = getattr(getattr(error, "response", None), "headers", None) or {}
+    try:
+        return max(0.0, float(headers.get("retry-after", 1.0)))
+    except (TypeError, ValueError):
+        return 1.0
 
 
 def reasoning_options(
@@ -45,7 +61,9 @@ class RotatingChatClient:
     """Expose ``chat.completions.create`` and rotate keys on HTTP 429.
 
     A non-rate-limit error is raised immediately so callers keep their own
-    fail-closed handling. If every key is rate limited, the last 429 is raised.
+    fail-closed handling. If every key is rate limited, the client waits for
+    the provider's retry-after (capped) and tries one more round; if that
+    round is also rate limited, the last 429 is raised.
     """
 
     def __init__(
@@ -53,6 +71,8 @@ class RotatingChatClient:
         clients: Sequence[Any],
         *,
         logger: logging.Logger | None = None,
+        sleeper: Callable[[float], None] = time.sleep,
+        max_wait_seconds: float = MAX_RATE_LIMIT_WAIT_SECONDS,
     ) -> None:
         if not clients:
             raise ValueError("at least one provider client is required")
@@ -61,6 +81,9 @@ class RotatingChatClient:
         self._lock = Lock()
         self._logger = logger or logging.getLogger("agentic_support.groq")
         self.rotations = 0
+        self.rate_limit_waits = 0
+        self._sleeper = sleeper
+        self._max_wait_seconds = max_wait_seconds
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
 
     @property
@@ -68,6 +91,23 @@ class RotatingChatClient:
         return len(self._clients)
 
     def _create(self, **request: Any) -> Any:
+        try:
+            return self._one_round(request)
+        except Exception as error:
+            if not _is_rate_limited(error) or self._max_wait_seconds <= 0:
+                raise
+            wait = min(_retry_after_seconds(error), self._max_wait_seconds)
+            self.rate_limit_waits += 1
+            log_event(
+                self._logger,
+                "groq_all_keys_rate_limited",
+                wait_seconds=wait,
+                key_count=len(self._clients),
+            )
+            self._sleeper(wait)
+            return self._one_round(request)
+
+    def _one_round(self, request: dict[str, Any]) -> Any:
         last_error: BaseException | None = None
         for _ in range(len(self._clients)):
             with self._lock:

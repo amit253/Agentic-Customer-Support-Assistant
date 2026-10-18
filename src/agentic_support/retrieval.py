@@ -60,6 +60,13 @@ class RetrievalResponse:
     reason: str
 
 
+class Retriever(Protocol):
+    """What the product handler needs from any retriever implementation."""
+
+    def retrieve(self, query: str, *, top_k: int = 4) -> "RetrievalResponse":
+        """Return supporting chunks or an explicit insufficient-evidence result."""
+
+
 class TextEmbedder(Protocol):
     """Minimal embedding interface used by the vector index."""
 

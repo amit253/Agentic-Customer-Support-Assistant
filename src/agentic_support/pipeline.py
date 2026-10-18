@@ -28,7 +28,7 @@ from .memory import MemorySnapshot, MemoryTurn, SessionMemoryStore
 from .hybrid_routing import HybridRouter
 from .routing import GroqStructuredClassifier, RouteDecision, StructuredIntentRouter
 from .semantic_routing import SemanticRouter, build_semantic_router
-from .retrieval import GroundedRetriever
+from .hybrid_retrieval import build_production_retriever
 from .tool_calling import GroqOrderToolCaller
 from .tools import DeterministicOrderTools
 from .tracing import trace_context
@@ -398,7 +398,7 @@ def build_live_support_service(
         max_attempts=active_settings.router_max_attempts,
         retry_delay_seconds=active_settings.router_retry_delay_seconds,
     )
-    retriever = GroundedRetriever.from_directory(
+    retriever = build_production_retriever(
         Path(__file__).resolve().parents[2] / "knowledge_base"
     )
     return SupportService(

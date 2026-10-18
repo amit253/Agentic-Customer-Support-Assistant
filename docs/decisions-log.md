@@ -714,3 +714,43 @@ Remaining misroutes: "the blue one" gets no route (answered as unclear) and
 "xkcd lorem ipsum dolor" goes to out_of_scope instead of unclear. "I need a
 human to approve a refund for NS-..." goes to the order tool because the order
 rule runs first; it is labeled acceptable but is reviewed in the red-team pass.
+
+### 2026-10-18T16:39:10.4789074+05:30 - [CLAUDE] Phase 3 hybrid retrieval
+
+Decision: replace the MiniLM per-chunk-threshold retriever with
+multilingual-e5-small + BM25 reciprocal-rank fusion and a gate on the best
+candidate only. `scripts/compare_retrievers.py` compared nine configurations
+with thresholds tuned on the dev set and scored once on the held-out set.
+Re-tuning the old threshold alone raised evidence recall from 0.516 to 0.781;
+the chosen hybrid reached 0.891 with MRR 0.912. Its retrieval gate rejects
+near-misses less often (0.615 vs 0.692), which is accepted because the
+answerer is a second gate.
+
+Tried and abandoned: cross-encoder reranking (ms-marco-MiniLM-L-6-v2 with three
+embedders, and the multilingual mmarco reranker). With 12 chunks the reranker
+alone sets the order, so the three ms-marco runs were identical; their
+near-0/1 scores made the dev-tuned gate (0.948) fail to transfer (held-out
+acceptance 0.562), and they cost about half a second per query on CPU.
+
+Adding a deterministic tie-break to the fusion moved the dev-tuned thresholds
+from 0.821 / 0.6158 to 0.8311 / 0.6233 and held-out evidence recall from 0.922
+to 0.891. Production uses the values from the rerun with the final code.
+
+Failure found and fixed: the first live end-to-end run
+(`--sections rag --live-delay 2`) had 13 handler errors in 45 questions. Each
+failing question succeeded when retried alone, so the errors were transient;
+the most likely cause is the 8,000 tokens/minute per-key limit (answer calls
+are about 1,000 tokens), but the first run recorded only the exception type,
+so this is inferred rather than captured. It exposed a real gap: with two
+keys the SDK's own backoff was disabled to allow fast rotation, so when every
+key was rate limited the call failed at once. The rotating client now waits
+for the provider's retry-after (capped at 8 s) and tries one more round, and
+the RAG evaluation records the error cause. The rerun at 3 s pacing had no
+errors and logged no rate-limit events, so the new wait was not exercised
+live.
+
+Rerun result: answerable answered 0.906, citing an expected document 0.875,
+unanswerable declined 13/13 (10 by the retrieval gate, the rest by the
+answerer's insufficient-evidence flag), one correct answer blocked by the
+output guard because its promise pattern ignores negation ("does not mean your
+refund is approved").

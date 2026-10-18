@@ -12,7 +12,7 @@ from .demo_data import DEMO_SESSIONS
 from .facts import AllowedFacts
 from .grounded_answers import GroundedAnswerError, ProductAnswerer
 from .handler_result import HandlerResult
-from .retrieval import GroundedRetriever
+from .retrieval import Retriever
 from .routing import Intent, RouteDecision
 from .tool_calling import OrderToolCaller, ToolCallProviderError
 from .tools import DeterministicOrderTools, OrderToolError
@@ -46,7 +46,7 @@ class ProductQuestionHandler:
 
     def __init__(
         self,
-        retriever: GroundedRetriever | None = None,
+        retriever: Retriever | None = None,
         answerer: ProductAnswerer | None = None,
     ) -> None:
         self._retriever = retriever
@@ -266,7 +266,7 @@ class HandlerRegistry:
 
 def build_default_registry(
     *,
-    retriever: GroundedRetriever | None = None,
+    retriever: Retriever | None = None,
     answerer: ProductAnswerer | None = None,
     order_tools: DeterministicOrderTools | None = None,
     order_tool_caller: OrderToolCaller | None = None,

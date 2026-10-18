@@ -1,0 +1,452 @@
+{
+  "generated_at": "2026-10-18T10:55:43.857229+00:00",
+  "held_out_cases": 45,
+  "dev_cases": 33,
+  "results": {
+    "A_current_minilm_chunk_threshold": {
+      "thresholds_from_dev": null,
+      "ranking": {
+        "hit_at_1": 0.78125,
+        "hit_at_3": 0.90625,
+        "recall_at_3": 0.90625,
+        "recall_at_5": 0.96875,
+        "mrr": 0.8565104166666667,
+        "ndcg_at_5": 0.8790637317240779
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.59375,
+        "unanswerable_rejection_rate": 0.6923076923076923,
+        "balanced_accuracy": 0.6430288461538461
+      },
+      "end_to_end": {
+        "evidence_recall": 0.515625,
+        "gated_mrr": 0.5625
+      },
+      "ms_per_query_eval_loop": 20.8,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-001-northstar-overview",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": false
+        }
+      ]
+    },
+    "B_minilm_recalibrated_threshold": {
+      "thresholds_from_dev": {
+        "gate": 0.3797,
+        "support": 0.3797,
+        "dev_balanced_accuracy": 0.855,
+        "dev_evidence_recall": 0.8
+      },
+      "ranking": {
+        "hit_at_1": 0.78125,
+        "hit_at_3": 0.90625,
+        "recall_at_3": 0.90625,
+        "recall_at_5": 0.96875,
+        "mrr": 0.8565104166666667,
+        "ndcg_at_5": 0.8790637317240779
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.84375,
+        "unanswerable_rejection_rate": 0.6153846153846154,
+        "balanced_accuracy": 0.7295673076923077
+      },
+      "end_to_end": {
+        "evidence_recall": 0.78125,
+        "gated_mrr": 0.7916666666666666
+      },
+      "ms_per_query_eval_loop": 50.0,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-001-northstar-overview",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": true
+        }
+      ]
+    },
+    "C_minilm_dense_top1_gate": {
+      "thresholds_from_dev": {
+        "gate": 0.3797,
+        "support": 0.2848,
+        "dev_balanced_accuracy": 0.855,
+        "dev_evidence_recall": 0.94
+      },
+      "ranking": {
+        "hit_at_1": 0.78125,
+        "hit_at_3": 0.90625,
+        "recall_at_3": 0.90625,
+        "recall_at_5": 0.96875,
+        "mrr": 0.8565104166666667,
+        "ndcg_at_5": 0.8790637317240779
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.84375,
+        "unanswerable_rejection_rate": 0.6153846153846154,
+        "balanced_accuracy": 0.7295673076923077
+      },
+      "end_to_end": {
+        "evidence_recall": 0.8125,
+        "gated_mrr": 0.7916666666666666
+      },
+      "ms_per_query_eval_loop": 25.0,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-001-northstar-overview",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": true
+        }
+      ]
+    },
+    "D_minilm_bm25_rrf": {
+      "thresholds_from_dev": {
+        "gate": 0.3797,
+        "support": 0.1898,
+        "dev_balanced_accuracy": 0.855,
+        "dev_evidence_recall": 0.96
+      },
+      "ranking": {
+        "hit_at_1": 0.84375,
+        "hit_at_3": 0.96875,
+        "recall_at_3": 0.953125,
+        "recall_at_5": 0.984375,
+        "mrr": 0.9072916666666667,
+        "ndcg_at_5": 0.9185246643973242
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.8125,
+        "unanswerable_rejection_rate": 0.6153846153846154,
+        "balanced_accuracy": 0.7139423076923077
+      },
+      "end_to_end": {
+        "evidence_recall": 0.796875,
+        "gated_mrr": 0.7916666666666666
+      },
+      "ms_per_query_eval_loop": 28.2,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-001-northstar-overview",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns"
+          ],
+          "sufficient_evidence": true
+        }
+      ]
+    },
+    "E_minilm_bm25_msmarco_rerank": {
+      "thresholds_from_dev": {
+        "gate": 0.9483,
+        "support": 0.0,
+        "dev_balanced_accuracy": 0.88,
+        "dev_evidence_recall": 0.76
+      },
+      "ranking": {
+        "hit_at_1": 0.8125,
+        "hit_at_3": 1.0,
+        "recall_at_3": 0.984375,
+        "recall_at_5": 0.984375,
+        "mrr": 0.8854166666666666,
+        "ndcg_at_5": 0.9023439593721366
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.5625,
+        "unanswerable_rejection_rate": 0.7692307692307693,
+        "balanced_accuracy": 0.6658653846153846
+      },
+      "end_to_end": {
+        "evidence_recall": 0.5625,
+        "gated_mrr": 0.5625
+      },
+      "ms_per_query_eval_loop": 878.0,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns"
+          ],
+          "sufficient_evidence": false
+        }
+      ]
+    },
+    "F_bge_small_bm25_msmarco_rerank": {
+      "thresholds_from_dev": {
+        "gate": 0.9483,
+        "support": 0.0,
+        "dev_balanced_accuracy": 0.88,
+        "dev_evidence_recall": 0.76
+      },
+      "ranking": {
+        "hit_at_1": 0.8125,
+        "hit_at_3": 1.0,
+        "recall_at_3": 0.984375,
+        "recall_at_5": 0.984375,
+        "mrr": 0.8854166666666666,
+        "ndcg_at_5": 0.9023439593721366
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.5625,
+        "unanswerable_rejection_rate": 0.7692307692307693,
+        "balanced_accuracy": 0.6658653846153846
+      },
+      "end_to_end": {
+        "evidence_recall": 0.5625,
+        "gated_mrr": 0.5625
+      },
+      "ms_per_query_eval_loop": 892.5,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns"
+          ],
+          "sufficient_evidence": false
+        }
+      ]
+    },
+    "G_e5_small_bm25_msmarco_rerank": {
+      "thresholds_from_dev": {
+        "gate": 0.9483,
+        "support": 0.0,
+        "dev_balanced_accuracy": 0.88,
+        "dev_evidence_recall": 0.76
+      },
+      "ranking": {
+        "hit_at_1": 0.8125,
+        "hit_at_3": 1.0,
+        "recall_at_3": 0.984375,
+        "recall_at_5": 0.984375,
+        "mrr": 0.8854166666666666,
+        "ndcg_at_5": 0.9023439593721366
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.5625,
+        "unanswerable_rejection_rate": 0.7692307692307693,
+        "balanced_accuracy": 0.6658653846153846
+      },
+      "end_to_end": {
+        "evidence_recall": 0.5625,
+        "gated_mrr": 0.5625
+      },
+      "ms_per_query_eval_loop": 847.4,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-004-custom-latitude-pack",
+            "kb-011-gear-care"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting",
+            "kb-006-trail-week-returns"
+          ],
+          "sufficient_evidence": false
+        }
+      ]
+    },
+    "H_e5_small_bm25_rrf": {
+      "thresholds_from_dev": {
+        "gate": 0.8311,
+        "support": 0.6233,
+        "dev_balanced_accuracy": 0.7949999999999999,
+        "dev_evidence_recall": 0.84
+      },
+      "ranking": {
+        "hit_at_1": 0.84375,
+        "hit_at_3": 0.96875,
+        "recall_at_3": 0.953125,
+        "recall_at_5": 0.984375,
+        "mrr": 0.9125,
+        "ndcg_at_5": 0.9226162191964322
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.9375,
+        "unanswerable_rejection_rate": 0.6153846153846154,
+        "balanced_accuracy": 0.7764423076923077
+      },
+      "end_to_end": {
+        "evidence_recall": 0.890625,
+        "gated_mrr": 0.88125
+      },
+      "ms_per_query_eval_loop": 106.4,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-004-custom-latitude-pack",
+            "kb-005-standard-returns",
+            "kb-008-international-shipping-and-duties"
+          ],
+          "sufficient_evidence": true
+        }
+      ]
+    },
+    "I_minilm_bm25_mmarco_multilingual_rerank": {
+      "thresholds_from_dev": {
+        "gate": 0.362,
+        "support": 0.0,
+        "dev_balanced_accuracy": 0.9,
+        "dev_evidence_recall": 0.8
+      },
+      "ranking": {
+        "hit_at_1": 0.875,
+        "hit_at_3": 0.96875,
+        "recall_at_3": 0.953125,
+        "recall_at_5": 0.984375,
+        "mrr": 0.9177083333333333,
+        "ndcg_at_5": 0.925966554799108
+      },
+      "gate": {
+        "answerable_acceptance_rate": 0.625,
+        "unanswerable_rejection_rate": 0.6923076923076923,
+        "balanced_accuracy": 0.6586538461538461
+      },
+      "end_to_end": {
+        "evidence_recall": 0.625,
+        "gated_mrr": 0.625
+      },
+      "ms_per_query_eval_loop": 1446.0,
+      "hinglish_cases": [
+        {
+          "id": "rv-031",
+          "ranked_doc_ids_top5": [
+            "kb-002-trailmark-28",
+            "kb-003-cityhaul-20",
+            "kb-005-standard-returns",
+            "kb-012-human-escalation",
+            "kb-010-delivery-troubleshooting"
+          ],
+          "sufficient_evidence": true
+        },
+        {
+          "id": "rv-032",
+          "ranked_doc_ids_top5": [
+            "kb-003-cityhaul-20",
+            "kb-002-trailmark-28",
+            "kb-011-gear-care",
+            "kb-007-final-sale-and-warranty",
+            "kb-001-northstar-overview"
+          ],
+          "sufficient_evidence": true
+        }
+      ]
+    }
+  }
+}
