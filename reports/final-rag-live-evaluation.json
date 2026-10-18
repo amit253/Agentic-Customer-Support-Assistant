@@ -1,0 +1,473 @@
+{
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.3"
+  },
+  "generated_at": "2026-10-18T11:20:07.099298+00:00",
+  "label": "final-rag-live",
+  "rag": {
+    "answerable_answered_rate": 0.9375,
+    "answerable_cites_expected_rate": 0.90625,
+    "cases": [
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-001",
+        "latency_ms": 1062.9,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Yes, the Trailmark 28 comes with a removable hip belt.\n\nSources: Trailmark 28 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-002",
+        "latency_ms": 779.5,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Yes, the Trailmark 28 backpack is made from water\u2011resistant recycled nylon.\n\nSources: Trailmark 28 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-003",
+        "latency_ms": 805.8,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "The Trailmark\u202f28 opens with a clamshell opening.\n\nSources: Trailmark 28 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": false,
+        "decline_reason": "answerer_reported_insufficient_evidence",
+        "id": "rv-004",
+        "latency_ms": 550.5,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-005",
+        "latency_ms": 545.6,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Yes, the CityHaul 20 backpack has weather\u2011resistant zippers.\n\nSources: CityHaul 20 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-006",
+        "latency_ms": 844.1,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "The Trailmark 28 is larger.\n\nSources: Trailmark 28 backpack; CityHaul 20 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-007",
+        "latency_ms": 678.5,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Yes, you can have your initials stitched on a pack.\n\nSources: Custom Latitude Pack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-008",
+        "latency_ms": 447.1,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No, a pack with a custom patch is a personalized item and is considered final sale.  Personalized units cannot be returned or refunded, and the extended return window does not apply to them.\n\nSources:"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-009",
+        "latency_ms": 875.3,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "You have 30 calendar days to return an unused bag.\n\nSources: Standard return policy"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-010",
+        "latency_ms": 842.8,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Yes, returned items must be in original condition with tags and accessories.\n\nSources: Standard return policy; Trailmark 28 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-011",
+        "latency_ms": 1159.1,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Your return deadline is November\u202f15,\u202f2026.\n\nSources: Trail Week extended return window; Standard return policy; Trailmark 28 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-012",
+        "latency_ms": 635.4,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No, the Trail Week extension does not apply to embroidered items.\n\nSources: Trail Week extended return window; Final-sale items and warranty claims"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-013",
+        "latency_ms": 729.6,
+        "outcome": "answered",
+        "output_guard_passed": false,
+        "reply_preview": "No, Trail Week does not mean your refund is approved. The Trail Week policy only extends the return deadline; it does not automatically approve a refund.\n\nSources: Trail Week extended return window"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-014",
+        "latency_ms": 1232.2,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "If your bag has a factory defect, you can file a warranty claim. Northstar Gear will inspect the item and, depending on the inspection, may repair it, replace it, or offer another resolution. It is no"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-015",
+        "latency_ms": 992.2,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No \u2013 a warranty claim is not the same as getting a refund.  A warranty review can lead to a repair, replacement, or another resolution, but it is not an automatic refund and should not be described as"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-016",
+        "latency_ms": 1343.9,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "The limited warranty lasts 12 months.\n\nSources: Final-sale items and warranty claims"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-017",
+        "latency_ms": 1159.9,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "International customers are responsible for import duties, taxes, and customs charges assessed by the destination country.\n\nSources: International shipping and duties"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-018",
+        "latency_ms": 357.5,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No, outbound shipping fees are not refundable under Northstar Gear\u2019s policy.\n\nSources: International shipping and duties"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-019",
+        "latency_ms": 806.5,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "I\u2019m sorry, but I can\u2019t estimate a refund amount based on the item price. Refunds are determined from the confirmed order or refund record, and we can\u2019t provide an estimate before that information is a"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-020",
+        "latency_ms": 796.5,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No \u2013 the delivery date shown on your order is only an estimate. It becomes a confirmed date only when the order record shows it, and until then it is informational. The order\u2011status record is the defi"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-021",
+        "latency_ms": 766.8,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "The confirmed status of a specific order can be found on the order\u2011status path, which is the source of truth for an individual order\u2019s current status and confirmed dates.\n\nSources: Domestic shipping a"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-022",
+        "latency_ms": 810.7,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "We need your order ID to start the review process for a delayed package.\n\nSources: Delivery troubleshooting"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-023",
+        "latency_ms": 700.9,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Yes, for a damaged item you may need to provide photos for review.\n\nSources: Delivery troubleshooting"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-024",
+        "latency_ms": 551.2,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No \u2013 you should not put the backpack in the dryer. Spot\u2011clean it with mild soap and cool water, then air\u2011dry it away from direct heat. Do not machine\u2011dry the pack or use bleach on the coated fabric.\n\n"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-025",
+        "latency_ms": 664.0,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No, bleach is not safe on the coated fabric.\n\nSources: Backpack care"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-026",
+        "latency_ms": 917.3,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No, cleaning the bag the wrong way does not affect your warranty. The care guidance states that cleaning instructions do not change return eligibility or warranty coverage.\n\nSources: Backpack care"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-027",
+        "latency_ms": 31.3,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-028",
+        "latency_ms": 857.8,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Issues that get escalated to a person include safety concerns, possible manufacturing defects, damaged or lost packages, ownership/identity issues, policy conflicts, and requests that require a refund"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-029",
+        "latency_ms": 874.0,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "Northstar support can help you by explaining product features, shipping policies, return eligibility, warranty coverage, and how to reach a human specialist. It can also read confirmed order facts and"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": false,
+        "decline_reason": null,
+        "id": "rv-030",
+        "latency_ms": 1244.0,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "No, the assistant cannot approve your refund.\n\nSources: Delivery troubleshooting; Human escalation policy; Trail Week extended return window"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-031",
+        "latency_ms": 763.9,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "\u0939\u093e\u0901, Trailmark 28 \u092e\u0947\u0902 \u092a\u0947\u0921\u0947\u0921 \u0932\u0948\u092a\u091f\u0949\u092a \u0938\u094d\u0932\u093f\u0935 \u0939\u0948\u0964\n\nSources: Trailmark 28 backpack"
+      },
+      {
+        "answerable": true,
+        "cites_expected_doc": true,
+        "decline_reason": null,
+        "id": "rv-032",
+        "latency_ms": 8899.2,
+        "outcome": "answered",
+        "output_guard_passed": true,
+        "reply_preview": "CityHaul 20 20-liter ka hai.\n\nSources: CityHaul 20 backpack"
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "answerer_reported_insufficient_evidence",
+        "id": "rv-033",
+        "latency_ms": 481.4,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "answerer_reported_insufficient_evidence",
+        "id": "rv-034",
+        "latency_ms": 627.8,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "answerer_reported_insufficient_evidence",
+        "id": "rv-035",
+        "latency_ms": 637.5,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-036",
+        "latency_ms": 22.3,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-037",
+        "latency_ms": 26.4,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-038",
+        "latency_ms": 29.8,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-039",
+        "latency_ms": 28.3,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-040",
+        "latency_ms": 29.3,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-041",
+        "latency_ms": 17.0,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "answerer_reported_insufficient_evidence",
+        "id": "rv-042",
+        "latency_ms": 750.9,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-043",
+        "latency_ms": 25.7,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "best_candidate_below_evidence_gate",
+        "id": "rv-044",
+        "latency_ms": 30.6,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      },
+      {
+        "answerable": false,
+        "cites_expected_doc": false,
+        "decline_reason": "answerer_reported_insufficient_evidence",
+        "id": "rv-045",
+        "latency_ms": 702.3,
+        "outcome": "declined",
+        "output_guard_passed": true,
+        "reply_preview": "I do not have enough verified information to answer that from our help articles, so I won't guess. I can help with product features, returns, shipping, and warranty, or connect you with a human agent."
+      }
+    ],
+    "declined_by_answerer": 6,
+    "declined_by_retrieval_gate": 9,
+    "errors": 0,
+    "latency_ms_p50": 729.6,
+    "mode": "live_groq_answerer",
+    "model": "openai/gpt-oss-20b",
+    "output_guard_blocks": 1,
+    "unanswerable_declined_rate": 1.0
+  },
+  "schema_version": "evaluation-v2"
+}

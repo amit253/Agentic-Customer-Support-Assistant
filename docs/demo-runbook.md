@@ -17,13 +17,24 @@ $env:PYTHONPATH = "src"
 python -m pytest -q
 python -m pytest -q -s tests/test_voice.py tests/test_voice_coordination.py
 python scripts/validate_audio_manifest.py
-python scripts/run_evaluation.py --output-dir reports
+python scripts/run_evaluation.py --label latest
 python scripts/scan_secrets.py
 ```
 
+Live checks (Groq; never part of the default suite):
+
+```powershell
+$env:PYTHONIOENCODING = "utf-8"
+python scripts/run_evaluation.py --label live --sections routing --routing-mode live --live-delay 3
+python scripts/run_evaluation.py --label rag-live --sections rag --live-delay 3
+python scripts/run_ui_check.py
+python scripts/run_red_team.py
+```
+
 The model-backed speech test requires the local Silero ONNX dependency. The
-retrieval evaluation may download the public
-`sentence-transformers/all-MiniLM-L6-v2` model into the local cache. Neither
+retrieval evaluation and the service download the public
+`sentence-transformers/all-MiniLM-L6-v2` (routing examples) and
+`intfloat/multilingual-e5-small` (retrieval) models into the local cache. Neither
 requires a Groq key. Optional extension tests/corpora are **[REC]** and should
 remain outside the required default suite unless separately labeled.
 

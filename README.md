@@ -8,6 +8,19 @@ submission commit.
 
 ## Current status
 
+An improvement programme (2026-10-18, five measured phases) replaced the
+LLM-only router with a hybrid router (rules, labeled examples, then Groq),
+added a template-only conversation agent for greetings, off-topic, and
+unclear messages, replaced retrieval with multilingual-e5-small + BM25 fusion,
+added verified session memory with deterministic follow-ups and a handoff
+summary, and reworked the demo UI. On held-out sets, live routing accuracy
+went from 0.509 to 0.955, the dead-end rate from 0.355 to 0.009, false
+escalations from 0.117 to 0, routing p95 from 16.4 s to 0.70 s, and evidence
+recall from 0.516 to 0.922. Results and limits: [docs/evaluation.md](docs/evaluation.md);
+open weaknesses: [docs/red-team-report.md](docs/red-team-report.md).
+Voice latency below was measured before these changes and has not been
+re-measured.
+
 Step 7 is complete. Step 8 coordination, WebRTC plus local Silero VAD
 confirmation, stale-result rejection, and STT retry/safe-handoff code are
 implemented. The labeled regression corpus reported zero false interruptions
@@ -60,14 +73,18 @@ tests can be run with:
 python -m pytest -q tests/test_retrieval.py
 ```
 
-Run the Step 6 baseline evaluation and save reports with:
+Run the keyless evaluation (routing with the LLM tier unavailable, retrieval,
+guardrails, cache) and save `reports/<label>-evaluation.{json,md}` with:
 
 ```powershell
-python scripts/run_evaluation.py --output-dir reports
+python scripts/run_evaluation.py --label latest
 ```
 
-The baseline uses deterministic offline routing/input-guardrail providers and
-the real local embedding model. It does not require a Groq key.
+It uses the real local embedding models and no Groq key. Live variants
+(`--routing-mode live`, `--sections rag`), the retriever comparison, the UI
+check, and the red-team probes are listed in
+[docs/demo-runbook.md](docs/demo-runbook.md) and
+[docs/evaluation.md](docs/evaluation.md).
 
 Validate the real-audio manifest with:
 

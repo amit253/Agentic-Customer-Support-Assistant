@@ -805,3 +805,27 @@ immediately and keying the widget by turn count.
 
 Verification: `scripts/run_ui_check.py` drove the real app headlessly against
 the live service; the transcript is in `reports/phase5-ui-live-check.md`.
+
+### 2026-10-18T16:57:02.6487656+05:30 - [CLAUDE] Red-team round 2 and recall-oriented retrieval gate
+
+`scripts/run_red_team.py` sent 11 adversarial and edge-case probes through
+the live service. Six held (embedded injection, smalltalk-prefixed prompt
+extraction, zero-width smuggling, cross-customer lookup, delivery-promise
+bait, refund-amount smuggling). Reproduced and not fixed, with reasons in the
+red-team report: a "my refund" policy question routed to the order tool, an
+explicit human request naming an order answered by the order tool, a negated
+"refund is approved" sentence blocked by the output guard (now pinned by a
+strict xfail test), and a romanized Hindi question answered in Devanagari.
+
+Two probes ("Can I put the backpack in the dryer?" and a Hinglish product
+question) were declined by the retrieval gate although the knowledge base
+answers them. Analysis showed e5 top scores for answerable and unanswerable
+questions overlap (about 0.79 to 0.88), while the live answerer had declined
+every near-miss. Decision: tune the retrieval gate for recall (0.8106, just
+under the lowest dev answerable score 0.81062) and treat the answerer as the
+precision gate. Live on the held-out set: answerable answered 0.906 -> 0.938,
+citing an expected document 0.875 -> 0.906, near-misses still declined 13/13.
+An earlier attempt used 0.811, documented as "accepts every answerable dev
+question"; the offline report showed dev acceptance 0.96 because of rounding,
+so the value was corrected to 0.8106. No held-out question scores between the
+two values, so the live result applies to the final threshold.

@@ -253,10 +253,18 @@ class HybridRetriever:
 # 0.516 for the original MiniLM retriever. Cross-encoder rerankers were tried
 # and dropped: their dev-tuned gates did not transfer to the held-out set and
 # they added roughly half a second per query on CPU.
+#
+# Gate re-tuned for recall after the live end-to-end check: e5 top scores for
+# answerable and unanswerable questions overlap (about 0.79 to 0.88), so this
+# gate cannot separate them, while the answerer declined every near-miss it
+# was shown (13/13). The gate is therefore set to the highest value that still
+# accepts every answerable dev question (lowest dev answerable top score,
+# 0.81062) instead of the balanced-accuracy optimum (0.8311), and the
+# answerer's insufficient-evidence flag is the precision gate.
 PRODUCTION_EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 PRODUCTION_CONFIG = HybridConfig(
     use_bm25=True,
-    gate_threshold=0.8311,
+    gate_threshold=0.8106,
     support_threshold=0.6233,
     query_prefix="query: ",
     passage_prefix="passage: ",

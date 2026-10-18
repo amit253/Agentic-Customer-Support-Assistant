@@ -142,3 +142,22 @@ baseline on the same held-out set:
 The retrieval gate now rejects fewer near-misses on its own; the live
 answerer declined all 13 of them end to end (`reports/phase3-rag-live-evaluation.md`,
 see `docs/retrieval-design.md`).
+
+## Final measured state
+
+| Area | Before (Phase 0) | Final |
+|---|---:|---:|
+| Routing strict accuracy (live, 110 cases) | 0.509 | 0.955 |
+| Routing dead-end rate | 0.355 | 0.009 |
+| False escalations to a human | 0.117 | 0.000 |
+| Routing latency p95 | 16.4 s | 0.70 s (low router effort, the final default) |
+| LLM calls per message for routing | 1.28 | 0.245 |
+| Retrieval MRR (held-out) | 0.857 | 0.912 |
+| Evidence recall reaching the answerer | 0.516 | 0.922 |
+| Live: answerable questions answered | not measured | 0.938 |
+| Live: unanswerable near-misses declined | not measured | 13 / 13 |
+
+Live checks beyond the metrics: `reports/phase5-ui-live-check.md` (real UI,
+12-turn conversation) and `reports/red-team-live-probes.jsonl` (11 adversarial
+probes; see `docs/red-team-report.md`). The keyless suite is the reproducible
+baseline; every live number depends on Groq behavior at run time.

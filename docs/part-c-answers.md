@@ -39,12 +39,16 @@ voice interaction only. It is not the shared state layer described above.
 
 ## Production evaluation, safety regression, SLOs, and routing A/B tests
 
-**PARTIALLY IMPLEMENTED.** The repository has deterministic tests, a labeled
-offline evaluation script, and local measurements. The current offline
-baseline reports routing accuracy 0.8333, retrieval recall@5 0.7273, input
-guardrail recall 0.6667, output guardrail recall 1.0, and classifier-cache
-hit rate 0.5. The sample sets are small and are not production quality
-estimates. Speech regression results are likewise limited to the current
+**PARTIALLY IMPLEMENTED.** The repository has deterministic tests, held-out
+routing (110) and retrieval (45) sets, an evaluation runner with keyless and
+explicitly live modes, and committed before/after reports. Live routing
+accuracy went from 0.509 to 0.955 and evidence recall from 0.516 to 0.922
+between the Phase 0 baseline and the final system; the offline input
+guardrail baseline recall is 0.6667 and output guardrail recall 1.0. The sets
+are small and author-written and are not production quality estimates. The
+same runner is the shape of a routing A/B gate: compare per-intent recall,
+dead-end rate, and false-escalation rate for the candidate router against the
+current one on the same set before any traffic shift. Speech regression results are likewise limited to the current
 recorded/synthetic corpus.
 
 In production, maintain versioned, access-controlled evaluation sets for

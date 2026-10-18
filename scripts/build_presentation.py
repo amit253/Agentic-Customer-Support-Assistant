@@ -33,8 +33,8 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "Architecture and trust boundaries",
         (
-            "Input shape checks -> InputGuard -> structured intent router",
-            "Registered handler -> read-only tools or semantic retrieval",
+            "Input shape checks -> InputGuard -> hybrid router (rules, examples, LLM)",
+            "Handler: read-only tools, hybrid retrieval, human handoff, or conversation agent",
             "OutputClaimGuard validates facts before the response leaves the service",
             "Voice transcript reuses the same support boundary",
         ),
@@ -51,19 +51,19 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "Grounded answers and tool-calling choice",
         (
-            "12 original KB documents; local MiniLM embeddings and exact cosine scan",
-            "Retrieval keeps source and chunk provenance; insufficient evidence is explicit",
+            "12 original KB documents; multilingual-e5-small + BM25 fusion, top-candidate gate",
+            "Retrieval gate tuned for recall; the answerer declines when evidence is insufficient",
             "Product answers cite retrieved chunks; only cited facts reach the output claim guard",
             "Native Groq calls select one allow-listed tool; local code validates arguments and ownership",
         ),
     ),
     (
-        "Measured offline baseline",
+        "Measured improvement on held-out sets",
         (
-            "Keyless suite: 89 passed, 2 live checks skipped; 2 dependency warnings",
-            "Routing accuracy 0.8333; retrieval recall@5 0.7273",
-            "Input guardrail recall 0.6667; output guardrail recall 1.0",
-            "Classifier cache hit rate 0.5 on the measured workload",
+            "Live routing (110 cases): strict accuracy 0.509 -> 0.955; dead ends 0.355 -> 0.009",
+            "False escalations 0.117 -> 0; LLM calls per message 1.28 -> 0.245; p95 16.4 s -> 0.70 s",
+            "Retrieval (45 cases): evidence recall 0.516 -> 0.922; live: 0.938 answered, 13/13 near-misses declined",
+            "Keyless suite: 214 passed, 2 live skipped, 1 known-limitation xfail",
         ),
     ),
     (
@@ -94,12 +94,12 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
         ),
     ),
     (
-        "Red-team: two reproduced gaps",
+        "Red-team: reproduced gaps (two rounds)",
         (
-            "safe=true with confidence 0.0 allowed an injection before the fix",
-            "Natural-language unverified delivery date passed output validation before the fix",
-            "Both fixes have service-boundary regression tests",
-            "Residual risks: semantic classifier errors and heuristic coverage",
+            "Round 1 (fixed): low-confidence safe=true and unverified natural-language dates",
+            "Round 2 (fixed): greeting dead ends, off-topic escalations, comparison crash",
+            "Round 2 (open): 'my refund' policy question -> order tool; human + order ID -> no handoff",
+            "Round 2 (open): guard blocks negated 'refund is approved'; Hinglish answered in Devanagari",
         ),
     ),
     (
@@ -114,7 +114,7 @@ SLIDES: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "Part C and next work",
         (
-            "Voice-to-text/human shared-state transfer is designed, not implemented",
+            "Voice and text share session memory; handoffs carry a turn summary (process-local)",
             "Groq degradation: bounded retry then fail-closed or local safe handoff",
             "Separate live Groq product-answer and native-tool smoke checks passed",
             "Next: reduce voice latency, measure acoustic output, practice unaided",

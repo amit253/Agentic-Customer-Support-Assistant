@@ -45,8 +45,9 @@ small are sensitive and should be re-tuned whenever the corpus changes.
    ("Trail Week", "CityHaul") that embeddings blur.
 3. **Reciprocal-rank fusion** (k = 60) merges the two rankings without
    comparing their incompatible score scales; ties are broken by cosine.
-4. **Evidence gate on the best candidate only** (cosine >= 0.8311). If it
-   passes, up to four candidates with cosine >= 0.6233 go to the answerer.
+4. **Evidence gate on the best candidate only** (cosine >= 0.8106, tuned for
+   recall; see "Two gates, not one"). If it passes, up to four candidates
+   with cosine >= 0.6233 go to the answerer.
    The old per-chunk cutoff dropped the second product in comparison
    questions; gating on the top candidate keeps both.
 
@@ -112,3 +113,30 @@ understand negation (see the red-team report). Two answerable questions
 ("Can I put the backpack in the dryer?", "When will a human specialist take
 over my case?") were rejected by the retrieval gate; that is the recall cost
 of the threshold.
+
+## Final gate: tuned for recall
+
+The red-team run and the live end-to-end check showed that e5 top scores for
+answerable and unanswerable questions overlap (about 0.79 to 0.88), so no
+retrieval threshold separates them, while the answerer declined every
+near-miss it was shown. The gate was therefore moved from the
+balanced-accuracy optimum (0.8311) to the highest value that accepts every
+answerable dev question: 0.8106, just under the lowest dev answerable score
+(0.81062). Held-out results (`reports/final-retrieval-offline-evaluation.md`,
+`reports/final-rag-live-evaluation.md`):
+
+| Held-out | Gate 0.8311 | Gate 0.8106 (final) |
+|---|---:|---:|
+| Answerable acceptance (retrieval) | 0.938 | 0.969 |
+| Unanswerable rejection (retrieval) | 0.615 | 0.615 |
+| Evidence recall | 0.891 | 0.922 |
+| Live: answerable answered | 0.906 | 0.938 |
+| Live: answers citing an expected document | 0.875 | 0.906 |
+| Live: unanswerable declined end to end | 13 / 13 | 13 / 13 |
+
+The live run used 0.811; no held-out question scores between 0.8106 and
+0.811, so the result applies to the final value. The trade-off is explicit:
+more near-miss questions now reach the answerer, so precision depends on the
+answerer declining them. That held on all 13 held-out near-misses, but a
+plausible, uncited-style claim with no date, amount, or order ID would not be
+caught by the output guard (not reproduced; listed as a residual risk).

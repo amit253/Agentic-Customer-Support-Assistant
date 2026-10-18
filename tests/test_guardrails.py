@@ -221,3 +221,17 @@ def test_output_guard_accepts_a_verified_month_name_date() -> None:
     )
 
     assert result.allowed is True
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Known limitation reproduced live (red-team round 2): the promise "
+        "patterns do not understand negation, so a correct 'does not mean your "
+        "refund is approved' answer is blocked. Fails safe; see red-team report."
+    ),
+)
+def test_output_guard_allows_a_negated_refund_statement() -> None:
+    assert OutputClaimGuard().validate(
+        "No, Trail Week does not mean your refund is approved."
+    ).allowed

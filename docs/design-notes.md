@@ -10,38 +10,41 @@ run exercises the behavior; it does not imply production readiness.
 
 **IMPLEMENTED+TESTED.** Text and voice transcripts enter the transport-neutral
 `SupportService.handle()` boundary in `src/agentic_support/pipeline.py`.
-Normalization and shape checks run first, then `InputGuard`, then the
-structured intent router, registered handler, and `OutputClaimGuard`. The
-Step 5 call-path tests assert that rejected input does not reach the
-classifier, RAG retriever, or order tools.
+Normalization and shape checks run first, then `InputGuard`, then the hybrid
+router, the registered handler, and `OutputClaimGuard`. The call-path tests
+assert that rejected input does not reach the classifier, RAG retriever, or
+order tools; every routing tier runs after the guard.
 
-`StructuredIntentRouter` uses the Groq strict-schema classifier in live
-construction and injected fakes in the default suite. It validates the
-allow-listed intent and confidence, retries invalid/provider responses a
-bounded number of times, and measures its bounded process-local cache.
-Handlers currently cover `product_question`, `order_status`, and
-`escalate_to_human`.
+**IMPLEMENTED+TESTED; MEASURED LIVE.** `HybridRouter` tries deterministic rules
+first, then nearest labeled examples (MiniLM, leave-one-out-calibrated
+margin), then the Groq strict-schema classifier, and finally a clarifying
+question. Six intents are registered: `product_question`, `order_status`,
+`escalate_to_human`, and the template-only `smalltalk`, `out_of_scope`, and
+`unclear`. On the 110-case held-out set the live hybrid router reached strict
+accuracy 0.955 (original LLM-only router 0.509), with 0.245 LLM calls per
+message and no false escalations. See [router-design.md](./router-design.md)
+and [evaluation.md](./evaluation.md).
 
 ### Retrieval and answer grounding
 
-**IMPLEMENTED+TESTED:** `GroundedRetriever` embeds the 12-document Northstar
-Gear corpus using local `sentence-transformers/all-MiniLM-L6-v2`, uses
-normalized NumPy vectors with exact cosine similarity, and returns source
-document/chunk provenance. The retrieval tests cover paraphrase, irrelevant,
-conflicting, and insufficient-evidence queries. See
+**IMPLEMENTED+TESTED; MEASURED LIVE.** `HybridRetriever` fuses local
+`intfloat/multilingual-e5-small` embeddings with BM25 by reciprocal rank and
+gates on the best candidate. Nine configurations were compared with
+thresholds tuned on a dev set and scored on a 45-case held-out set; evidence
+reaching the answerer rose from 0.516 (original MiniLM retriever) to 0.922.
+Cross-encoder rerankers were tried and dropped. See
 [retrieval-design.md](./retrieval-design.md).
 
-**IMPLEMENTED+TESTED; LIVE SMOKE LIMITED TO ONE CASE.**
-`ProductQuestionHandler` sends sufficient retrieved hits to the structured
-Groq answer adapter, requires nonempty citations, rejects chunk IDs not
-returned by that retrieval, and passes only cited chunks' extracted facts to
-`OutputClaimGuard`. Insufficient evidence skips generation; provider or
-citation errors fail closed. Keyless tests cover the adapter contract,
-retrieval boundary, cited-fact scope, and output guard. A separate live smoke
-check passed, validating a nonempty answer, retrieved-chunk citations, and
-output-claim guard acceptance without recording generated text. It does not
-independently prove that every natural-language statement is entailed by the
-cited passages or establish answer quality across queries.
+`ProductQuestionHandler` sends retrieved hits to the structured Groq answer
+adapter, rejects chunk IDs that retrieval did not return, and passes only
+cited chunks' extracted facts to `OutputClaimGuard`. If the answerer reports
+insufficient evidence or returns no citations, the fixed "not enough verified
+information" reply is used and the model text is discarded. The retrieval
+gate is tuned for recall and the answerer is the precision gate: live on the
+held-out set, 0.938 of answerable questions were answered (0.906 citing an
+expected document) and all 13 unanswerable near-misses were declined. This
+does not prove that every sentence is entailed by its citations; the output
+guard checks only dates, amounts, order IDs, and promise phrases.
 
 ### Tool-calling choice and refund reconciliation
 
@@ -74,32 +77,35 @@ returned by the executed tool.
 
 **IMPLEMENTED+TESTED:** input rule signals are sent as evidence to a
 provider-neutral safety classifier; unsafe decisions and low-confidence
-`safe=true` results do not proceed. Provider/shape errors fail closed. Output
-claims are limited to verified order IDs, dates, and amounts, and detected
-delivery promises without verified dates are rejected. The rule-based
-keyless provider is a deterministic test baseline, not a semantic production
-defense. Live recorded-speech scenarios completed the safety/router path after
-provider-generation corrections; this small number of live examples is not a
-broad semantic-guardrail evaluation. Strict JSON Schema remains primary. Only
-the exact HTTP 400 `json_validate_failed` condition triggers JSON-object retry,
-and local exact-key, type, and range checks keep malformed output fail-closed.
+`safe=true` results do not proceed. Provider/shape errors fail closed. A
+message made entirely of closed-vocabulary smalltalk is allowed without a
+provider call, and definitive provider decisions are cached briefly (failures
+never are). Output claims are limited to verified order IDs, dates, and
+amounts, and detected delivery or refund promises without verified facts are
+rejected. The red-team round 2 run reproduced one false positive: a negated
+"does not mean your refund is approved" answer is blocked, because the promise
+patterns ignore negation (pinned by a strict xfail test). Strict JSON Schema
+remains primary; only HTTP 400 `json_validate_failed` triggers the JSON-object
+fallback, and local exact-key, type, and range checks keep malformed output
+fail-closed.
 
 **IMPLEMENTED+TESTED:** classifier cache metrics report measured lookups,
-hits, misses, retries, errors, and hit rate. The current cache is bounded but
-process-local; it does not share results across workers.
+hits, misses, retries, errors, and hit rate. The cache is thread-safe, bounded,
+and process-local; the memory hint is part of the key only for messages that
+refer back to earlier turns. Classifier retries happen only for transient
+provider failures. All Groq adapters share a client that rotates to the next
+configured key on HTTP 429 and waits a bounded time when every key is limited.
 
 ### Session memory and follow-ups
 
-**IMPLEMENTED+TESTED for the local demo.** `SessionMemoryStore` keeps a
-bounded, thread-safe, process-local text-only history shared by the text and
-voice `SupportService` paths. Only the last intent and order IDs returned by a
-successful, ownership-checked order tool become routing context. Clear order
-operations with one explicit order ID, and clear order pronoun follow-ups, are
-resolved locally before the LLM router, so they reuse verified order context
-without adding provider latency. Product look-alikes that merely mention an
-order ID still use the classifier and grounded retrieval. Ambiguous references
-such as “another order” still require an explicit ID.
-Audio bytes and raw untrusted memory instructions are not sent as context.
+**IMPLEMENTED+TESTED for the local demo.** `SessionMemoryStore` keeps verified
+slots (active order, active product, last intent, unresolved streak) that are
+the only memory an LLM sees, and a bounded transcript of every turn, including
+refused and failed ones, that is never sent to a model. Order and product
+follow-ups are resolved deterministically; "my other order" uses an
+ownership-checked `list_orders` tool; a second unresolved turn offers a human;
+handoffs carry a summary of the recent voice and text turns. See
+[memory-handling.md](./memory-handling.md).
 
 This is not durable production memory. A multi-worker deployment still needs
 server-verified tenant/session keys and a retained PostgreSQL/Redis-style store
@@ -133,14 +139,29 @@ metrics, not measurements from 10,000 users.
 
 ### Adding a fourth agent
 
-**PROPOSED.** Add a typed intent and explicit registry entry, handler contract,
-schema and prompt version update, and tests for valid route, malformed or
-low-confidence route, handler error, authorization, and output claims. Add
-the new labeled cases to per-intent evaluation before rollout. Run shadow
-classification without dispatching its tool or response, compare confusion
-and safety metrics, then use a feature flag/canary with automatic rollback
-gates. Existing handlers remain registered and tested; a missing handler
-continues to fail closed.
+**IMPLEMENTED for the conversation agent; procedure below.** Intents are
+defined once in `intents.py`; the schema enum and router prompt are generated
+from it. Adding `smalltalk`, `out_of_scope`, and `unclear` took one registry
+entry per intent, one handler, labeled examples for the semantic tier, and new
+held-out evaluation rows; the three original handlers and their tests were
+unchanged. For a business agent such as `billing_dispute`, also add handler
+tests for valid route, handler error, authorization, and output claims, then
+run shadow classification without dispatching, compare the confusion matrix
+and false-escalation rate against the current router, and roll out behind a
+feature flag with automatic rollback. A missing handler continues to fail
+closed.
+
+### Evaluation set and metrics
+
+**IMPLEMENTED; MEASURED.** `evals/routing_eval.jsonl` (110 held-out cases) and
+`evals/retrieval_eval.jsonl` (45 held-out cases, 13 unanswerable) were
+committed before the hybrid router and retriever were built. Routing metrics:
+strict and lenient accuracy, per-intent precision/recall, dead-end rate,
+false-escalation rate, LLM calls per message, latency. Retrieval metrics:
+ranking before the threshold (hit@1, recall@k, MRR, nDCG), the threshold
+decision (acceptance and rejection rates), and evidence recall. Guardrail
+recall is measured on the input and output guard sets. All sets are small and
+author-written; see [evaluation.md](./evaluation.md).
 
 ## Part B - Voice pipeline
 
