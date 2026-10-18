@@ -556,3 +556,14 @@ references still require an explicit order ID, audio bytes are never stored in
 memory, and the UI clear action clears the service memory for that session.
 Durable PostgreSQL/Redis-style memory remains a production recommendation, not
 a claim about the local assignment demo.
+
+### 2026-10-18T13:14:53.2240152+05:30 - [USER/CODEX] Deterministic order follow-up resolution
+
+The first memory implementation retained the verified order and text turns,
+but a live classifier still routed “Can I return it?” to `product_question`.
+The safe fix is a narrow pre-router resolver: after current-input safety
+passes, a pronoun plus an order action can select `order_status` only when the
+session has an order ID previously returned by the ownership-checked order
+tool. This avoids an extra LLM classifier call, records
+`routing_source=verified_session_memory`, and leaves ambiguous or explicit
+new-order messages on the normal classifier path.

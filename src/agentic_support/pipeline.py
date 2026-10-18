@@ -36,6 +36,29 @@ Channel = Literal["text", "voice"]
 ResponseStatus = Literal["ok", "rejected", "failed_closed"]
 
 
+def _is_memory_order_follow_up(
+    message: str,
+    *,
+    active_order_id: str | None,
+) -> bool:
+    """Recognize only clear order pronoun follow-ups with verified memory."""
+
+    if active_order_id is None:
+        return False
+    if re.search(r"\bNS-\d{2}-\d{4}-\d\b", message, re.I):
+        return False
+    has_reference = re.search(
+        r"\b(?:it|that|this|the order|my order)\b", message, re.I
+    )
+    has_order_action = re.search(
+        r"\b(?:return|eligible|send back|status|where|track|deliver|arrive|"
+        r"cancel|refund)\b",
+        message,
+        re.I,
+    )
+    return has_reference is not None and has_order_action is not None
+
+
 @dataclass(frozen=True, slots=True)
 class CheckedInput:
     """Input created only after the Step 4 normalization/shape checks."""
@@ -184,12 +207,30 @@ class SupportService:
                 active_order_id=memory.active_order_id,
                 last_intent=memory.last_intent,
             )
-            decision = self.router.route(
-                RoutingInput(
-                    text=checked_input.text,
-                    memory_hint=memory.routing_hint(),
+            if _is_memory_order_follow_up(
+                checked_input.text,
+                active_order_id=checked_input.active_order_id,
+            ):
+                decision = RouteDecision(
+                    intent="order_status",
+                    confidence=1.0,
+                    accepted=True,
+                    reason="memory_resolved_order_follow_up",
                 )
-            )
+                routing_source = "verified_session_memory"
+                log_event(
+                    self.logger,
+                    "memory_resolved_order_follow_up",
+                    active_order_id=checked_input.active_order_id,
+                )
+            else:
+                decision = self.router.route(
+                    RoutingInput(
+                        text=checked_input.text,
+                        memory_hint=memory.routing_hint(),
+                    )
+                )
+                routing_source = "classifier"
             if not decision.accepted or decision.intent is None:
                 log_event(
                     self.logger,
@@ -268,6 +309,7 @@ class SupportService:
                 metadata={
                     **public_metadata,
                     "confidence": decision.confidence,
+                    "routing_source": routing_source,
                 },
             )
             verified_order_id = None

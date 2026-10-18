@@ -9,11 +9,13 @@ turns. Both transports share the same cached `SupportService`, which owns one
 1. Validate and safety-check the current user message first.
 2. Load the session snapshot: at most 12 text-only turns and a small verified
    routing hint.
-3. Send the current message to the router with only `active_verified_order_id`
-   and `last_intent` as memory context. The context is data, never an
-   instruction.
-4. Resolve a follow-up order reference such as “Can I return it?” only when a
-   previous order tool result established the active order ID.
+3. Resolve a clear order follow-up locally when it contains a pronoun and an
+   order action such as “Can I return it?”; this avoids an unnecessary LLM
+   classifier call. Other messages go to the router with only
+   `active_verified_order_id` and `last_intent` as memory context. The context
+   is data, never an instruction.
+4. Reuse a follow-up order reference only when a previous order tool result
+   established the active order ID.
 5. Execute the normal guarded handler and output-claim validation.
 6. Append the validated turn without storing audio bytes. A successful order
    tool result may update the active verified order ID.

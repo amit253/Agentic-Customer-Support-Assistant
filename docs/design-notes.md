@@ -93,9 +93,10 @@ process-local; it does not share results across workers.
 **IMPLEMENTED+TESTED for the local demo.** `SessionMemoryStore` keeps a
 bounded, thread-safe, process-local text-only history shared by the text and
 voice `SupportService` paths. Only the last intent and order IDs returned by a
-successful, ownership-checked order tool become routing context. A follow-up
-such as “Can I return it?” can therefore reuse the verified active order;
-ambiguous references such as “another order” still require an explicit ID.
+successful, ownership-checked order tool become routing context. A clear order
+pronoun follow-up is resolved locally before the LLM router, so it reuses the
+verified active order without adding provider latency. Ambiguous references
+such as “another order” still require an explicit ID.
 Audio bytes and raw untrusted memory instructions are not sent as context.
 
 This is not durable production memory. A multi-worker deployment still needs
