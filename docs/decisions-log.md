@@ -502,3 +502,13 @@ opt-in live Groq tests were rerun through the configured Python environment:
 both passed, with 19 non-live tests deselected and two third-party retrieval
 warnings. The tests did not print or persist the credential or generated
 answer text. The default keyless suite remains the reproducible baseline.
+
+### 2026-10-18T12:06:32.8009296+05:30 - [USER/CODEX] Optional local demo UI
+
+The user requested a simple browser-based demo that is easy to understand.
+Streamlit was added as an optional `demo` dependency rather than a core
+runtime dependency. The UI reuses `build_live_support_service` and
+`build_live_voice_pipeline`, displays only safe metadata and trace IDs, and
+binds the documented launch command to `127.0.0.1`. It does not create a
+second routing or guardrail path and stores generated voice output under the
+ignored `.tmp/streamlit/` directory.

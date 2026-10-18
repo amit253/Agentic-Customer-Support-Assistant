@@ -96,6 +96,25 @@ The default runner plays responses through the Windows audio device and writes
 scenario reports to `recordings/`. Speech input is replayed from recorded WAV
 files as microphone frames; it is not captured from a live microphone.
 
+## Optional local Streamlit demo
+
+The repository also includes a deliberately small local UI for demonstrations.
+It reuses the same guarded `SupportService` and recorded-audio `VoicePipeline`;
+it does not create a second application path or expose the Groq key.
+
+Install the optional demo dependency and start it from the repository root:
+
+```powershell
+python -m pip install -e ".[dev,demo]"
+python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1
+```
+
+Streamlit will print a local URL such as `http://localhost:8501`. The Text
+support tab exercises live routing, RAG/tool handling, and output validation.
+The Voice demo tab plays the checked recordings and can run a live STT → shared
+support service → local TTS turn. Use the trace ID shown in the result when
+following logs or debugging a request.
+
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are
 never printed.

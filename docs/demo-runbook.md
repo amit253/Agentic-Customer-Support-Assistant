@@ -65,6 +65,21 @@ from the same run together. Read current outcomes and limitations in
 For repeatable logic-only checks without audio hardware, append
 `--no-playback`. Never label that mode as an audible demonstration.
 
+## Optional local Streamlit demo
+
+For a simple browser-based demonstration, install the optional UI dependency
+and run from the repository root:
+
+```powershell
+python -m pip install -e ".[dev,demo]"
+python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1
+```
+
+Open the local URL printed by Streamlit, normally `http://localhost:8501`.
+The Text support tab uses the live guarded service. The Voice demo tab plays
+the checked recordings and can run a live recorded-audio turn. Both tabs show
+the response trace ID; no API key value is rendered.
+
 ## Presentation and final evidence checks
 
 ```powershell
