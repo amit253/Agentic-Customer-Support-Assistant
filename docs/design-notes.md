@@ -173,15 +173,18 @@ cancellation callbacks, stale-result rejection, and bounded STT retry are
 tested. The regression corpus reports zero false interruptions and zero
 missed speech in its labeled cases; this is not a universal guarantee.
 
-The report's current latency definition ends at app playback start after the
-output WAV exists. It is not hardware loopback and does not prove the
-time-to-first-acoustic-sample requirement. On 2026-10-18, successful audible
-speech follow-ups measured 19,293.912-20,168.889 ms; the injected failure
-handoff measured 15,886.752 ms. The confirmed-speech-to-cancellation-call
-measurements were 105.217-117.732 ms. These are individual observations, not
-SLO percentiles, and the end-to-playback values are far above the proposed
-sub-three-second target. No loopback capture package was installed, so
-acoustic output latency could not be instrumented.
+**MEASURED.** Latency is defined from the VAD end-of-speech timestamp to
+application playback start after the output WAV exists. It is not hardware
+loopback and does not prove time to first acoustic sample. The Step 8 runs
+measured 19,293.912-20,168.889 ms for speech follow-ups, but the harness built
+the support service (local models and index) after end of speech, so each turn
+included a cold start. With the pipeline built at call setup, the final runs
+measured 2,118.6-2,947.3 ms for speech follow-ups and 541.5 ms for the
+injected failure handoff; confirmed speech to cancellation was 114.3-126.5 ms.
+These are single observations per scenario, not SLO percentiles; one earlier
+adversarial run measured 3,020.1 ms, so the sub-three-second target is met with
+a thin margin. No loopback capture package was installed, so acoustic output
+latency could not be instrumented. See `docs/voice-coordination.md`.
 
 For multilingual and varied-pause production audio, calibrate end-of-utterance
 against language/accent-specific labeled audio, including short pauses,

@@ -23,7 +23,7 @@ dev = [
     "python-pptx>=1.0,<2",
 ]
 demo = [
-    "streamlit>=1.40,<2",
+    "streamlit>=1.66,<2",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,5 +1,7 @@
 # Step 9 Integration and Regression Test Report
 
+> **Point-in-time record.** This document records the state at the time it was written and is kept unchanged as history. Current results: `README.md`, `docs/evaluation.md`, `docs/voice-coordination.md` ("Final measured runs"), and `docs/requirements-matrix.md` ("Final status").
+
 **Run date:** 2026-10-18 (local time, Asia/Calcutta)
 **Interpreter:** `C:\Users\ADMIN\AppData\Local\Python\pythoncore-3.14-64\python.exe`
 **Mode:** keyless automated suite; fake/stub providers are used by tests.

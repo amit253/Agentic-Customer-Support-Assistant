@@ -7,13 +7,14 @@ production chat, human handoff, or distributed control plane exists.
 
 **PARTIALLY IMPLEMENTED for the local demo; durable transfer is proposed.**
 The current voice and text transports call the same cached `SupportService` and
-share a bounded process-local `SessionMemoryStore`, so a verified order can be
-used by a text follow-up after a voice turn. This repository does not implement
-a shared persistent conversation/session store or a live voice-to-text
-transfer. The demo session-to-customer mapping is fictional fixture data, not
-authentication.
-The demo session-to-customer mapping is fictional fixture data, not
-authentication.
+share a bounded process-local `SessionMemoryStore`, so a verified order or
+product from a voice turn is used by a text follow-up. Every turn, including
+refused ones, is recorded with its channel, and a human handoff carries
+`MemorySnapshot.handoff_summary()`: verified slots plus the last six voice and
+text turns (`tests/test_memory_followups.py`). This repository does not
+implement a persistent conversation store or a live transfer of a running call
+to a chat agent. The demo session-to-customer mapping is fictional fixture
+data, not authentication.
 
 A production handoff should persist one canonical session record containing:
 

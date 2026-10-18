@@ -1,5 +1,7 @@
 # Implementation Plan
 
+> **Point-in-time record.** This document records the state at the time it was written and is kept unchanged as history. Current results: `README.md`, `docs/evaluation.md`, `docs/voice-coordination.md` ("Final measured runs"), and `docs/requirements-matrix.md` ("Final status").
+
 This plan turns the verified requirements in `docs/requirements-matrix.md`
 into reviewable milestones. The assignment's 72-hour limit is the governing
 constraint. The target is approximately 48-55 hours of focused work, leaving

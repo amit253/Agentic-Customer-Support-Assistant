@@ -1,5 +1,7 @@
 # Step 7 Voice Baseline
 
+> **Point-in-time record.** This document records the state at the time it was written and is kept unchanged as history. Current results: `README.md`, `docs/evaluation.md`, `docs/voice-coordination.md` ("Final measured runs"), and `docs/requirements-matrix.md` ("Final status").
+
 Status: Step 7 acceptance is met. Both required Step 7 user recordings are
 format-validated. A live Groq STT -> shared support service -> local Windows
 TTS run handled the normal order-status request and created a playable WAV

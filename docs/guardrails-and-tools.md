@@ -1,7 +1,10 @@
 # Guardrails and Read-Only Tools
 
-Status: Step 5 implemented and tested. Voice coordination and production-scale
-resilience remain future steps.
+Status: implemented and tested. Voice coordination was added in Step 8; later
+additions (guard decision cache, closed-vocabulary smalltalk fast path,
+`list_orders`, honest cancel/refund replies) are described in
+`docs/router-design.md`, `docs/memory-handling.md`, and
+`docs/red-team-report.md`. Production-scale resilience remains proposed.
 
 ## Input safety path
 

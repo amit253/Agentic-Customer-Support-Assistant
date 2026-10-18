@@ -156,6 +156,7 @@ see `docs/retrieval-design.md`).
 | Evidence recall reaching the answerer | 0.516 | 0.922 |
 | Live: answerable questions answered | not measured | 0.938 |
 | Live: unanswerable near-misses declined | not measured | 13 / 13 |
+| Voice: end of speech to playback start (speech turns) | 19.3–20.2 s | 2.1–2.9 s |
 
 Live checks beyond the metrics: `reports/phase5-ui-live-check.md` (real UI,
 12-turn conversation) and `reports/red-team-live-probes.jsonl` (11 adversarial

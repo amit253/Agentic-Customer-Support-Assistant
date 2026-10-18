@@ -1,7 +1,9 @@
 # Northstar Gear Domain and Contracts
 
-Status: Step 2 data and contract foundation. Tool execution, authorization
-logic, RAG, and agents are not implemented yet.
+Status: the Step 2 data and contracts below are the foundation of the final
+system. The read-only tools, ownership checks, RAG agent, and routing built on
+them are implemented and tested; see `docs/design-notes.md` and
+`docs/guardrails-and-tools.md`.
 
 ## Domain choice
 

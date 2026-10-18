@@ -122,7 +122,9 @@ It reports file paths and counts only; it never prints a detected value.
 - The injected provider-failure run demonstrates retry and local handoff, not
   a real provider outage.
 - Latency reports end at application playback start, not a physical
-  microphone/speaker loopback measurement. Current observed end-of-speech to
-  app-start times are 15.9-20.2 seconds, above the proposed <3 second target.
+  microphone/speaker loopback measurement. Final observed end-of-speech to
+  app-start times are 2.1-2.9 seconds for speech turns (Step 8: 15.9-20.2
+  seconds, which included loading the models inside each turn). Reproduce
+  with `python scripts/run_voice_coordination.py <scenario> --evidence-prefix final`.
 - No real customer data is present; demo identity and order records are
   fictional.

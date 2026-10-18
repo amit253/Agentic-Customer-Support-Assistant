@@ -1,214 +1,231 @@
 # Agentic Customer Support Assistant
 
-This repository is being built for the accompanying senior AI engineer
-assignment. The implementation is developed one reviewed milestone at a time.
-The assignment PDF and execution plan are kept locally under
-`Problem_Statement/`; those source files are intentionally outside the
-submission commit.
+A customer support assistant for **Northstar Gear**, a fictional travel-backpack
+brand, that works over text chat and a phone-style voice line. It routes each
+message to the right agent, grounds product answers in a small knowledge base,
+reads orders through read-only tools, and enforces its safety rules in
+application code rather than in prompts. Groq provides the LLM and Whisper
+speech-to-text; everything else runs locally.
 
-## Current status
+Every number in this README comes from a committed report and can be
+reproduced with the commands below.
 
-An improvement programme (2026-10-18, five measured phases) replaced the
-LLM-only router with a hybrid router (rules, labeled examples, then Groq),
-added a template-only conversation agent for greetings, off-topic, and
-unclear messages, replaced retrieval with multilingual-e5-small + BM25 fusion,
-added verified session memory with deterministic follow-ups and a handoff
-summary, and reworked the demo UI. On held-out sets, live routing accuracy
-went from 0.509 to 0.955, the dead-end rate from 0.355 to 0.009, false
-escalations from 0.117 to 0, routing p95 from 16.4 s to 0.70 s, and evidence
-recall from 0.516 to 0.922. Results and limits: [docs/evaluation.md](docs/evaluation.md);
-open weaknesses: [docs/red-team-report.md](docs/red-team-report.md).
-Voice latency below was measured before these changes and has not been
-re-measured.
+## Results at a glance
 
-Step 7 is complete. Step 8 coordination, WebRTC plus local Silero VAD
-confirmation, stale-result rejection, and STT retry/safe-handoff code are
-implemented. The labeled regression corpus reported zero false interruptions
-and zero missed speech. Audible recorded-audio runs completed normal order,
-return eligibility, wrong-order, and adversarial follow-ups; silence and noise
-completed without interruption. The injected provider-failure run played a
-safe handoff. App-level response-start latency was 15.9-20.2 seconds, above
-the proposed <3 second target; first-acoustic-sample loopback was unavailable.
-Live microphone capture and real provider-outage behavior are not claimed.
-See [docs/voice-coordination.md](docs/voice-coordination.md).
+Measured on held-out sets that were committed before the improved router and
+retriever were built. Live runs used Groq `openai/gpt-oss-20b`.
 
-## Assignment deliverables
+| Area | Before | Final | Evidence |
+|---|---:|---:|---|
+| Routing accuracy, live (110 messages) | 0.509 | **0.955** | `reports/phase2-hybrid-live-evaluation.md` |
+| Messages with no usable route | 35.5% | **0.9%** | same |
+| Non-escalation messages sent to a human | 11.7% | **0%** | same |
+| Routing latency p95 | 16.4 s | **0.70 s** | `reports/phase2-hybrid-live-low-effort-evaluation.md` |
+| LLM calls per message for routing | 1.28 | **0.245** | same |
+| Expected evidence reaching the answerer (45 questions) | 0.516 | **0.922** | `reports/final-retrieval-offline-evaluation.md` |
+| Live: answerable questions answered / near-misses declined | not measured | **0.938 / 13 of 13** | `reports/final-rag-live-evaluation.md` |
+| Voice: end of speech to playback start | 19.3–20.2 s | **2.1–2.9 s** | `recordings/final-*-run.json` |
+| Keyless test suite | | **221 passed**, 2 live skipped, 1 known-limit xfail | `python -m pytest` |
 
-- [Part A/B design notes](docs/design-notes.md) and
-  [Part C answers](docs/part-c-answers.md), with implementation gaps labeled.
-- [Step 9 test report](docs/step9-test-report.md) and
-  [reproduced red-team findings](docs/red-team-report.md).
-- [Reproducible demo runbook](docs/demo-runbook.md).
-- [Live-defense notes](docs/live-defense-notes.md); no unaided practice is
-  claimed.
-- Generate the PowerPoint using `python scripts/build_presentation.py`; the
-  verified output is `presentation/agentic-customer-support.pptx`.
-- Scan tracked, untracked non-ignored, and recording files using
-  `python scripts/scan_secrets.py`. The scanner prints paths/counts only, not
-  matching secret values.
+The before/after story, including what was tried and abandoned, is in
+[docs/evaluation.md](docs/evaluation.md) and
+[docs/decisions-log.md](docs/decisions-log.md).
 
-## Local setup
+## Architecture
 
-Use Python 3.11 or newer. In PowerShell:
+```mermaid
+flowchart LR
+    T["Text chat<br/>(Streamlit)"] --> VAL
+    V["Voice line<br/>VAD + barge-in + Whisper STT"] --> VAL
+    subgraph S["SupportService (one guarded path for every channel)"]
+        VAL["Validate input"] --> G["Input guard<br/>rules + Groq classifier"]
+        G --> R{"Hybrid router<br/>rules → examples → LLM"}
+        R --> RAG["RAG agent<br/>e5 + BM25, cited"]
+        R --> ORD["Order agent<br/>read-only tools"]
+        R --> H["Handoff agent<br/>summary + reference"]
+        R --> C["Conversation agent<br/>templates only"]
+        RAG --> OG["Output claim guard"]
+        ORD --> OG
+        H --> OG
+        C --> OG
+    end
+    OG --> OUT["Reply: text, or local TTS playback"]
+    MEM[("Session memory<br/>verified slots + transcript")] -.-> S
+    KB[("Knowledge base<br/>12 docs")] -.-> RAG
+    DB[("Order records<br/>ownership-checked")] -.-> ORD
+```
+
+- **Nothing reaches the router or an agent before the input guard allows it.**
+  Unrouted or unclear messages go to an agent with no retrieval and no tools.
+- **Hybrid routing.** Deterministic rules decide the clear cases, a
+  nearest-example classifier decides confident paraphrases, and the Groq LLM
+  handles the rest. In the live run the tiers decided 54, 29, and 27 of 110
+  messages. See [docs/router-design.md](docs/router-design.md).
+- **Grounded answers.** Retrieval fuses multilingual embeddings with BM25 and
+  is tuned for recall; the answerer must decline when the passages do not
+  answer, and the output guard blocks any date, amount, order ID, or promise
+  that no tool or citation confirmed. See
+  [docs/retrieval-design.md](docs/retrieval-design.md).
+- **Tools stay in code.** Groq native function calling chooses one read-only
+  tool; the application validates the order ID and checks ownership against
+  the server-side session. Cancel and refund requests get an honest "I can't
+  do that in chat" with the verified facts and a route to a human.
+- **Memory with two trust levels.** Verified slots (active order, active
+  product) are the only memory an LLM sees; the full transcript feeds the
+  human handoff summary and is never put in a prompt. See
+  [docs/memory-handling.md](docs/memory-handling.md).
+- **Voice line.** WebRTC VAD proposes speech, Silero confirms it, the turn
+  coordinator cancels playback and discards stale results, and STT failures
+  retry once before a spoken safe handoff. See
+  [docs/voice-coordination.md](docs/voice-coordination.md).
+
+## Quick start
+
+Requires Python 3.11 or newer; developed and tested on Windows 11 with
+Python 3.14. Voice playback and TTS use built-in Windows audio and speech.
 
 ```powershell
 py -m venv .venv
-\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
-```
-
-The project tests are deliberately keyless:
-
-```powershell
-python -m pytest
-python -m agentic_support
-```
-
-The first retrieval run may download the configured local embedding model into
-the local Hugging Face cache. It does not use a Groq key. Retrieval-specific
-tests can be run with:
-
-```powershell
-python -m pytest -q tests/test_retrieval.py
-```
-
-Run the keyless evaluation (routing with the LLM tier unavailable, retrieval,
-guardrails, cache) and save `reports/<label>-evaluation.{json,md}` with:
-
-```powershell
-python scripts/run_evaluation.py --label latest
-```
-
-It uses the real local embedding models and no Groq key. Live variants
-(`--routing-mode live`, `--sections rag`), the retriever comparison, the UI
-check, and the red-team probes are listed in
-[docs/demo-runbook.md](docs/demo-runbook.md) and
-[docs/evaluation.md](docs/evaluation.md).
-
-Validate the real-audio manifest with:
-
-```powershell
-python scripts/validate_audio_manifest.py
-```
-
-After activating the project environment and configuring Groq credentials
-locally (do not commit or share them), run a live voice turn with:
-
-```powershell
-python scripts/run_voice_baseline.py audio/normal_order_status.wav
-```
-
-The live run record and generated response audio are saved under
-`recordings/step7-normal-order-run.json` and
-`recordings/step7-normal-order-response.wav`.
-
-The pipeline uses Windows' built-in speech synthesizer for TTS, so Groq's
-separate TTS model terms do not block local playback. Groq is still required
-for STT and the live support service.
-
-Run or repeat the real-time scenarios from the
-[Step 8 runbook](docs/voice-coordination.md).
-The default runner plays responses through the Windows audio device and writes
-scenario reports to `recordings/`. Speech input is replayed from recorded WAV
-files as microphone frames; it is not captured from a live microphone.
-
-## Optional local Streamlit demo
-
-The repository also includes a deliberately small local UI for demonstrations.
-It reuses the same guarded `SupportService` and recorded-audio `VoicePipeline`;
-it does not create a second application path or expose the Groq key.
-
-Install the optional demo dependency and start it from the repository root:
-
-```powershell
 python -m pip install -e ".[dev,demo]"
+
+# Keyless test suite (fake providers; no Groq key needed)
+python -m pytest
+```
+
+The first run downloads two small public models to the local Hugging Face
+cache: `sentence-transformers/all-MiniLM-L6-v2` (routing examples) and
+`intfloat/multilingual-e5-small` (retrieval).
+
+To use the live service, put your Groq key in a local `.env` (see
+[Configuration](#configuration)), then start the demo UI:
+
+```powershell
 python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1 --server.port 8502
 ```
 
-Streamlit will print a local URL such as `http://127.0.0.1:8502`. The single
-conversation view accepts text through the message box and browser-recorded
-voice through the microphone control beside it; both use the same guarded
-service path. Voice turns show their transcript and playable response audio.
-Trace IDs and safe metadata stay in the collapsed sidebar panel.
-Follow-up behavior and the bounded memory limits are documented in
-[`docs/memory-handling.md`](docs/memory-handling.md).
+Open `http://127.0.0.1:8502`, pick a demo customer in the sidebar, and type,
+or tap the microphone inside the message box and press Enter to send a
+recording. Each reply shows which path answered it; trace details, the
+handoff summary, and thumbs feedback are in the UI.
 
-The health command prints a JSON response and one structured log event. A
-configured provider is reported only as `groq_configured: true`; key values are
-never printed.
+## Configuration
 
-## Local provider configuration
+Copy `.env.example` to `.env` (ignored by Git) and fill in your values. Never
+put a real key in source, docs, logs, chat, or recordings.
 
-Copy `.env.example` to `.env` for reference, or set environment variables in
-the current shell. Do not paste a real key into chat, source code, logs, or
-recordings.
+| Variable | Purpose | Default |
+|---|---|---|
+| `GROQ_API_KEY` | Groq key for live LLM and STT calls | none (tests run without it) |
+| `GROQ_API_KEYS` or any `GROQ_<NAME>_KEY` | Extra keys; a rate-limited key is skipped for the next one | none |
+| `GROQ_ROUTER_MODEL` | Model for guard, router, answers, tool choice | `openai/gpt-oss-20b` |
+| `GROQ_ROUTER_REASONING_EFFORT` | Router reasoning effort (measured: same accuracy, lower latency) | `low` |
+| `GROQ_TIMEOUT_SECONDS` | Per-request timeout | `15` |
+| `ROUTER_MAX_ATTEMPTS` | Classifier attempts; only transient errors are retried | `2` |
+| `LOG_LEVEL`, `LOG_FORMAT` | Logging level and `json` or `text` | `INFO`, `json` |
 
-```powershell
-$env:GROQ_API_KEY = "<your-local-key>"
+Configuration output reports only whether keys are configured and how many,
+never their values.
+
+## Reproduce the evidence
+
+| What | Command | Needs Groq |
+|---|---|---|
+| Keyless tests | `python -m pytest` | no |
+| Routing (local tiers only), retrieval, guardrails, cache | `python scripts/run_evaluation.py --label latest` | no |
+| Live routing on the 110-message set | `python scripts/run_evaluation.py --label live --sections routing --routing-mode live --live-delay 3` | yes |
+| Live end-to-end product answers (45 questions) | `python scripts/run_evaluation.py --label rag-live --sections rag --live-delay 3` | yes |
+| Retriever comparison (9 configurations) | `python scripts/compare_retrievers.py` | no |
+| Semantic-router threshold calibration | `python scripts/calibrate_semantic_router.py` | no |
+| Voice scenarios with real recordings (plays audio) | `python scripts/run_voice_coordination.py <scenario> --evidence-prefix final` | yes |
+| Drive the real UI headlessly | `python scripts/run_ui_check.py` | yes |
+| Red-team probes | `python scripts/run_red_team.py` | yes |
+| Audio manifest check | `python scripts/validate_audio_manifest.py` | no |
+| Secret scan (prints paths and counts only) | `python scripts/scan_secrets.py` | no |
+| Rebuild the presentation | `python scripts/build_presentation.py` | no |
+
+Voice scenarios: `silence`, `noise`, `normal_speech`, `return_eligibility`,
+`interruption`, `adversarial`, `provider_failure`. On Windows, set
+`$env:PYTHONIOENCODING = "utf-8"` before the live scripts that print model
+text. The full walkthrough is in [docs/demo-runbook.md](docs/demo-runbook.md).
+
+## Repository layout
+
+```text
+src/agentic_support/   SupportService pipeline, guards, routing tiers, agents, tools, memory, voice
+scripts/               evaluation, calibration, voice scenarios, UI, red team, deck builder
+tests/                 keyless pytest suite (live checks are opt-in)
+evals/                 held-out and dev sets for routing, retrieval, and guardrails
+knowledge_base/        12 Northstar Gear documents (fictional)
+audio/                 user-recorded test clips and manifest
+recordings/            voice run evidence (step7-*, step8-* history; final-* current)
+reports/               evaluation reports, phase by phase
+docs/                  design notes, Part C answers, decisions log, red-team report
+presentation/          generated slide deck
 ```
 
-The foundation can run without a key. Code that needs a live provider must
-call `Settings.require_groq_credentials()` explicitly and handle its safe
-configuration error.
+## Deliverables
 
-The application loads an ignored local `.env` file when present. Keep
-`.env.example` blank and never place a real key there. Router retries are
-bounded by `ROUTER_MAX_ATTEMPTS` and `ROUTER_RETRY_DELAY_SECONDS`; the default
-is two total attempts with a 0.25-second initial delay.
+| Deliverable | Location |
+|---|---|
+| Presentation | [presentation/agentic-customer-support.pptx](presentation/agentic-customer-support.pptx), built by `scripts/build_presentation.py` |
+| Design notes (Parts A and B) | [docs/design-notes.md](docs/design-notes.md) |
+| Part C answers | [docs/part-c-answers.md](docs/part-c-answers.md) |
+| Voice demo evidence | [recordings/](recordings/), [docs/voice-coordination.md](docs/voice-coordination.md) |
+| Decisions log | [docs/decisions-log.md](docs/decisions-log.md) |
+| Red-team report | [docs/red-team-report.md](docs/red-team-report.md) |
+| Requirements status | [docs/requirements-matrix.md](docs/requirements-matrix.md) |
+| Live-defense notes | [docs/live-defense-notes.md](docs/live-defense-notes.md) |
 
-## Logging and traceability
+## Known limitations
 
-The foundation logger writes one event per line as JSON by default. Every
-event contains:
+Stated rather than hidden; each is explained in the linked documents.
 
-- UTC timestamp;
-- level and logger name;
-- `trace_id` for following one request/turn across components;
-- event name and structured fields;
-- redacted exception details when applicable.
+- Session memory is process-local. A restart or a second worker loses it;
+  production needs a durable shared store.
+- There is no second LLM provider. Key rotation and bounded rate-limit waits
+  are implemented; provider failover is designed only.
+- Voice latency is measured to application playback start, not to the first
+  audible sample, with one run per scenario. One earlier run of the
+  adversarial scenario took 3.02 s, so the 3-second target is met with a thin
+  margin. Speech input is replayed from recordings, not a live microphone.
+- The output claim guard uses patterns and does not understand negation: it
+  blocks a correct "does not mean your refund is approved" (fails safe; pinned
+  by a strict xfail test).
+- A policy question phrased as "my refund" can be routed to the order agent,
+  and a request for a human combined with a plain status question is answered
+  without a handoff.
+- A romanized-Hindi question can be answered in Devanagari script, which the
+  English Windows TTS voice cannot read.
+- The evaluation sets are small and written by the project author; one
+  optional pace/accent recording is still pending.
 
-Use `trace_context()` at the transport boundary. The context uses Python's
-`contextvars`, so the ID can be propagated through asynchronous work without
-passing it through every function signature:
+## How this was built
 
-```python
-from agentic_support.logging_config import configure_logging, log_event
-from agentic_support.tracing import trace_context
+The work is in incremental commits, one per reviewed and measured step, with a
+timestamped [decisions log](docs/decisions-log.md) that records choices,
+abandoned approaches (cross-encoder rerankers, running the guard and router in
+parallel), and corrections to earlier claims. AI coding assistants were used,
+as the assignment allows; log entries are labeled by author (`[USER]`,
+`[CODEX]`, `[CLAUDE]`). Red-team findings come only from reproduced behavior,
+and live results are always labeled as live. All customer data, orders, and
+policies are fictional.
 
-logger = configure_logging(level="DEBUG", json_logs=True)
-with trace_context("demo-request-001"):
-    log_event(logger, "support_request_started", channel="text")
-```
+## Logging and debugging
 
-Trace IDs are restricted to safe characters. Invalid inbound IDs are replaced
-with a new ID rather than being written to logs. Common Groq/OpenAI-style token
-shapes, bearer tokens, and key assignments are redacted recursively before
-formatting.
+Logs are one JSON event per line with a UTC timestamp, level, `trace_id`,
+event name, and structured fields; secrets and token shapes are redacted
+before formatting. The UI sidebar lists each turn's trace ID. To debug a turn: rerun
+the smallest command with `LOG_LEVEL=DEBUG`, filter by its trace ID, compare
+the event sequence with the expected path (`route_selected` shows which
+routing tier decided), and add a failing test before changing code. Set
+`LOG_FORMAT=text` for human-readable local output.
 
-## Debugging workflow
+## Security
 
-1. Reproduce the issue with a specific input and capture its `trace_id`.
-2. Set `LOG_LEVEL=DEBUG` locally and rerun only the smallest relevant command.
-3. Filter the JSON logs by that trace ID.
-4. Compare the event sequence and exception fields with the expected call path.
-5. Add a focused test that reproduces the behavior before changing the producer.
-6. Record the real decision or failed experiment in `docs/decisions-log.md`.
-
-For human-readable local output, set `LOG_FORMAT=text`; JSON remains the
-default for machine-readable debugging and later request correlation.
-
-## Docker
-
-Docker is available, but no Dockerfile or Compose service is created in Step 1:
-there is not yet an application server to run, and adding one now would be a
-placeholder. Containerization will be reconsidered when the API or file-based
-evaluation path exists.
-
-## Security baseline
-
-- `.env` and secret-like files are ignored by Git.
-- Default tests use no Groq key.
-- Configuration metadata exposes only whether a key is configured and how many
-  keys are available, never their values.
-- Real customer data is not permitted; later order data will be fictional.
+- `.env` and secret-like files are ignored by Git; `.env.example` stays blank.
+- Default tests use fake providers and no key.
+- Provider errors are logged by class, HTTP status, and provider code only,
+  never with message text or key values.
+- No real customer data is used anywhere in the repository.

@@ -1,8 +1,8 @@
 # Requirements Matrix
 
 The original tables below define the assignment requirements and planned
-verification. The current evidence/status snapshot at the end of Step 12 is
-appended below and is subject to the independent Step 13 review.
+verification. The Step 13 snapshot is kept as history; the **Final status**
+section at the end supersedes it.
 
 The assignment PDF and working execution plan are local review inputs under
 `Problem_Statement/` and are intentionally outside the submission commit, per
@@ -139,3 +139,41 @@ or tool-selection reliability.
 | P5 | IMPLEMENTED+TESTED | `scripts/scan_secrets.py` scanned 113 files with no secret-pattern matches; see Step 12 runbook and output. |
 | P6 | IMPLEMENTED+TESTED | Local code/docs/audio/report/PPTX deliverables exist; the assignment source directory remains intentionally untracked per the user's decision. |
 | P7 | PARTIAL ([REC]) | Actual-module notes exist in `docs/live-defense-notes.md`; no unaided practice drill has been performed or claimed. |
+
+## Final status (2026-10-18, after the improvement programme)
+
+This table supersedes the Step 13 snapshot above.
+
+| ID | Status | Evidence or limitation |
+|---|---|---|
+| A1 | IMPLEMENTED+TESTED (live eval) | Six intents with distinct handlers; hybrid router (rules, labeled examples, Groq LLM). Live strict accuracy 0.955 on 110 held-out cases: `reports/phase2-hybrid-live-evaluation.md`. |
+| A2 | IMPLEMENTED+TESTED (live eval) | multilingual-e5-small + BM25 fusion with a recall-tuned gate; live on 45 held-out questions: 0.938 answered, 13/13 near-misses declined, 0 errors: `reports/final-rag-live-evaluation.md`. |
+| A3 | IMPLEMENTED+TESTED | Read-only `get_order_status`, `check_return_eligibility`, `list_orders` with ownership checks: `tests/test_tools.py`, `tests/test_memory_followups.py`. |
+| A4 | IMPLEMENTED+TESTED (keyless + live) | Groq native function calling; local ID and ownership validation; decision recorded in `docs/decisions-log.md` and `docs/design-notes.md`. |
+| A5 | IMPLEMENTED+TESTED (live probes) | Rule signals + Groq safety classifier, fail-closed; six attack probes held in `reports/red-team-live-probes.jsonl`. Not a broad semantic-classifier evaluation. |
+| A6 | IMPLEMENTED+TESTED | Allowed-facts output guard; one known false positive on a negated sentence, pinned by a strict xfail test. |
+| A7 | IMPLEMENTED+TESTED | Guardrails, ownership, and validation in code: `tests/test_pipeline.py`, `tests/test_step5_call_path.py`. |
+| A8 | IMPLEMENTED+TESTED | Every routing tier and agent runs after the input guard; conversation agents have no retrieval or tools: `tests/test_conversation.py`, `tests/test_hybrid_routing.py`. |
+| A9 | IMPLEMENTED+TESTED | Thread-safe classifier cache with measured hit rate (`classifier_cache` in `reports/phase0-baseline-offline-evaluation.md`); guard decision cache tested in `tests/test_hybrid_routing.py`. |
+| A10 | IMPLEMENTED+TESTED | Eligibility is never refund approval; cancel/refund requests answered honestly with verified facts: `tests/test_order_actions.py`. |
+| A11 | IMPLEMENTED+TESTED (design) | Scaling, fourth-agent procedure (exercised by adding the conversation agent), and eval metrics: `docs/design-notes.md`. |
+| B1-B7 | IMPLEMENTED+TESTED (recorded audio) | Final audible runs of all scenarios: `recordings/final-*-run.json`, `docs/voice-coordination.md`. |
+| B8 | IMPLEMENTED+TESTED (app-level) | End of speech to app playback start 2,118.6-2,947.3 ms for speech turns, 541.5 ms for the failure handoff. First-acoustic-sample (loopback) timing is not measured; one run per scenario. |
+| B9 | IMPLEMENTED+TESTED (design) | `docs/design-notes.md` Part B. |
+| B10 | IMPLEMENTED+TESTED | `recordings/`, `docs/demo-runbook.md`. |
+| C1 | PARTIAL | Shared process-local session across voice and text with a handoff summary; durable store and live call-to-chat transfer are proposed, not built. |
+| C2 | ANSWERED + TOOLING | Evaluation runner with keyless/live modes and before/after reports: `docs/evaluation.md`, `docs/part-c-answers.md`. |
+| C3 | ANSWERED-PROPOSED | Detection, retry, and failover trade-offs; key rotation and bounded rate-limit waits are implemented, an alternate LLM provider is not. |
+| P1 | IMPLEMENTED | Incremental commits, one per measured phase; pushed to `origin/main` after the final review. |
+| P2 | IMPLEMENTED | `docs/decisions-log.md`, including abandoned approaches (rerankers, parallel guard/router). |
+| P3 | IMPLEMENTED | Two red-team rounds; open findings kept with reasons: `docs/red-team-report.md`. |
+| P4 | IMPLEMENTED | User-selected Northstar Gear domain and user-authored adversarial audio. |
+| P5 | IMPLEMENTED | `scripts/scan_secrets.py` reports no secret patterns; keys only in the ignored `.env`. |
+| P6 | IMPLEMENTED | README, runbook, reports, recordings, and generated deck (`scripts/build_presentation.py`). |
+| P7 | PARTIAL ([REC]) | `docs/live-defense-notes.md`; no unaided practice drill is claimed. |
+
+Known gaps, stated rather than hidden: process-local memory; no alternate LLM
+provider; voice latency is app-level and measured once per scenario; one
+optional pace/accent recording is still pending; the output guard blocks one
+correct negated statement; a policy question phrased as "my refund" can be
+sent to the order agent.
