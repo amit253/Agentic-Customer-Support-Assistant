@@ -12,6 +12,7 @@ from typing import Literal
 from .config import Settings
 from .facts import AllowedFacts, OutputClaimGuard
 from .grounded_answers import GroqGroundedAnswerer
+from .groq_client import build_groq_chat_client
 from .guardrails import (
     GroqSafetyClassifier,
     InputGuard,
@@ -34,6 +35,37 @@ from .tracing import trace_context
 MAX_INPUT_CHARS = 2000
 Channel = Literal["text", "voice"]
 ResponseStatus = Literal["ok", "rejected", "failed_closed"]
+
+# Customer-facing wording for each way a turn can stop. They are distinct so
+# the customer can tell "I won't do that" from "something is broken" from
+# "please rephrase", and none of them reveals which check fired.
+INVALID_INPUT_REPLY = (
+    "I couldn't read that message. Please send it again as plain text "
+    "(up to 2,000 characters)."
+)
+UNSAFE_INPUT_REPLY = (
+    "I can't help with that request. I can check your orders, explain our "
+    "return, warranty, and shipping policies, or answer product questions."
+)
+SAFETY_UNAVAILABLE_REPLY = (
+    "I can't check that request safely right now. Please try again in a "
+    "moment, or ask for a human agent."
+)
+UNROUTABLE_REPLY = (
+    "I couldn't work out what you need. Please rephrase, or ask for a human "
+    "agent."
+)
+NO_HANDLER_REPLY = (
+    "I can't handle that kind of request right now. Please ask for a human agent."
+)
+HANDLER_ERROR_REPLY = (
+    "Something went wrong while handling that request, so I stopped rather "
+    "than guess. Please try again, or ask for a human agent."
+)
+UNVERIFIED_ANSWER_REPLY = (
+    "I couldn't verify every detail in that answer, so I won't guess. A human "
+    "agent can help if you need more detail."
+)
 ORDER_ID_PATTERN = re.compile(r"\bNS-\d{2}-\d{4}-\d\b", re.I)
 ORDER_OPERATION_PATTERN = re.compile(
     r"\b(?:where|status|track|tracking|delivery|deliver|arrive|"
@@ -305,7 +337,7 @@ class SupportService:
                 return SupportResponse(
                     trace_id=active_trace_id,
                     status="rejected",
-                    message="I could not process that request safely.",
+                    message=INVALID_INPUT_REPLY,
                     metadata={"reason": rejection_reason or "invalid_input"},
                 )
 
@@ -319,7 +351,11 @@ class SupportService:
                 return SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
-                    message="I could not process that request safely.",
+                    message=(
+                        SAFETY_UNAVAILABLE_REPLY
+                        if safety_decision.fail_closed
+                        else UNSAFE_INPUT_REPLY
+                    ),
                     metadata={"reason": safety_decision.reason},
                 )
 
@@ -331,17 +367,33 @@ class SupportService:
             )
             decision, routing_source = self._select_route(checked_input, memory)
             if not decision.accepted or decision.intent is None:
+                if self.registry.get("unclear") is None:
+                    log_event(
+                        self.logger,
+                        "routing_failed_closed",
+                        reason=decision.reason,
+                    )
+                    return SupportResponse(
+                        trace_id=active_trace_id,
+                        status="failed_closed",
+                        message=UNROUTABLE_REPLY,
+                        metadata={"reason": decision.reason},
+                    )
+                # No confident route: ask the customer to clarify through the
+                # template-only conversation handler. It has no retriever or
+                # tools, so an unrouted message still cannot reach them.
                 log_event(
                     self.logger,
-                    "routing_failed_closed",
+                    "routing_fallback_to_clarification",
                     reason=decision.reason,
                 )
-                return SupportResponse(
-                    trace_id=active_trace_id,
-                    status="failed_closed",
-                    message="I could not classify that request safely. Please rephrase or request human support.",
-                    metadata={"reason": decision.reason},
+                decision = RouteDecision(
+                    intent="unclear",
+                    confidence=decision.confidence,
+                    accepted=True,
+                    reason=decision.reason,
                 )
+                routing_source = "router_fallback"
 
             handler = self.registry.get(decision.intent)
             if handler is None:
@@ -353,7 +405,7 @@ class SupportService:
                 return SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
-                    message="This request cannot be routed safely right now.",
+                    message=NO_HANDLER_REPLY,
                     intent=decision.intent,
                     metadata={"reason": "handler_not_registered"},
                 )
@@ -368,7 +420,7 @@ class SupportService:
                 return SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
-                    message="I could not complete that request safely.",
+                    message=HANDLER_ERROR_REPLY,
                     intent=decision.intent,
                     metadata={"reason": "handler_error"},
                 )
@@ -388,7 +440,7 @@ class SupportService:
                 return SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
-                    message="I could not verify that response safely.",
+                    message=UNVERIFIED_ANSWER_REPLY,
                     intent=decision.intent,
                     handler_name=result.handler_name,
                     metadata={"reason": claim_decision.reason},
@@ -409,6 +461,7 @@ class SupportService:
                     **public_metadata,
                     "confidence": decision.confidence,
                     "routing_source": routing_source,
+                    "route_reason": decision.reason,
                 },
             )
             verified_order_id = None
@@ -438,8 +491,11 @@ def build_live_support_service(
     """Build the Groq-backed service; requires a local provider key."""
 
     active_settings = settings or Settings.from_environment()
-    classifier = GroqStructuredClassifier(active_settings)
-    safety_classifier = GroqSafetyClassifier(active_settings)
+    # One rotating client shared by every adapter, so a rate-limited key is
+    # skipped by all of them and extra keys in GROQ_API_KEYS are used.
+    client = build_groq_chat_client(active_settings)
+    classifier = GroqStructuredClassifier(active_settings, client=client)
+    safety_classifier = GroqSafetyClassifier(active_settings, client=client)
     router = StructuredIntentRouter(
         classifier,
         model_name=active_settings.groq_router_model,
@@ -453,9 +509,9 @@ def build_live_support_service(
         router=router,
         registry=build_default_registry(
             retriever=retriever,
-            answerer=GroqGroundedAnswerer(active_settings),
+            answerer=GroqGroundedAnswerer(active_settings, client=client),
             order_tools=DeterministicOrderTools(),
-            order_tool_caller=GroqOrderToolCaller(active_settings),
+            order_tool_caller=GroqOrderToolCaller(active_settings, client=client),
         ),
         input_guard=InputGuard(safety_classifier),
         output_guard=OutputClaimGuard(),

@@ -3,17 +3,26 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+import hashlib
 import re
 from typing import Protocol
 
+from .conversation import SUGGESTIONS, ConversationHandler
 from .demo_data import DEMO_SESSIONS
 from .facts import AllowedFacts
 from .grounded_answers import GroundedAnswerError, ProductAnswerer
+from .handler_result import HandlerResult
 from .retrieval import GroundedRetriever
 from .routing import Intent, RouteDecision
 from .tool_calling import OrderToolCaller, ToolCallProviderError
 from .tools import DeterministicOrderTools, OrderToolError
+
+
+INSUFFICIENT_EVIDENCE_REPLY = (
+    "I do not have enough verified information to answer that from our help "
+    "articles, so I won't guess. I can help with product features, returns, "
+    "shipping, and warranty, or connect you with a human agent."
+)
 
 
 class CheckedInputLike(Protocol):
@@ -21,15 +30,6 @@ class CheckedInputLike(Protocol):
     trace_id: str
     session_id: str
     active_order_id: str | None
-
-
-@dataclass(frozen=True, slots=True)
-class HandlerResult:
-    """Handler output before the pipeline wraps it in a support response."""
-
-    message: str
-    handler_name: str
-    metadata: Mapping[str, object] = field(default_factory=dict)
 
 
 class SupportHandler(Protocol):
@@ -59,15 +59,13 @@ class ProductQuestionHandler:
             raise GroundedAnswerError("product_retriever_unavailable")
         retrieval = self._retriever.retrieve(request.text)
         if not retrieval.sufficient_evidence:
-            return HandlerResult(
-                message="I do not have enough verified information to answer that product question.",
-                handler_name=self.name,
-                metadata={"retrieval_reason": retrieval.reason},
-            )
+            return self._insufficient(retrieval.reason)
         if self._answerer is None:
             raise GroundedAnswerError("grounded_answerer_unavailable")
 
         answer = self._answerer.answer(request.text, retrieval.hits)
+        if answer.insufficient_evidence:
+            return self._insufficient("answerer_reported_insufficient_evidence")
         available_chunks = {
             hit.chunk.chunk_id: hit.chunk for hit in retrieval.hits
         }
@@ -96,6 +94,14 @@ class ProductQuestionHandler:
                 "cited_chunk_ids": answer.cited_chunk_ids,
                 "allowed_facts": AllowedFacts.from_retrieval(cited_chunks),
             },
+        )
+
+
+    def _insufficient(self, reason: str) -> HandlerResult:
+        return HandlerResult(
+            message=INSUFFICIENT_EVIDENCE_REPLY,
+            handler_name=self.name,
+            metadata={"retrieval_reason": reason, "suggestions": SUGGESTIONS},
         )
 
 
@@ -218,14 +224,27 @@ class EscalateToHumanHandler:
     def handle(
         self, request: CheckedInputLike, decision: RouteDecision
     ) -> HandlerResult:
+        reference = handoff_reference(request.trace_id)
         return HandlerResult(
-            message="Your request has been marked for human support review.",
+            message=(
+                "I've passed this conversation to a human support agent. "
+                f"Your reference is {reference}. An agent will review the "
+                "details; I can't promise a specific outcome before that review."
+            ),
             handler_name=self.name,
             metadata={
                 "handoff_required": True,
+                "handoff_reference": reference,
                 "session_id": request.session_id,
             },
         )
+
+
+def handoff_reference(trace_id: str) -> str:
+    """Return a short, stable reference a customer can quote to an agent."""
+
+    digest = hashlib.sha256(trace_id.encode("utf-8")).hexdigest()[:8].upper()
+    return f"HO-{digest}"
 
 
 class HandlerRegistry:
@@ -252,10 +271,14 @@ def build_default_registry(
     order_tools: DeterministicOrderTools | None = None,
     order_tool_caller: OrderToolCaller | None = None,
 ) -> HandlerRegistry:
+    conversation = ConversationHandler()
     return HandlerRegistry(
         {
             "product_question": ProductQuestionHandler(retriever, answerer),
             "order_status": OrderStatusHandler(order_tools, order_tool_caller),
             "escalate_to_human": EscalateToHumanHandler(),
+            "smalltalk": conversation,
+            "out_of_scope": conversation,
+            "unclear": conversation,
         }
     )

@@ -9,6 +9,7 @@ keyless tests can load the same settings without a key.
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -21,13 +22,26 @@ _ALLOWED_LOG_FORMATS = frozenset({"json", "text"})
 _ALLOWED_LOG_LEVELS = frozenset(
     {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}
 )
+_ALLOWED_REASONING_EFFORTS = frozenset({"", "low", "medium", "high"})
+
+
+# Extra keys may be added as any GROQ_<NAME>_KEY variable (for example
+# GROQ_SECOND_KEY or GROQ_API_KEY_2) in addition to GROQ_API_KEY and the
+# comma-separated GROQ_API_KEYS. Only variable names are ever inspected.
+_EXTRA_KEY_VARIABLE = re.compile(r"^GROQ_(?:[A-Z0-9]+_)*KEYS?(?:_\d+)?$")
 
 
 def _read_groq_keys(environment: Mapping[str, str]) -> tuple[str, ...]:
     """Return configured Groq keys without exposing their values to callers."""
 
+    variable_names = ["GROQ_API_KEY", "GROQ_API_KEYS"] + sorted(
+        name
+        for name in environment
+        if _EXTRA_KEY_VARIABLE.match(name)
+        and name not in ("GROQ_API_KEY", "GROQ_API_KEYS")
+    )
     candidates: list[str] = []
-    for variable_name in ("GROQ_API_KEY", "GROQ_API_KEYS"):
+    for variable_name in variable_names:
         raw_value = environment.get(variable_name, "")
         candidates.extend(
             value.strip() for value in raw_value.split(",") if value.strip()
@@ -55,6 +69,8 @@ class Settings:
     router_max_attempts: int
     router_retry_delay_seconds: float
     groq_api_keys: tuple[str, ...]
+    groq_reasoning_effort: str = ""
+    groq_timeout_seconds: float = 15.0
 
     @classmethod
     def from_environment(
@@ -123,6 +139,19 @@ class Settings:
                 "ROUTER_RETRY_DELAY_SECONDS must not be negative"
             )
 
+        groq_reasoning_effort = source.get("GROQ_REASONING_EFFORT", "").strip().lower()
+        if groq_reasoning_effort not in _ALLOWED_REASONING_EFFORTS:
+            raise ConfigurationError(
+                "GROQ_REASONING_EFFORT must be empty, low, medium, or high"
+            )
+
+        try:
+            groq_timeout_seconds = float(source.get("GROQ_TIMEOUT_SECONDS", "15"))
+        except (TypeError, ValueError) as exc:
+            raise ConfigurationError("GROQ_TIMEOUT_SECONDS must be numeric") from exc
+        if groq_timeout_seconds <= 0:
+            raise ConfigurationError("GROQ_TIMEOUT_SECONDS must be positive")
+
         return cls(
             app_name=app_name,
             environment=environment_name,
@@ -135,6 +164,8 @@ class Settings:
             router_max_attempts=router_max_attempts,
             router_retry_delay_seconds=router_retry_delay_seconds,
             groq_api_keys=_read_groq_keys(source),
+            groq_reasoning_effort=groq_reasoning_effort,
+            groq_timeout_seconds=groq_timeout_seconds,
         )
 
     @property
@@ -166,6 +197,8 @@ class Settings:
             "groq_tts_voice": self.groq_tts_voice,
             "router_max_attempts": self.router_max_attempts,
             "router_retry_delay_seconds": self.router_retry_delay_seconds,
+            "groq_reasoning_effort": self.groq_reasoning_effort or "provider_default",
+            "groq_timeout_seconds": self.groq_timeout_seconds,
             "groq_configured": self.groq_configured,
             "groq_key_count": len(self.groq_api_keys),
         }

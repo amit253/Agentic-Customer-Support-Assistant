@@ -13,6 +13,7 @@ from agentic_support.routing import (
     GroqStructuredClassifier,
     ROUTER_RESPONSE_FORMAT,
     StructuredIntentRouter,
+    is_retryable_classifier_error,
 )
 
 
@@ -73,10 +74,11 @@ def test_unknown_intent_fails_closed() -> None:
     assert decision.accepted is False
     assert decision.intent is None
     assert decision.reason == "classifier_failure_or_invalid_output"
-    assert router.cache_stats.classifier_errors == 2
-    assert router.cache_stats.classifier_attempts == 2
-    assert router.cache_stats.retries == 1
-    assert router.cache_stats.retry_exhausted == 1
+    # An out-of-contract answer repeats at temperature 0, so it is not retried.
+    assert router.cache_stats.classifier_errors == 1
+    assert router.cache_stats.classifier_attempts == 1
+    assert router.cache_stats.retries == 0
+    assert router.cache_stats.retry_exhausted == 0
 
 
 def test_unexpected_classifier_field_fails_closed() -> None:
@@ -107,26 +109,81 @@ def test_low_confidence_fails_closed_without_caching() -> None:
     assert router.cache_stats.entries == 0
 
 
-def test_retry_recovers_from_invalid_first_output() -> None:
+def test_invalid_output_is_not_retried() -> None:
     client = SequenceClassifier(
         [
             {"intent": "unknown", "confidence": 0.99},
             {"intent": "order_status", "confidence": 0.91},
         ]
     )
-    router = StructuredIntentRouter(
-        client,
-        retry_delay_seconds=0,
-    )
+    router = StructuredIntentRouter(client, retry_delay_seconds=0)
+
+    decision = router.route(InputValue("Where is my order?"))
+
+    assert decision.accepted is False
+    assert client.calls == 1
+    assert router.cache_stats.retries == 0
+
+
+def test_low_confidence_is_not_retried() -> None:
+    client = FakeClassifier({"intent": "order_status", "confidence": 0.2})
+    router = StructuredIntentRouter(client, retry_delay_seconds=0)
+
+    router.route(InputValue("Maybe where is my order?"))
+
+    assert client.calls == 1
+    assert router.cache_stats.retries == 0
+
+
+def test_transient_provider_error_is_retried_and_recovers() -> None:
+    class RateLimited(Exception):
+        status_code = 429
+
+    class FlakyClassifier:
+        calls = 0
+
+        def classify(self, message: str) -> dict[str, object]:
+            FlakyClassifier.calls += 1
+            if FlakyClassifier.calls == 1:
+                try:
+                    raise RateLimited("rate limited")
+                except RateLimited as exc:
+                    raise ClassifierProviderError("Groq classifier request failed") from exc
+            return {"intent": "order_status", "confidence": 0.91}
+
+    router = StructuredIntentRouter(FlakyClassifier(), retry_delay_seconds=0)
 
     decision = router.route(InputValue("Where is my order?"))
 
     assert decision.accepted is True
     assert decision.intent == "order_status"
-    assert client.calls == 2
-    assert router.cache_stats.classifier_errors == 1
+    assert FlakyClassifier.calls == 2
     assert router.cache_stats.retries == 1
     assert router.cache_stats.retry_exhausted == 0
+
+
+@pytest.mark.parametrize(
+    ("status_code", "retryable"),
+    [(400, False), (401, False), (408, True), (429, True), (500, True), (503, True)],
+)
+def test_retry_policy_by_provider_status(status_code: int, retryable: bool) -> None:
+    class ProviderError(Exception):
+        pass
+
+    error = ProviderError("provider")
+    error.status_code = status_code  # type: ignore[attr-defined]
+    wrapped = ClassifierProviderError("Groq classifier request failed")
+    wrapped.__cause__ = error
+
+    assert is_retryable_classifier_error(wrapped) is retryable
+
+
+def test_new_intents_are_accepted_by_the_router() -> None:
+    for intent in ("smalltalk", "out_of_scope", "unclear"):
+        router = StructuredIntentRouter(FakeClassifier({"intent": intent, "confidence": 0.9}))
+        decision = router.route(InputValue(f"message for {intent}"))
+        assert decision.accepted is True
+        assert decision.intent == intent
 
 
 def test_provider_failure_fails_closed() -> None:

@@ -35,6 +35,23 @@ def test_multiple_provider_keys_are_parsed_without_leaking_them() -> None:
     assert "gsk_secondary_fake_value" not in public
 
 
+def test_extra_named_key_variables_are_used_and_deduplicated() -> None:
+    settings = Settings.from_environment(
+        {
+            "GROQ_API_KEY": "gsk_primary_fake_value",
+            "GROQ_API_KEYS": "gsk_primary_fake_value",
+            "GROQ_ANOTHER_KEY": "gsk_another_fake_value",
+            "GROQ_API_KEY_2": "gsk_numbered_fake_value",
+            "GROQ_ROUTER_MODEL": "not-a-key",
+            "GROQ_MONKEY": "not-a-key",
+        }
+    )
+
+    assert len(settings.groq_api_keys) == 3
+    assert "not-a-key" not in settings.groq_api_keys
+    assert "gsk_another_fake_value" not in json.dumps(settings.public_dict())
+
+
 def test_invalid_log_configuration_fails_without_echoing_input() -> None:
     with pytest.raises(ConfigurationError, match="LOG_LEVEL must be"):
         Settings.from_environment({"LOG_LEVEL": "not-a-level"})

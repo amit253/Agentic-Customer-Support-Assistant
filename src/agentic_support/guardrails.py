@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from .config import Settings
+from .groq_client import build_groq_chat_client, reasoning_options
 
 
 class GuardrailProviderError(RuntimeError):
@@ -133,11 +134,8 @@ class GroqSafetyClassifier:
 
     def __init__(self, settings: Settings, *, client: Any | None = None) -> None:
         self.model_name = settings.groq_router_model
-        if client is None:
-            from groq import Groq
-
-            client = Groq(api_key=settings.require_groq_credentials()[0])
-        self._client = client
+        self._reasoning = reasoning_options(settings, self.model_name)
+        self._client = client or build_groq_chat_client(settings)
 
     def classify(
         self, message: str, rule_signals: Sequence[str]
@@ -148,6 +146,7 @@ class GroqSafetyClassifier:
                 "temperature": 0,
                 "max_tokens": 300,
                 "response_format": self._response_format,
+                **self._reasoning,
                 "messages": [
                     {
                         "role": "system",

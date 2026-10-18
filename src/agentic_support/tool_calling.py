@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Literal, Protocol
 
 from .config import Settings
+from .groq_client import build_groq_chat_client, reasoning_options
 
 
 OrderToolName = Literal["get_order_status", "check_return_eligibility"]
@@ -72,19 +73,17 @@ class GroqOrderToolCaller:
 
     def __init__(self, settings: Settings, *, client: Any | None = None) -> None:
         self.model_name = settings.groq_router_model
-        if client is None:
-            from groq import Groq
-
-            client = Groq(api_key=settings.require_groq_credentials()[0])
-        self._client = client
+        self._reasoning = reasoning_options(settings, self.model_name)
+        self._client = client or build_groq_chat_client(settings)
 
     def select_tool(self, message: str) -> OrderToolSelection:
         try:
             response = self._client.chat.completions.create(
                 model=self.model_name,
                 temperature=0,
-                max_tokens=160,
+                max_tokens=300,
                 tools=ORDER_TOOL_DEFINITIONS,
+                **self._reasoning,
                 tool_choice="required",
                 parallel_tool_calls=False,
                 messages=[

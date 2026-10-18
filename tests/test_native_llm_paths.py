@@ -144,7 +144,8 @@ def test_grounded_answerer_sends_passages_and_parses_citations() -> None:
     "content",
     [
         "not-json",
-        json.dumps({"answer": "A plausible answer.", "citations": []}),
+        json.dumps({"answer": 7, "citations": ["kb-test#chunk-000"]}),
+        json.dumps({"answer": "", "citations": ["kb-test#chunk-000"]}),
     ],
 )
 def test_grounded_answerer_rejects_invalid_provider_output(content: str) -> None:
@@ -154,6 +155,46 @@ def test_grounded_answerer_rejects_invalid_provider_output(content: str) -> None
 
     with pytest.raises(GroundedAnswerError):
         answerer.answer("What is its capacity?", [RetrievalHit(_chunk(), 0.91)])
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"answer": "A plausible answer.", "citations": []},
+        {
+            "answer": "I don't have that information.",
+            "citations": [],
+            "insufficient_evidence": True,
+        },
+    ],
+)
+def test_uncited_answer_becomes_insufficient_evidence_and_is_never_shown(
+    payload: dict[str, object],
+) -> None:
+    # Live Groq returned an honest "not enough information" answer with no
+    # citations for a comparison question; that used to crash the handler.
+    client = FakeGroqClient(_groq_response(content=json.dumps(payload)))
+    answer = GroqGroundedAnswerer(_settings(), client=client).answer(
+        "Is it bigger than the other one?", [RetrievalHit(_chunk(), 0.91)]
+    )
+    assert answer.insufficient_evidence is True
+    assert answer.cited_chunk_ids == ()
+
+    service = _service(
+        build_default_registry(
+            retriever=_retriever(),
+            answerer=GroqGroundedAnswerer(_settings(), client=client),
+        )
+    )
+    response = service.handle("What is the backpack capacity?")
+
+    assert response.status == "ok"
+    assert "not have enough verified information" in response.message
+    assert "A plausible answer" not in response.message
+    assert (
+        response.metadata["retrieval_reason"]
+        == "answerer_reported_insufficient_evidence"
+    )
 
 
 def test_product_answer_is_guarded_and_cites_only_retrieved_chunks() -> None:

@@ -628,3 +628,46 @@ messages match the earlier live-probe messages. A test prevents any example
 message from appearing verbatim in the held-out routing set, but the rules
 were written with knowledge of the eval categories. Live results should be
 read as evidence on this author-written set, not as an unbiased estimate.
+
+### 2026-10-18T16:15:01.5188648+05:30 - [CLAUDE] Phase 1 conversation agent and LLM-tier fixes
+
+Decision: add `smalltalk`, `out_of_scope`, and `unclear` as real intents with
+one template-only `ConversationHandler`, instead of making the existing three
+intents absorb them. Before writing code, a live check of the extended strict
+enum returned valid JSON for all ten probe messages that previously failed.
+Intent names, descriptions, the JSON-schema enum, and the router prompt are
+now generated from `intents.py`, so adding an agent is one registry entry plus
+a handler. The conversation handler has no retriever, tools, or LLM, so the
+"no unchecked message reaches RAG or tools" argument is unchanged.
+
+Decision: a route that is still not accepted now goes to that handler as a
+clarifying question (`routing_source=router_fallback`) instead of the old
+"I could not classify that request safely" dead end. Provider failure gets an
+honest "having trouble" message. Custom registries without an `unclear`
+handler still fail closed exactly as before.
+
+Decision: retry the classifier only on transient failures (timeouts,
+connection errors, 408/409/429, 5xx). Invalid output, 4xx validation errors,
+and low confidence are not retried: at temperature 0 they repeat, and the
+probe showed each greeting costing four failing requests. Two existing tests
+that asserted retry-on-invalid-output were rewritten to assert the new policy.
+
+Decision: an uncited or explicitly insufficient grounded answer becomes the
+fixed "not enough verified information" reply instead of a handler crash. The
+answer schema gained an `insufficient_evidence` boolean; uncited model text is
+still never shown. The test that expected an exception for an empty citation
+list now asserts that the text is withheld.
+
+Decision: one shared `RotatingChatClient` for all Groq adapters. It rotates to
+the next key on HTTP 429, logs only the key index, and applies a 15 s timeout.
+Extra keys may be given as `GROQ_API_KEYS` or any `GROQ_<NAME>_KEY` variable;
+the user added a second key that way, and the configuration reports two keys.
+`reasoning_effort` is configurable (`GROQ_REASONING_EFFORT`) and only sent to
+gpt-oss models; the default stays the provider default until measured. The
+tool-selection `max_tokens` was raised from 160 to 300 because gpt-oss
+reasoning tokens count against it.
+
+Live result for the LLM tier alone (`reports/phase1-llm-only-live-evaluation.md`,
+same 110 cases): strict accuracy 0.509 -> 0.909, lenient 0.527 -> 0.945,
+dead-end rate 0.355 -> 0.045, false escalation 0.117 -> 0.000, classifier
+errors 62 -> 1, routing p95 16.4 s -> 0.89 s. No key rotation occurred.
