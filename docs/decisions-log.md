@@ -910,3 +910,21 @@ voice baseline, implementation plan) keep their original numbers with a note
 pointing to current results, because rewriting them would misstate history.
 The Streamlit `demo` extra now requires 1.66 or newer, the only version on
 which the microphone-in-message-box input was verified.
+
+### 2026-10-18T19:29:12.1726008+05:30 - [USER/CLAUDE] Final-submission deck format
+
+The user asked for a deck that can be submitted directly: no text under the
+slides, the problem statement on slide 2, and final results only rather than
+before/after comparisons. Decision: slides now carry only the brand footer and
+slide number; source lines and speaker notes moved to
+`docs/presentation-speaker-notes.md`, generated together with the deck, so the
+evidence trail is kept for the live defense. Slide 2 summarizes the problem
+statement (Parts A, B, C and its constraints). Results slides show the final
+configuration: per-intent routing precision and recall, live product-answer
+results, and per-scenario voice latency against the 3-second target. The
+retrieval slide still compares five configurations because the assignment asks
+for the embedding choice to be justified; it is labeled as configurations
+evaluated, with the selected one marked. The README results table follows the
+same final-results format; the full before/after record stays in
+`docs/evaluation.md` and this log. Visual QA rendered all 18 slides and the
+OOXML validator passed.

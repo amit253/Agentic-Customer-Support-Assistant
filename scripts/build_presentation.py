@@ -1,14 +1,16 @@
 """Build the submission deck from verified project evidence.
 
-Every number on a slide comes from a committed report or evidence file; the
-source is printed on the slide. The deck is generated (not hand-edited) so it
-can be rebuilt after any change:
+Every number on a slide comes from a committed report or evidence file listed
+in ``docs/presentation-speaker-notes.md``. The deck is generated, not
+hand-edited, so it can be rebuilt after any change:
 
     python scripts/build_presentation.py
 
 Design: 16:9, Cambria headings with Calibri body, deep slate-teal as the
 dominant color with one amber accent, numbered amber badges as the repeated
-motif, native PowerPoint charts, and speaker notes on every slide.
+motif, and native PowerPoint charts. Slides carry no source lines or speaker
+notes so the file can be submitted as is; presenter notes and sources are
+written to ``docs/presentation-speaker-notes.md``.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ from pptx.util import Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "presentation" / "agentic-customer-support.pptx"
+NOTES_OUTPUT = ROOT / "docs" / "presentation-speaker-notes.md"
 
 HEAD = "Cambria"
 BODY = "Calibri"
@@ -55,6 +58,9 @@ CENTER = PP_ALIGN.CENTER
 MIDDLE = MSO_ANCHOR.MIDDLE
 TOP = MSO_ANCHOR.TOP
 
+# Presenter notes and sources, collected per slide and written to Markdown.
+SPEAKER_NOTES: list[tuple[str, str, str]] = []
+
 
 # --------------------------------------------------------------------------
 # Drawing helpers
@@ -63,9 +69,9 @@ TOP = MSO_ANCHOR.TOP
 def _runs(paragraph, content, *, size, color, bold, font, italic=False) -> None:
     parts = content if isinstance(content, list) else [(content, {})]
     for part in parts:
-        text, overrides = (part, {}) if isinstance(part, str) else part
+        text_value, overrides = (part, {}) if isinstance(part, str) else part
         run = paragraph.add_run()
-        run.text = text
+        run.text = text_value
         run.font.name = overrides.get("font", font)
         run.font.size = Pt(overrides.get("size", size))
         run.font.bold = overrides.get("bold", bold)
@@ -94,10 +100,10 @@ def text(
 ):
     """Text box with zero padding; ``paragraphs`` is a str or a list of them."""
 
-    box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+    shape = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     if name:
-        box.name = name
-    frame = box.text_frame
+        shape.name = name
+    frame = shape.text_frame
     frame.word_wrap = True
     frame.margin_left = frame.margin_right = frame.margin_top = frame.margin_bottom = 0
     frame.vertical_anchor = anchor
@@ -109,7 +115,7 @@ def text(
         if bullets:
             _bullet(paragraph)
         _runs(paragraph, item, size=size, color=color, bold=bold, font=font, italic=italic)
-    return box
+    return shape
 
 
 def _bullet(paragraph) -> None:
@@ -164,7 +170,7 @@ def node(
     y: float,
     w: float,
     h: float,
-    title: str,
+    heading: str,
     sub: str | None = None,
     *,
     fill: RGBColor = WHITE,
@@ -185,7 +191,7 @@ def node(
     frame.vertical_anchor = MIDDLE
     first = frame.paragraphs[0]
     first.alignment = align
-    _runs(first, title, size=title_size, color=title_color, bold=True, font=BODY)
+    _runs(first, heading, size=title_size, color=title_color, bold=True, font=BODY)
     if sub:
         second = frame.add_paragraph()
         second.alignment = align
@@ -233,14 +239,12 @@ def arrow(
     return connector
 
 
-def stat(slide, x: float, y: float, w: float, value: str, label: str, *, before: str | None = None,
+def stat(slide, x: float, y: float, w: float, value: str, label: str, *, detail: str | None = None,
          value_color: RGBColor = TEAL, label_color: RGBColor = INK, size: float = 40) -> None:
     text(slide, x, y, w, 0.75, value, size=size, color=value_color, bold=True, font=HEAD)
-    offset = 0.8
-    if before:
-        text(slide, x, y + offset, w, 0.3, before, size=13, color=MUTED)
-        offset += 0.34
-    text(slide, x, y + offset, w, 0.6, label, size=14, color=label_color, bold=True)
+    text(slide, x, y + 0.8, w, 0.6, label, size=14, color=label_color, bold=True)
+    if detail:
+        text(slide, x, y + 1.42, w, 0.5, detail, size=12, color=MUTED)
 
 
 def chart(
@@ -255,9 +259,10 @@ def chart(
     number_format: str = "0%",
     axis_format: str | None = None,
     maximum: float | None = None,
+    major_unit: float | None = None,
     horizontal: bool = False,
     legend: bool = True,
-    title: str | None = None,
+    point_colors: Sequence[RGBColor] | None = None,
 ):
     data = CategoryChartData()
     data.categories = list(categories)
@@ -269,14 +274,7 @@ def chart(
     figure.font.name = BODY
     figure.font.size = Pt(11)
     figure.font.color.rgb = MUTED
-    figure.has_title = bool(title)
-    if title:
-        figure.chart_title.text_frame.text = title
-        title_run = figure.chart_title.text_frame.paragraphs[0].runs[0]
-        title_run.font.size = Pt(13)
-        title_run.font.bold = True
-        title_run.font.color.rgb = INK
-        title_run.font.name = BODY
+    figure.has_title = False
     figure.has_legend = legend and len(series) > 1
     if figure.has_legend:
         figure.legend.position = XL_LEGEND_POSITION.TOP
@@ -291,12 +289,17 @@ def chart(
     labels.number_format = number_format
     labels.number_format_is_linked = False
     labels.position = XL_LABEL_POSITION.OUTSIDE_END
-    labels.font.size = Pt(10)
+    labels.font.size = Pt(11)
     labels.font.color.rgb = INK
     for index, (_, _, color) in enumerate(series):
         fill = plot.series[index].format.fill
         fill.solid()
         fill.fore_color.rgb = color
+    if point_colors:
+        for index, color in enumerate(point_colors):
+            point = plot.series[0].points[index]
+            point.format.fill.solid()
+            point.format.fill.fore_color.rgb = color
     values = figure.value_axis
     values.has_major_gridlines = True
     values.major_gridlines.format.line.color.rgb = GRID
@@ -309,6 +312,8 @@ def chart(
     values.minimum_scale = 0
     if maximum is not None:
         values.maximum_scale = maximum
+    if major_unit is not None:
+        values.major_unit = major_unit
     categories_axis = figure.category_axis
     categories_axis.format.line.color.rgb = LINE
     categories_axis.has_major_gridlines = False
@@ -351,14 +356,6 @@ def table(slide, x: float, y: float, w: float, header: Sequence[str], rows: Sequ
             _runs(paragraph, value, size=size, color=color, bold=bold, font=BODY)
 
 
-def footer(slide, number: int, source: str | None = None, *, dark: bool = False) -> None:
-    color = ICE if dark else MUTED
-    if source:
-        text(slide, 0.6, 6.78, 12.15, 0.28, f"Source: {source}", size=10, color=color, italic=True)
-    text(slide, 0.6, 7.08, 8.0, 0.25, FOOTER, size=10, color=color)
-    text(slide, 11.9, 7.08, 0.85, 0.25, str(number), size=10, color=color, align=PP_ALIGN.RIGHT)
-
-
 def title(slide, heading: str, kicker: str | None = None, *, dark: bool = False) -> None:
     text(slide, 0.6, 0.42, 12.1, 0.72, heading, size=34, bold=True, font=HEAD,
          color=WHITE if dark else INK, name="Title")
@@ -374,8 +371,14 @@ def new_slide(prs, *, dark: bool = False):
     return slide
 
 
-def notes(slide, content: str) -> None:
-    slide.notes_slide.notes_text_frame.text = content
+def finish(prs, slide, heading: str, notes: str, sources: str, *, dark: bool = False) -> None:
+    """Add the brand footer and slide number; record notes and sources off-slide."""
+
+    number = len(prs.slides._sldIdLst)
+    color = ICE if dark else MUTED
+    text(slide, 0.6, 7.02, 8.0, 0.25, FOOTER, size=10, color=color)
+    text(slide, 11.9, 7.02, 0.85, 0.25, str(number), size=10, color=color, align=PP_ALIGN.RIGHT)
+    SPEAKER_NOTES.append((heading, notes, sources))
 
 
 # --------------------------------------------------------------------------
@@ -386,69 +389,115 @@ def slide_cover(prs) -> None:
     slide = new_slide(prs, dark=True)
     star = box(slide, 0.62, 1.06, 0.34, 0.34, fill=AMBER, shape=MSO_SHAPE.STAR_4_POINT)
     star.name = "North star"
-    text(slide, 1.08, 1.08, 10, 0.32, "AI / LLM ENGINEERING ASSIGNMENT  ·  EVIDENCE AS OF 2026-10-18",
+    text(slide, 1.08, 1.08, 10, 0.32, "AI / LLM ENGINEERING ASSIGNMENT  ·  FINAL SUBMISSION",
          size=13, color=AMBER, bold=True)
-    text(slide, 0.6, 1.7, 12.0, 0.95, "Agentic Customer Support Assistant", size=46, bold=True,
-         font=HEAD, color=WHITE, name="Title")
+    heading = "Agentic Customer Support Assistant"
+    text(slide, 0.6, 1.7, 12.0, 0.95, heading, size=46, bold=True, font=HEAD, color=WHITE, name="Title")
     text(slide, 0.6, 2.75, 11.4, 0.9,
          "Text and voice support for Northstar Gear, a fictional travel-backpack brand, "
          "with Groq for LLM and speech, grounded answers, read-only tools, and guardrails in code",
          size=19, color=ICE)
     chips = [
-        ("0.955", "live routing accuracy on 110 held-out cases (was 0.509)"),
-        ("0.922", "expected evidence reaching the answerer (was 0.516)"),
-        ("2.1–2.9 s", "voice: end of speech to playback start (was 19.3–20.2 s)"),
+        ("95.5%", "routing accuracy, live, on 110 held-out messages"),
+        ("13 / 13", "unanswerable questions declined; 93.8% of answerable ones answered"),
+        ("2.1–2.9 s", "voice: end of speech to start of the spoken reply"),
     ]
     for index, (value, label) in enumerate(chips):
         x = 0.6 + index * 4.1
         box(slide, x, 4.55, 3.8, 1.55, fill=INK_SOFT, radius=0.1)
         text(slide, x + 0.3, 4.72, 3.3, 0.65, value, size=34, bold=True, font=HEAD, color=AMBER)
         text(slide, x + 0.3, 5.42, 3.3, 0.6, label, size=13, color=WHITE)
-    footer(slide, 1, "reports/phase2-hybrid-live-evaluation.md, reports/final-retrieval-offline-evaluation.md, "
+    finish(prs, slide, heading,
+           "One sentence: a support assistant that works over text and a phone-style voice line, where "
+           "every safety property is enforced in application code and every number comes from a "
+           "committed report.",
+           "reports/phase2-hybrid-live-low-effort-evaluation.md; reports/final-rag-live-evaluation.md; "
            "recordings/final-*-run.json", dark=True)
-    notes(slide, "One sentence: a support assistant that works over text and a phone-style voice line, "
-          "where every safety property is enforced in application code and every number in this deck "
-          "comes from a committed report. The three numbers are the before/after of the improvement "
-          "programme on held-out sets.")
+
+
+def slide_problem(prs) -> None:
+    slide = new_slide(prs)
+    heading = "The problem: support over text and voice"
+    title(slide, heading,
+          "Build a customer-support assistant on Groq that routes, grounds, calls tools, refuses "
+          "unsafe requests, and behaves like a phone line")
+    parts = [
+        ("A", "Agentic support system", [
+            "Route messages to 3+ intents, each with its own agent",
+            "RAG agent grounded in a 10–20 document knowledge base",
+            "Tool-calling agent for order status and return eligibility",
+            "Input guard for prompt injection; output guard for forbidden claims",
+            "Cache classifier calls and report the hit rate",
+        ]),
+        ("B", "Voice turn-taking pipeline", [
+            "Audio in, Groq Whisper STT, TTS out, framed as a phone line",
+            "Barge-in: silence, noise burst, real interruption, own adversarial case",
+            "Provider failure mid-call: retry or fall back, never hang",
+            "Measure end of speech to the first audio of the reply",
+        ]),
+        ("C", "Integration and operations", [
+            "Share state when a call moves to text chat or a human",
+            "Production evaluation: guardrail regression, latency SLOs, routing A/B",
+            "Groq degradation: detection, fallback, and failover trade-offs",
+        ]),
+    ]
+    for index, (letter, name, items) in enumerate(parts):
+        x = 0.6 + index * 4.1
+        box(slide, x, 1.85, 3.85, 3.65, fill=PANEL, line=GRID)
+        badge(slide, x + 0.25, 2.05, letter)
+        text(slide, x + 0.8, 2.1, 2.9, 0.35, name, size=16, bold=True)
+        text(slide, x + 0.3, 2.7, 3.3, 2.75, items, size=13, bullets=True, space_after=5)
+    text(slide, 0.6, 5.72, 3.0, 0.3, "Constraints that shape the design", size=14, bold=True, color=TEAL)
+    constraints = ["Own domain and knowledge base", "Real recorded audio", "Grounding, not guessing",
+                   "Guardrails hold under pressure", "No dropped or duplicated turns", "Keys never committed"]
+    for index, label in enumerate(constraints):
+        x = 0.6 + index * 2.05
+        node(slide, x, 6.1, 1.9, 0.6, label, fill=MIST, line=None, title_size=11.5)
+    finish(prs, slide, heading,
+           "The assignment in one slide. Part A is the text agent system, Part B the phone-style voice "
+           "line, Part C written integration and operations answers. The constraint strip is what "
+           "reviewers test hardest: grounding, guardrails under pressure, and no dropped or duplicated "
+           "voice turns.",
+           "Assignment problem statement (kept locally under Problem_Statement/, not in the repository)")
 
 
 def slide_summary(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Measure first, then fix what the data shows",
-          "Five phases on held-out sets; each change was kept only if its live numbers improved")
+    heading = "Solution at a glance"
+    title(slide, heading, "Measured on held-out sets with live Groq calls; every figure is reproducible")
     stats = [
-        ("0.955", "from 0.509", "Routing accuracy, live"),
-        ("0.9%", "from 35.5%", "Messages with no usable route"),
-        ("0.922", "from 0.516", "Evidence reaching the answerer"),
-        ("2.1–2.9 s", "from 19.3–20.2 s", "Voice response start"),
+        ("95.5%", "Routing accuracy", "110 held-out messages, live"),
+        ("93.8%", "Answerable questions answered", "13 / 13 unanswerable declined"),
+        ("0.922", "Evidence recall", "expected documents reaching the answerer"),
+        ("2.1–2.9 s", "Voice response start", "end of speech to spoken reply"),
     ]
-    for index, (value, before, label) in enumerate(stats):
+    for index, (value, label, detail) in enumerate(stats):
         x = 0.6 + index * 3.1
         box(slide, x, 1.85, 2.85, 2.1, fill=MIST)
-        stat(slide, x + 0.25, 2.0, 2.4, value, label, before=before, size=36)
+        stat(slide, x + 0.25, 2.0, 2.4, value, label, detail=detail, size=36)
     steps = [
         ("1", "Hybrid router", "Rules, then labeled examples, then the LLM only when needed: 0.245 LLM calls per message"),
-        ("2", "Conversation agent", "Greetings, off-topic and unclear input get a fixed, safe reply instead of a dead end"),
-        ("3", "Hybrid retrieval", "e5 + BM25 fusion; the gate is tuned for recall and the answerer is the precision gate"),
-        ("4", "Voice set up per call", "Models load when the call connects, not inside each turn's latency window"),
+        ("2", "Conversation agent", "Greetings, off-topic and unclear input get a fixed, safe reply, never a dead end"),
+        ("3", "Hybrid retrieval", "e5 + BM25 fusion; the gate favors recall and the answerer declines without evidence"),
+        ("4", "Voice built per call", "Models load when the call connects, so each turn only pays for STT, routing and TTS"),
     ]
-    for index, (number, heading, body) in enumerate(steps):
+    for index, (number, name, body) in enumerate(steps):
         x = 0.6 + (index % 2) * 6.2
         y = 4.3 + (index // 2) * 1.15
         badge(slide, x, y + 0.02, number)
-        text(slide, x + 0.6, y, 5.4, 0.32, heading, size=16, bold=True)
+        text(slide, x + 0.6, y, 5.4, 0.32, name, size=16, bold=True)
         text(slide, x + 0.6, y + 0.34, 5.4, 0.65, body, size=14, color=MUTED)
-    footer(slide, 2, "docs/evaluation.md (Phase 0 and final tables), recordings/step8-* vs recordings/final-*")
-    notes(slide, "Phase 0 committed held-out eval sets before any new code, so the labels predate the router "
-          "they test. Phases 1-5: conversation agent and LLM-tier fixes, hybrid router, hybrid retrieval, "
-          "memory, UI. The voice latency drop is mostly one root cause: the old harness loaded the local "
-          "models after end of speech.")
+    finish(prs, slide, heading,
+           "Four headline numbers and the four design moves behind them. All live figures used Groq "
+           "openai/gpt-oss-20b on held-out sets committed before tuning.",
+           "reports/phase2-hybrid-live-low-effort-evaluation.md; reports/final-rag-live-evaluation.md; "
+           "reports/final-retrieval-offline-evaluation.md; recordings/final-*-run.json")
 
 
 def slide_requirements(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Every required capability, with its status",
-          "✓ implemented and evidenced   ◐ partial, and stated as partial")
+    heading = "Every required capability, with its status"
+    title(slide, heading, "✓ implemented and evidenced   ◐ partial, and stated as partial")
     columns = [
         ("A", "Part A · Agentic support", [
             ("✓", "Router: 6 intents, distinct handlers"),
@@ -475,24 +524,26 @@ def slide_requirements(prs) -> None:
             ("✓", "Held-out eval sets, live vs offline labels"),
         ]),
     ]
-    for index, (letter, heading, items) in enumerate(columns):
+    for index, (letter, name, items) in enumerate(columns):
         x = 0.6 + index * 4.1
         box(slide, x, 1.85, 3.85, 4.75, fill=PANEL, line=GRID)
         badge(slide, x + 0.25, 2.05, letter)
-        text(slide, x + 0.8, 2.1, 2.9, 0.35, heading, size=16, bold=True)
+        text(slide, x + 0.8, 2.1, 2.9, 0.35, name, size=16, bold=True)
         for row, (mark, label) in enumerate(items):
             y = 2.75 + row * 0.62
             text(slide, x + 0.3, y, 0.3, 0.35, mark, size=16, bold=True,
                  color=GREEN if mark == "✓" else AMBER)
             text(slide, x + 0.65, y, 3.05, 0.55, label, size=14)
-    footer(slide, 3, "docs/requirements-matrix.md, docs/design-notes.md, docs/part-c-answers.md")
-    notes(slide, "The partial items are deliberate honesty: first-acoustic-sample latency needs a loopback "
-          "rig; durable memory and provider failover are designed in the docs but not built for the demo.")
+    finish(prs, slide, heading,
+           "The partial items are deliberate honesty: first-acoustic-sample latency needs a loopback rig; "
+           "durable memory and provider failover are designed in the docs but not built for the demo.",
+           "docs/requirements-matrix.md (Final status); docs/design-notes.md; docs/part-c-answers.md")
 
 
 def slide_architecture(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Architecture: one guarded service for text and voice")
+    heading = "Architecture: one guarded service for text and voice"
+    title(slide, heading)
     node(slide, 0.6, 1.85, 2.2, 0.95, "Text chat", "Streamlit UI, mic in the box")
     node(slide, 0.6, 3.05, 2.2, 1.75, "Voice line",
          "WebRTC + Silero VAD, barge-in coordinator, Groq Whisper STT")
@@ -502,19 +553,18 @@ def slide_architecture(prs) -> None:
     text(slide, 3.4, 1.88, 6.4, 0.3, "SupportService  ·  shared by every channel", size=12, bold=True, color=TEAL)
     row1 = [("Validate", "NFKC, size, control chars"), ("Input guard", "rules + Groq classifier"),
             ("Hybrid router", "rules → examples → LLM")]
-    for index, (heading, sub) in enumerate(row1):
-        node(slide, 3.4 + index * 2.25, 2.3, 1.95, 0.85, heading, sub)
+    for index, (name, sub) in enumerate(row1):
+        node(slide, 3.4 + index * 2.25, 2.3, 1.95, 0.85, name, sub)
     for index in range(2):
         arrow(slide, 5.35 + index * 2.25, 2.72, 5.65 + index * 2.25, 2.72)
     agents = [("RAG agent", "e5 + BM25, cited"), ("Order agent", "read-only tools"),
               ("Handoff", "summary + reference"), ("Conversation", "templates only")]
     arrow(slide, 8.875, 3.15, 8.875, 3.42, head=False)
-    connector = arrow(slide, 4.125, 3.42, 9.135, 3.42, head=False)
-    connector.name = "Router fan-out"
-    for index, (heading, sub) in enumerate(agents):
+    arrow(slide, 4.125, 3.42, 9.135, 3.42, head=False)
+    for index, (name, sub) in enumerate(agents):
         x = 3.4 + index * 1.67
         arrow(slide, x + 0.725, 3.42, x + 0.725, 3.68)
-        node(slide, x, 3.68, 1.45, 1.0, heading, sub, title_size=12.5, sub_size=10)
+        node(slide, x, 3.68, 1.45, 1.0, name, sub, title_size=12.5, sub_size=10)
         arrow(slide, x + 0.725, 4.68, x + 0.725, 4.95, head=False)
     arrow(slide, 4.125, 4.95, 9.135, 4.95, head=False)
     arrow(slide, 6.6, 4.95, 6.6, 5.25)
@@ -530,19 +580,20 @@ def slide_architecture(prs) -> None:
         ("Order records", "read-only · ownership-checked", 4.92, 0.72),
         ("Session memory", "verified slots + transcript", 5.79, 0.72),
     ]
-    for heading, sub, y, h in deps:
-        node(slide, 10.45, y, 2.3, h, heading, sub, fill=MIST, line=None, title_size=12, sub_size=10)
+    for name, sub, y, h in deps:
+        node(slide, 10.45, y, 2.3, h, name, sub, fill=MIST, line=None, title_size=12, sub_size=10)
         arrow(slide, 10.45, y + h / 2, 10.1, y + h / 2, color=SLATE, width=1.25, dashed=True)
-    footer(slide, 4, "src/agentic_support/pipeline.py (SupportService), hybrid_routing.py, handlers.py, voice.py")
-    notes(slide, "Read left to right. Both channels enter the same SupportService. Nothing reaches the router "
-          "or any agent before validation and the input guard; every reply leaves through the output claim "
-          "guard. Dashed lines are dependencies. Conversation agents have no retrieval or tools.")
+    finish(prs, slide, heading,
+           "Read left to right. Both channels enter the same SupportService. Nothing reaches the router or "
+           "any agent before validation and the input guard; every reply leaves through the output claim "
+           "guard. Dashed lines are dependencies. Conversation agents have no retrieval or tools.",
+           "src/agentic_support/pipeline.py (SupportService); hybrid_routing.py; handlers.py; voice.py")
 
 
 def slide_lifecycle(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Every step fails safe, and none of them fails silently",
-          "Each stage has a named failure outcome and a customer-facing reply")
+    heading = "Every step fails safe, and none of them fails silently"
+    title(slide, heading, "Each stage has a named failure outcome and a customer-facing reply")
     steps = [
         ("1", "Validate", "Unicode, size, control characters", "Rejected: “couldn’t read that”"),
         ("2", "Input guard", "Rule signals + Groq safety classifier", "Refused, or “can’t check that safely right now”"),
@@ -551,11 +602,11 @@ def slide_lifecycle(prs) -> None:
         ("5", "Output guard", "Facts must come from tools or citations", "Blocked: “couldn’t verify every detail”"),
         ("6", "Remember", "Every turn, refused ones included", "Only verified slots ever reach an LLM"),
     ]
-    for index, (number, heading, body, failure) in enumerate(steps):
+    for index, (number, name, body, failure) in enumerate(steps):
         x = 0.6 + index * 2.05
         box(slide, x, 1.85, 1.88, 2.05, fill=MIST)
         badge(slide, x + 0.18, 2.0, number)
-        text(slide, x + 0.18, 2.55, 1.6, 0.35, heading, size=16, bold=True)
+        text(slide, x + 0.18, 2.55, 1.6, 0.35, name, size=16, bold=True)
         text(slide, x + 0.18, 2.95, 1.6, 0.9, body, size=12, color=MUTED)
         if index < 5:
             arrow(slide, x + 1.88, 2.87, x + 2.05, 2.87)
@@ -569,25 +620,26 @@ def slide_lifecycle(prs) -> None:
          "Structural guarantee: the router and every agent run only after the input guard allows the message. "
          "Unrouted or unclear messages go to an agent with no retrieval and no tools.",
          size=15, color=WHITE, anchor=MIDDLE)
-    footer(slide, 5, "src/agentic_support/pipeline.py; tests/test_step5_call_path.py, tests/test_conversation.py")
-    notes(slide, "This is the end-to-end trace the assignment asks for. Running the guard and the router in "
-          "parallel was considered and rejected because the router LLM would then see unchecked text.")
+    finish(prs, slide, heading,
+           "This is the end-to-end trace the assignment asks for. Running the guard and the router in "
+           "parallel was considered and rejected because the router LLM would then see unchecked text.",
+           "src/agentic_support/pipeline.py; tests/test_step5_call_path.py; tests/test_conversation.py")
 
 
 def slide_router(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Hybrid routing: the LLM only when needed",
-          "Share of the 110 held-out messages each tier decided in the live run")
+    heading = "Hybrid routing: the LLM only when needed"
+    title(slide, heading, "Share of the 110 held-out messages each tier decided in the live run")
     tiers = [
         ("0", "Rules", "order ID + operation, verified follow-up, smalltalk, human request, gibberish", 54, "~0 ms"),
         ("1", "Labeled examples", "nearest examples on MiniLM; answers only with a clear margin", 29, "~6 ms"),
         ("2", "Groq LLM", "strict schema with all six intents; validated locally", 27, "~0.6 s"),
         ("?", "Clarify", "no confident route: a clarifying question, not a refusal", 0, "0 ms"),
     ]
-    for index, (number, heading, body, count, cost) in enumerate(tiers):
+    for index, (number, name, body, count, cost) in enumerate(tiers):
         y = 1.9 + index * 1.15
         badge(slide, 0.6, y + 0.1, number)
-        text(slide, 1.2, y, 2.6, 0.35, heading, size=16, bold=True)
+        text(slide, 1.2, y, 2.6, 0.35, name, size=16, bold=True)
         text(slide, 1.2, y + 0.38, 3.6, 0.65, body, size=12, color=MUTED)
         box(slide, 5.0, y + 0.12, 4.4, 0.42, fill=GRID, radius=0.2)
         if count:
@@ -595,81 +647,80 @@ def slide_router(prs) -> None:
         text(slide, 5.0, y + 0.62, 2.5, 0.3, f"{count} of 110", size=12, bold=True)
         text(slide, 7.5, y + 0.62, 1.9, 0.3, cost, size=12, color=MUTED, align=PP_ALIGN.RIGHT)
     box(slide, 9.85, 1.85, 2.9, 4.55, fill=MIST)
-    text(slide, 10.1, 2.0, 2.5, 0.35, "Why not LLM-only", size=16, bold=True)
+    text(slide, 10.1, 2.0, 2.5, 0.35, "Why hybrid", size=16, bold=True)
     text(slide, 10.1, 2.45, 2.5, 3.9, [
-        "62 classifier errors and 16.4 s p95 when the schema had no label for “hi”",
-        "Two live return-to-product misroutes, patched with regex",
-        "Rules alone miss Hinglish and paraphrases, so the LLM stays",
-        "Thresholds from leave-one-out on 137 examples, never the test set",
+        "Rules are instant and deterministic for unambiguous requests",
+        "Labeled examples cover paraphrases in milliseconds, with no API call",
+        "The LLM handles Hinglish, mixed and novel phrasing",
+        "Thresholds come from leave-one-out on 137 training examples, never the test set",
     ], size=13, bullets=True, space_after=6)
-    footer(slide, 6, "reports/phase2-hybrid-live-evaluation.md (routing sources), docs/router-design.md")
-    notes(slide, "Rules decide 54 of 110, labeled examples 29, the LLM 27. A test fails if any training example "
-          "appears in the held-out set. The semantic tier answers only when the best intent beats the runner-up "
-          "by 0.15 cosine; that margin gave precision 1.00 at 44% coverage in leave-one-out.")
+    finish(prs, slide, heading,
+           "Rules decide 54 of 110, labeled examples 29, the LLM 27. A test fails if any training example "
+           "appears in the held-out set. The semantic tier answers only when the best intent beats the "
+           "runner-up by 0.15 cosine; that margin gave precision 1.00 at 44% coverage in leave-one-out.",
+           "reports/phase2-hybrid-live-evaluation.md (routing sources); docs/router-design.md")
 
 
 def slide_routing_results(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Routing went from coin-flip to dependable",
-          "Same 110 held-out messages, live Groq openai/gpt-oss-20b")
+    heading = "Routing results on 110 held-out messages"
+    title(slide, heading, "Live run with Groq openai/gpt-oss-20b, final configuration")
+    intents = ["Product question", "Order status", "Human handoff", "Smalltalk", "Out of scope", "Unclear"]
     chart(
-        slide, 0.6, 1.75, 8.4, 4.85,
-        ["Strict accuracy", "Lenient accuracy", "Dead-end rate", "False escalation"],
-        [
-            ("Phase 0: LLM-only, 3 intents", [0.509, 0.527, 0.355, 0.117], SLATE),
-            ("Phase 1: 6 intents", [0.909, 0.945, 0.045, 0.0], TEAL_MID),
-            ("Phase 2: hybrid (final)", [0.955, 0.982, 0.009, 0.0], TEAL),
-        ],
-        number_format="0.0%", axis_format="0%", maximum=1.05,
+        slide, 0.6, 1.75, 8.5, 4.95, intents,
+        [("Precision", [1.0, 0.923, 0.933, 1.0, 0.933, 1.0], TEAL),
+         ("Recall", [0.917, 1.0, 0.933, 1.0, 1.0, 0.923], SLATE)],
+        number_format="0%", maximum=1.12, major_unit=0.2,
     )
-    callouts = [("16.4 s → 0.70 s", "routing p95 latency"), ("1.28 → 0.245", "LLM calls per message"),
-                ("62 → 0", "classifier errors")]
+    callouts = [("95.5%", "strict accuracy"), ("99.1%", "outcome the customer sees"),
+                ("0.70 s", "routing p95 latency"), ("0", "false escalations to a human")]
     for index, (value, label) in enumerate(callouts):
-        y = 1.95 + index * 1.55
-        box(slide, 9.35, y, 3.4, 1.3, fill=MIST)
-        text(slide, 9.6, y + 0.15, 3.0, 0.55, value, size=26, bold=True, font=HEAD, color=TEAL)
-        text(slide, 9.6, y + 0.75, 3.0, 0.4, label, size=14, bold=True)
-    footer(slide, 7, "reports/phase0-baseline-live-evaluation.md, phase1-llm-only-live-evaluation.md, "
-           "phase2-hybrid-live-evaluation.md, phase2-hybrid-live-low-effort-evaluation.md")
-    notes(slide, "Phase 1 alone (adding smalltalk, out_of_scope, unclear to the schema) fixed most of it. The "
-          "hybrid tiers then cut LLM calls by 4-5x. Remaining misses: 'the blue one' gets a clarifying question; "
-          "'xkcd lorem ipsum' is called off-topic instead of unclear.")
+        y = 1.85 + index * 1.2
+        box(slide, 9.45, y, 3.3, 1.05, fill=MIST)
+        text(slide, 9.7, y + 0.1, 2.9, 0.5, value, size=26, bold=True, font=HEAD, color=TEAL)
+        text(slide, 9.7, y + 0.62, 2.9, 0.35, label, size=13, bold=True)
+    finish(prs, slide, heading,
+           "Per-intent precision and recall on the held-out set. 'Outcome' counts a no-route result as "
+           "correct only when the clarifying reply is the right answer. Remaining misses: 'the blue one' "
+           "gets a clarifying question; 'xkcd lorem ipsum' is called off-topic instead of unclear.",
+           "reports/phase2-hybrid-live-low-effort-evaluation.md")
 
 
 def slide_retrieval(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Retrieval: fuse meaning and keywords, gate for recall",
-          "Thresholds tuned on a dev set; scored once on 45 held-out questions")
+    heading = "Retrieval: fuse meaning and keywords, gate for recall"
+    title(slide, heading, "Five configurations compared: tuned on a dev set, scored on 45 held-out questions")
     flow = [
         ("Query", None), ("e5 dense  +  BM25 keywords", "multilingual paraphrase · exact names"),
-        ("Reciprocal-rank fusion", "no score-scale mixing"), ("Gate on best candidate", "tuned for recall (0.8106)"),
+        ("Reciprocal-rank fusion", "no score-scale mixing"), ("Gate on best candidate", "tuned for recall"),
         ("Answerer", "declines if evidence is insufficient"), ("Output claim guard", "dates, amounts, IDs"),
     ]
-    for index, (heading, sub) in enumerate(flow):
+    for index, (name, sub) in enumerate(flow):
         y = 1.8 + index * 0.82
-        node(slide, 0.6, y, 3.6, 0.66, heading, sub, fill=MIST if index in (3, 4) else WHITE,
+        node(slide, 0.6, y, 3.6, 0.66, name, sub, fill=MIST if index in (3, 4) else WHITE,
              title_size=12.5, sub_size=10)
         if index < len(flow) - 1:
             arrow(slide, 2.4, y + 0.66, 2.4, y + 0.82)
     chart(
-        slide, 4.6, 1.75, 8.2, 4.9,
-        ["Original MiniLM, 0.45 cut", "Same model, re-tuned cut", "MiniLM + BM25 fusion",
-         "+ cross-encoder rerank", "e5 + BM25 (final)"],
+        slide, 4.6, 1.75, 8.2, 4.95,
+        ["MiniLM dense", "MiniLM dense, tuned cut", "MiniLM + BM25",
+         "MiniLM + BM25 + reranker", "e5 + BM25 (selected)"],
         [("Evidence recall", [0.516, 0.781, 0.797, 0.562, 0.922], TEAL),
          ("MRR", [0.857, 0.857, 0.907, 0.885, 0.912], SLATE)],
         number_format="0.00", maximum=1.0, horizontal=True,
     )
-    footer(slide, 8, "reports/retrieval-comparison.md, reports/final-retrieval-offline-evaluation.md")
-    notes(slide, "Re-tuning the old threshold alone lifted evidence recall from 0.52 to 0.78: the first problem "
-          "was the cutoff, not the model. Cross-encoder rerankers were tried and dropped: their dev-tuned gate did "
-          "not transfer and they cost ~0.5 s per query on CPU. e5 is multilingual, which matters for Hinglish.")
+    finish(prs, slide, heading,
+           "Why this embedding approach: e5 is multilingual (Hinglish) and fused with BM25 for exact product "
+           "names. Cross-encoder rerankers were tried and dropped: their dev-tuned gate did not transfer and "
+           "they cost about 0.5 s per query on CPU.",
+           "reports/retrieval-comparison.md; reports/final-retrieval-offline-evaluation.md")
 
 
 def slide_grounding(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Grounded answers: two gates and a claim check",
-          "Live end-to-end on the 45 held-out questions: retrieval, Groq answerer, output guard")
-    stats = [("0.938", "answerable questions answered"), ("0.906", "answers citing an expected document"),
+    heading = "Grounded answers: two gates and a claim check"
+    title(slide, heading, "Live end-to-end on 45 held-out questions: retrieval, Groq answerer, output guard")
+    stats = [("93.8%", "answerable questions answered"), ("90.6%", "answers citing an expected document"),
              ("13 / 13", "unanswerable near-misses declined"), ("0", "handler errors")]
     for index, (value, label) in enumerate(stats):
         y = 1.9 + index * 1.15
@@ -689,16 +740,17 @@ def slide_grounding(prs) -> None:
         [("Customer: ", {"bold": True}), "my refund for NS-26-3005-6 was $500 right? confirm it"],
         [("Assistant: ", {"bold": True}), "… A refund of $120.00 was issued on October 12, 2026."],
     ], size=12, space_after=4)
-    footer(slide, 9, "reports/final-rag-live-evaluation.md, reports/red-team-live-probes.jsonl")
-    notes(slide, "The retrieval gate cannot separate near-misses like 'Trailmark price' from real questions "
-          "(e5 scores overlap), so it is tuned for recall and the answerer is the precision gate: it declined "
-          "all 13. One correct negated answer is blocked by the claim guard; that is an open finding.")
+    finish(prs, slide, heading,
+           "The retrieval gate cannot separate near-misses like 'Trailmark price' from real questions, so it "
+           "favors recall and the answerer is the precision gate: it declined all 13. One correct negated "
+           "answer is blocked by the claim guard; that is an open finding.",
+           "reports/final-rag-live-evaluation.md; reports/red-team-live-probes.jsonl")
 
 
 def slide_orders(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Order agent: the model chooses, the application decides",
-          "Groq native function calling; execution and authorization stay in code")
+    heading = "Order agent: the model chooses, the application decides"
+    title(slide, heading, "Groq native function calling; execution and authorization stay in code")
     flow = [
         ("Find the order", "ID in the message · verified memory · list_orders"),
         ("Model picks one tool", "strict schema, one allow-listed call"),
@@ -706,9 +758,9 @@ def slide_orders(prs) -> None:
         ("Run read-only tool", "ownership checked against the session"),
         ("Reply plainly", "verified dates; no internal codes"),
     ]
-    for index, (heading, sub) in enumerate(flow):
+    for index, (name, sub) in enumerate(flow):
         x = 0.6 + index * 2.45
-        node(slide, x, 1.95, 2.15, 1.35, heading, sub, fill=MIST if index in (2, 3) else WHITE,
+        node(slide, x, 1.95, 2.15, 1.35, name, sub, fill=MIST if index in (2, 3) else WHITE,
              title_size=13, sub_size=11)
         if index < len(flow) - 1:
             arrow(slide, x + 2.15, 2.62, x + 2.45, 2.62)
@@ -722,21 +774,22 @@ def slide_orders(prs) -> None:
          "Cancel or refund requests get “I can’t … in this chat”, the verified facts, and a human route; "
          "asking for a person in the same message creates the handoff."),
     ]
-    for index, (heading, body) in enumerate(cards):
+    for index, (name, body) in enumerate(cards):
         x = 0.6 + index * 4.1
         box(slide, x, 3.75, 3.85, 2.55, fill=PANEL, line=GRID)
         badge(slide, x + 0.25, 3.95, str(index + 1))
-        text(slide, x + 0.8, 3.98, 2.9, 0.65, heading, size=16, bold=True)
+        text(slide, x + 0.8, 3.98, 2.9, 0.65, name, size=16, bold=True)
         text(slide, x + 0.3, 4.7, 3.3, 1.55, body, size=15, color=MUTED)
-    footer(slide, 10, "src/agentic_support/tool_calling.py, handlers.py, tools.py; tests/test_order_actions.py")
-    notes(slide, "Ownership is enforced by the tool with the server-side session's customer ID. The cancel/refund "
-          "behavior was found by the user in manual testing: those requests used to get a silent status lookup.")
+    finish(prs, slide, heading,
+           "Ownership is enforced by the tool with the server-side session's customer ID. Cancel and refund "
+           "requests are answered honestly with verified facts and a human route.",
+           "src/agentic_support/tool_calling.py; handlers.py; tools.py; tests/test_order_actions.py")
 
 
 def slide_memory(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Memory and handoff: one session across voice and text",
-          "Part C: what moves with a customer from a call to a chat transcript for a human")
+    heading = "Memory and handoff: one session across voice and text"
+    title(slide, heading, "Part C: what moves with a customer from a call to a chat transcript for a human")
     node(slide, 0.6, 2.0, 2.4, 1.0, "Voice turns", "transcripts only, never audio")
     node(slide, 0.6, 3.6, 2.4, 1.0, "Text turns", "same session ID")
     arrow(slide, 3.0, 2.5, 3.6, 3.2)
@@ -758,27 +811,28 @@ def slide_memory(prs) -> None:
         ("“Does it have a sleeve?”", "query rewritten with the remembered product"),
         ("Two unclear turns", "the second reply offers a human"),
     ]
-    for index, (heading, body) in enumerate(items):
+    for index, (name, body) in enumerate(items):
         x = 0.6 + (index % 2) * 6.2
         y = 5.35 + (index // 2) * 0.62
-        text(slide, x, y, 2.45, 0.5, heading, size=14, bold=True)
+        text(slide, x, y, 2.45, 0.5, name, size=14, bold=True)
         text(slide, x + 2.5, y, 3.5, 0.55, body, size=13, color=MUTED)
-    footer(slide, 11, "src/agentic_support/memory.py, catalog.py; docs/memory-handling.md")
-    notes(slide, "Raw transcript text is never sent to a model, so an earlier message cannot inject instructions "
-          "later. The store is process-local; production needs Redis for live session state and Postgres for "
-          "transcripts, with retention and encryption.")
+    finish(prs, slide, heading,
+           "Raw transcript text is never sent to a model, so an earlier message cannot inject instructions "
+           "later. The store is process-local; production needs Redis for live session state and Postgres "
+           "for transcripts, with retention and encryption.",
+           "src/agentic_support/memory.py; catalog.py; docs/memory-handling.md")
 
 
 def slide_voice(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Voice line: barge-in that cannot double-handle a turn",
-          "Recorded user audio replayed in real time against audible playback")
+    heading = "Voice line: barge-in that cannot double-handle a turn"
+    title(slide, heading, "Real recorded user audio replayed in real time against audible playback")
     flow = [("Assistant speaking", "playback with a turn ID"), ("VAD", "WebRTC candidate, Silero confirms"),
             ("Coordinator", "cancel playback, discard the stale turn"), ("Whisper STT", "retry once, then safe handoff"),
             ("SupportService → TTS", "same guarded path as text")]
-    for index, (heading, sub) in enumerate(flow):
+    for index, (name, sub) in enumerate(flow):
         y = 1.85 + index * 0.95
-        node(slide, 0.6, y, 3.4, 0.78, heading, sub, fill=MIST if index == 2 else WHITE, title_size=13, sub_size=10.5)
+        node(slide, 0.6, y, 3.4, 0.78, name, sub, fill=MIST if index == 2 else WHITE, title_size=13, sub_size=10.5)
         if index < len(flow) - 1:
             arrow(slide, 2.3, y + 0.78, 2.3, y + 0.95)
     rows = [
@@ -790,74 +844,78 @@ def slide_voice(prs) -> None:
         ["User’s adversarial line", "No refund promise", ("Status + no refund issued", GREEN, True)],
         ["STT provider failure", "Retry, then hand off", ("2 attempts, safe handoff", GREEN, True)],
     ]
-    table(slide, 4.4, 1.85, 8.35, ["Scenario", "Expected", "Observed (final run)"], rows,
+    table(slide, 4.4, 1.85, 8.35, ["Scenario", "Expected", "Observed"], rows,
           [2.55, 2.75, 3.05], size=13, row_h=0.56)
-    footer(slide, 12, "recordings/final-*-run.json, scripts/run_voice_coordination.py, docs/voice-coordination.md")
-    notes(slide, "Every scenario uses the user's own recordings. The coordinator only accepts a result for the "
-          "current turn ID, so a late STT result for a cancelled turn is discarded rather than spoken.")
+    finish(prs, slide, heading,
+           "Every scenario uses the user's own recordings. The coordinator only accepts a result for the "
+           "current turn ID, so a late STT result for a cancelled turn is discarded rather than spoken.",
+           "recordings/final-*-run.json; scripts/run_voice_coordination.py; docs/voice-coordination.md")
 
 
 def slide_latency(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Voice latency: under 3 s once models load at call setup",
-          "End of user speech (VAD) to application playback start, one run per scenario")
+    heading = "Voice latency: speech turns answered in 2.1–2.9 s"
+    title(slide, heading, "End of user speech (VAD) to application playback start, real recordings")
     chart(
-        slide, 0.6, 1.75, 8.2, 4.85,
+        slide, 0.6, 1.75, 8.2, 4.95,
         ["Order status", "Return eligibility", "Wrong-order interrupt", "Adversarial line", "STT failure handoff"],
-        [("Step 8 harness", [19.95, 20.17, 19.71, 19.29, 15.89], SLATE),
-         ("Final", [2.738, 2.947, 2.119, 2.778, 0.542], TEAL)],
-        number_format="0.00\" s\"", axis_format="0\" s\"", maximum=22,
+        [("Seconds", [2.738, 2.947, 2.119, 2.778, 0.542], TEAL)],
+        number_format="0.00\" s\"", axis_format="0.0\" s\"", maximum=3.5, major_unit=0.5, legend=False,
+        point_colors=[TEAL, TEAL, TEAL, TEAL, SLATE],
     )
     box(slide, 9.15, 1.85, 3.6, 4.75, fill=MIST)
-    text(slide, 9.4, 2.0, 3.1, 0.35, "Why it dropped", size=16, bold=True)
+    text(slide, 9.4, 2.0, 3.1, 0.35, "What keeps it fast", size=16, bold=True)
     text(slide, 9.4, 2.45, 3.1, 1.9, [
-        "The old harness built the service after end of speech, so each turn loaded the models",
-        "Routing now needs 0.245 LLM calls per message",
+        "Models load when the call connects, not inside a turn",
+        "Routing needs 0.245 LLM calls per message",
+        "Local TTS, no extra network hop",
     ], size=13, bullets=True, space_after=6)
     text(slide, 9.4, 4.3, 3.1, 0.35, "Read with care", size=16, bold=True)
     text(slide, 9.4, 4.75, 3.1, 1.8, [
         "Playback start, not first acoustic sample",
-        "One run each; an earlier adversarial run took 3.02 s",
+        "One run per scenario; one earlier adversarial run took 3.02 s",
     ], size=13, bullets=True, space_after=6)
-    footer(slide, 13, "recordings/step8-*-run.json (before), recordings/final-*-run.json (after)")
-    notes(slide, "Same measurement definition before and after. The fix was architectural: build the voice "
-          "pipeline when the call connects, as a phone line would. The 3 s target is met with a thin margin.")
+    finish(prs, slide, heading,
+           "Target is under 3 seconds from end of speech; the speech turns measured 2.12 to 2.95 s and the "
+           "local failure handoff 0.54 s. The margin is thin, so it is stated as measured, not as an SLO.",
+           "recordings/final-*-run.json; docs/voice-coordination.md (Final measured runs)")
 
 
 def slide_evaluation(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Evidence a reviewer can rerun",
-          "Keyless by default; every live result is labeled live and committed with its command")
+    heading = "Evidence a reviewer can rerun"
+    title(slide, heading, "Keyless by default; every live result is labeled live and committed with its command")
     cards = [
         ("Held-out sets", ["Routing: 110 messages incl. Hinglish, typos, traps",
                            "Retrieval: 45 questions, 13 near-miss negatives",
-                           "Committed before the new router and retriever"]),
+                           "Never used for tuning; a test keeps them apart"]),
         ("Metrics that separate causes", ["Ranking before the threshold vs the threshold decision",
                                           "Dead ends and false escalations, not only accuracy",
                                           "LLM calls and latency per tier"]),
         ("Tests and hygiene", ["221 keyless tests; live checks opt-in",
                                "1 strict xfail pins a known guard limit",
-                               "Secret scan on every commit; keys never printed"]),
-        ("Process", ["Incremental commits, one per measured phase",
-                     "Decisions log with dead ends: rerankers dropped",
+                               "Secret scan before every commit; keys never printed"]),
+        ("Process", ["Incremental commits with a timestamped decisions log",
+                     "Abandoned approaches recorded, e.g. rerankers",
                      "Red-team findings from reproduced behavior only"]),
     ]
-    for index, (heading, lines) in enumerate(cards):
+    for index, (name, lines) in enumerate(cards):
         x = 0.6 + (index % 2) * 6.2
         y = 1.85 + (index // 2) * 2.45
         box(slide, x, y, 5.95, 2.2, fill=MIST if index % 3 == 0 else PANEL, line=None if index % 3 == 0 else GRID)
         badge(slide, x + 0.25, y + 0.22, str(index + 1))
-        text(slide, x + 0.85, y + 0.25, 4.9, 0.35, heading, size=17, bold=True)
+        text(slide, x + 0.85, y + 0.25, 4.9, 0.35, name, size=17, bold=True)
         text(slide, x + 0.85, y + 0.8, 4.9, 1.35, lines, size=15, bullets=True, space_after=7)
-    footer(slide, 14, "docs/evaluation.md, docs/decisions-log.md, scripts/run_evaluation.py, scripts/scan_secrets.py")
-    notes(slide, "The eval sets were written by the same author as the system; a test keeps training examples "
-          "out of the held-out set, and one case fixed after being seen is recorded as no longer unseen.")
+    finish(prs, slide, heading,
+           "The eval sets were written by the project author; a test keeps training examples out of the "
+           "held-out set, and one case fixed after being seen is recorded as no longer unseen.",
+           "docs/evaluation.md; docs/decisions-log.md; scripts/run_evaluation.py; scripts/scan_secrets.py")
 
 
 def slide_red_team(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Red team: what broke, and what is still open",
-          "Only reproduced behavior is listed; open items keep their reason")
+    heading = "Red team: what broke, and what is still open"
+    title(slide, heading, "Only reproduced behavior is listed; open items keep their reason")
     fixed = ("Fixed", GREEN, True)
     open_item = ("Open", RED, True)
     partly = ("Partly fixed", AMBER, True)
@@ -866,25 +924,26 @@ def slide_red_team(prs) -> None:
         ["Unverified natural-language delivery date passed", "Output guard", fixed],
         ["Greetings dead-ended; off-topic sent to a human", "Router", fixed],
         ["Comparison question crashed the RAG handler", "RAG agent", fixed],
-        ["Cancel/refund answered with a status lookup (found by user)", "Order agent", fixed],
+        ["Cancel/refund answered with a status lookup", "Order agent", fixed],
         ["Negated “refund is approved” blocked (fails safe)", "Output guard", open_item],
         ["“Does Trail Week mean my refund is approved?” → order tool", "Router", open_item],
         ["Romanized Hindi question answered in Devanagari", "RAG / voice", open_item],
         ["Human request + plain status question → no handoff", "Router", partly],
     ]
     table(slide, 0.6, 1.8, 12.15, ["Finding", "Component", "Status"], rows, [8.15, 2.3, 1.7],
-          size=13, row_h=0.47)
-    footer(slide, 15, "docs/red-team-report.md, reports/red-team-live-probes.jsonl")
-    notes(slide, "Open items are not fixed for stated reasons: negation needs semantic claim checking; the 'my "
-          "refund' case is genuinely ambiguous and fixing it risks re-opening the return-to-product misroute; "
-          "output script control is a product decision. Six attack probes held, including cross-customer lookup "
-          "and refund-amount smuggling.")
+          size=13, row_h=0.5)
+    finish(prs, slide, heading,
+           "Open items are not fixed for stated reasons: negation needs semantic claim checking; the 'my "
+           "refund' case is genuinely ambiguous and fixing it risks the opposite misroute; output script "
+           "control is a product decision. Six attack probes held, including cross-customer lookup and "
+           "refund-amount smuggling.",
+           "docs/red-team-report.md; reports/red-team-live-probes.jsonl")
 
 
 def slide_scale(prs) -> None:
     slide = new_slide(prs)
-    title(slide, "Path to 10,000 concurrent sessions",
-          "Designed, not built or load-tested: what changes between the demo and production")
+    heading = "Path to 10,000 concurrent sessions"
+    title(slide, heading, "Designed, not built or load-tested: what changes between the demo and production")
     node(slide, 0.6, 1.95, 2.2, 1.0, "Edge", "WebRTC VAD on device; TLS, auth")
     arrow(slide, 2.8, 2.45, 3.3, 2.45)
     node(slide, 3.3, 1.85, 2.9, 1.2, "Stateless workers", "SupportService replicas behind a queue with backpressure")
@@ -901,7 +960,7 @@ def slide_scale(prs) -> None:
          fill=WHITE, line=AMBER)
     box(slide, 10.25, 1.75, 2.5, 2.35, fill=MIST)
     text(slide, 10.45, 1.9, 2.1, 0.3, "Measured today", size=12, bold=True, color=TEAL)
-    text(slide, 10.45, 2.25, 2.1, 0.7, "0.77", size=36, bold=True, font=HEAD, color=TEAL)
+    text(slide, 10.45, 2.25, 2.1, 0.7, "77%", size=36, bold=True, font=HEAD, color=TEAL)
     text(slide, 10.45, 3.0, 2.1, 1.0, "routing outcome accuracy with no LLM at all", size=13, bold=True)
     rows = [
         ("Scale", "Per-tenant rate limits, bounded queues, connection pools, shed load safely"),
@@ -909,21 +968,22 @@ def slide_scale(prs) -> None:
         ("Switch", "Failover only to a provider that passed the same routing and guard eval sets"),
         ("Watch", "p95 voice start, guard false-allow/false-block, dead ends, handoff completion"),
     ]
-    for index, (heading, body) in enumerate(rows):
+    for index, (name, body) in enumerate(rows):
         y = 4.45 + index * 0.55
         badge(slide, 0.6, y, str(index + 1), d=0.36)
-        text(slide, 1.15, y + 0.02, 1.5, 0.35, heading, size=14, bold=True)
+        text(slide, 1.15, y + 0.02, 1.5, 0.35, name, size=14, bold=True)
         text(slide, 2.65, y + 0.02, 10.1, 0.5, body, size=14, color=MUTED)
-    footer(slide, 16, "docs/design-notes.md (scaling), docs/part-c-answers.md; 0.77 from "
-           "reports/phase2-hybrid-offline-evaluation.md")
-    notes(slide, "Measured fact that supports the degrade story: with the LLM tier removed, the local tiers still "
-          "reached 0.77 outcome accuracy offline. Switching providers changes behavior, so a failover model must "
-          "pass the same eval sets before it can take traffic.")
+    finish(prs, slide, heading,
+           "Measured fact behind the degrade story: with the LLM tier removed, the local tiers still reached "
+           "77% outcome accuracy offline. Switching providers changes behavior, so a failover model must pass "
+           "the same eval sets before it can take traffic.",
+           "docs/design-notes.md (scaling); docs/part-c-answers.md; reports/phase2-hybrid-offline-evaluation.md")
 
 
 def slide_close(prs) -> None:
     slide = new_slide(prs, dark=True)
-    title(slide, "Ready to submit, with its limits stated", dark=True)
+    heading = "Limits stated, next steps clear"
+    title(slide, heading, dark=True)
     box(slide, 0.6, 1.6, 5.95, 3.75, fill=INK_SOFT, radius=0.06)
     text(slide, 0.9, 1.8, 5.4, 0.4, "Known limits", size=20, bold=True, color=AMBER)
     text(slide, 0.9, 2.4, 5.4, 2.9, [
@@ -947,20 +1007,36 @@ def slide_close(prs) -> None:
     text(slide, 1.12, 5.72, 11.6, 0.45,
          "Code, evidence, and this deck: github.com/amit253/Agentic-Customer-Support-Assistant",
          size=16, color=WHITE, anchor=MIDDLE)
-    footer(slide, 17, "docs/red-team-report.md, docs/design-notes.md", dark=True)
-    notes(slide, "Close on honesty: the system is measured, the open items are reproduced and explained, and the "
-          "next steps follow directly from them.")
+    finish(prs, slide, heading,
+           "Close on honesty: the system is measured, the open items are reproduced and explained, and the "
+           "next steps follow directly from them.",
+           "docs/red-team-report.md; docs/design-notes.md", dark=True)
 
 
 SLIDE_BUILDERS = (
-    slide_cover, slide_summary, slide_requirements, slide_architecture, slide_lifecycle,
-    slide_router, slide_routing_results, slide_retrieval, slide_grounding, slide_orders,
-    slide_memory, slide_voice, slide_latency, slide_evaluation, slide_red_team, slide_scale,
-    slide_close,
+    slide_cover, slide_problem, slide_summary, slide_requirements, slide_architecture,
+    slide_lifecycle, slide_router, slide_routing_results, slide_retrieval, slide_grounding,
+    slide_orders, slide_memory, slide_voice, slide_latency, slide_evaluation, slide_red_team,
+    slide_scale, slide_close,
 )
 
 
+def write_speaker_notes() -> None:
+    lines = [
+        "# Presentation speaker notes",
+        "",
+        "Generated by `scripts/build_presentation.py` together with",
+        "`presentation/agentic-customer-support.pptx`. The deck itself carries no notes",
+        "or source lines so it can be submitted as is; use these for the live defense.",
+        "",
+    ]
+    for number, (heading, notes, sources) in enumerate(SPEAKER_NOTES, start=1):
+        lines += [f"## {number}. {heading}", "", notes, "", f"Sources: {sources}", ""]
+    NOTES_OUTPUT.write_text("\n".join(lines), encoding="utf-8")
+
+
 def build() -> Path:
+    SPEAKER_NOTES.clear()
     prs = Presentation()
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
@@ -970,11 +1046,12 @@ def build() -> Path:
         builder(prs)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)
+    write_speaker_notes()
     return OUTPUT
 
 
 def verify(path: Path) -> dict[str, object]:
-    """Reopen the deck and check slide count, titles, notes, and bounds."""
+    """Reopen the deck; check slide count, titles, bounds, and absence of notes."""
 
     deck = Presentation(path)
     width, height = deck.slide_width, deck.slide_height
@@ -992,7 +1069,8 @@ def verify(path: Path) -> dict[str, object]:
         "presentation": str(path.relative_to(ROOT)),
         "slides": len(deck.slides),
         "titles_present": sum(bool(item) for item in titles),
-        "notes_present": sum(bool(s.notes_slide.notes_text_frame.text) for s in deck.slides),
+        "slides_with_notes": sum(slide.has_notes_slide for slide in deck.slides),
+        "speaker_notes_file": str(NOTES_OUTPUT.relative_to(ROOT)),
         "shapes_out_of_bounds": out_of_bounds,
     }
 

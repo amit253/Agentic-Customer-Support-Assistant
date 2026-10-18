@@ -10,25 +10,27 @@ speech-to-text; everything else runs locally.
 Every number in this README comes from a committed report and can be
 reproduced with the commands below.
 
-## Results at a glance
+## Results
 
-Measured on held-out sets that were committed before the improved router and
-retriever were built. Live runs used Groq `openai/gpt-oss-20b`.
+Measured on held-out sets that were never used for tuning. Live runs used Groq
+`openai/gpt-oss-20b`.
 
-| Area | Before | Final | Evidence |
-|---|---:|---:|---|
-| Routing accuracy, live (110 messages) | 0.509 | **0.955** | `reports/phase2-hybrid-live-evaluation.md` |
-| Messages with no usable route | 35.5% | **0.9%** | same |
-| Non-escalation messages sent to a human | 11.7% | **0%** | same |
-| Routing latency p95 | 16.4 s | **0.70 s** | `reports/phase2-hybrid-live-low-effort-evaluation.md` |
-| LLM calls per message for routing | 1.28 | **0.245** | same |
-| Expected evidence reaching the answerer (45 questions) | 0.516 | **0.922** | `reports/final-retrieval-offline-evaluation.md` |
-| Live: answerable questions answered / near-misses declined | not measured | **0.938 / 13 of 13** | `reports/final-rag-live-evaluation.md` |
-| Voice: end of speech to playback start | 19.3–20.2 s | **2.1–2.9 s** | `recordings/final-*-run.json` |
-| Keyless test suite | | **221 passed**, 2 live skipped, 1 known-limit xfail | `python -m pytest` |
+| Measure | Result | Evidence |
+|---|---:|---|
+| Routing accuracy, live (110 held-out messages) | **95.5%** | `reports/phase2-hybrid-live-low-effort-evaluation.md` |
+| Outcome the customer sees (no route answered as "unclear") | **99.1%** | same |
+| Messages sent to a human that did not need one | **0** | same |
+| Routing latency p50 / p95 | **14 ms / 0.70 s** | same |
+| LLM calls per message for routing | **0.245** | same |
+| Answerable product questions answered, live (32) | **93.8%** | `reports/final-rag-live-evaluation.md` |
+| Unanswerable near-miss questions declined, live (13) | **13 of 13** | same |
+| Expected evidence reaching the answerer | **0.922** | `reports/final-retrieval-offline-evaluation.md` |
+| Voice: end of speech to playback start, speech turns | **2.1–2.9 s** | `recordings/final-*-run.json` |
+| Voice: barge-in cancel after confirmed speech | **114–127 ms** | same |
+| Keyless test suite | **221 passed**, 2 live skipped, 1 known-limit xfail | `python -m pytest` |
 
-The before/after story, including what was tried and abandoned, is in
-[docs/evaluation.md](docs/evaluation.md) and
+How each design choice was evaluated, including approaches that were tried
+and dropped, is in [docs/evaluation.md](docs/evaluation.md) and
 [docs/decisions-log.md](docs/decisions-log.md).
 
 ## Architecture
@@ -169,7 +171,7 @@ presentation/          generated slide deck
 
 | Deliverable | Location |
 |---|---|
-| Presentation | [presentation/agentic-customer-support.pptx](presentation/agentic-customer-support.pptx), built by `scripts/build_presentation.py` |
+| Presentation | [presentation/agentic-customer-support.pptx](presentation/agentic-customer-support.pptx), built by `scripts/build_presentation.py`; presenter notes and slide sources in [docs/presentation-speaker-notes.md](docs/presentation-speaker-notes.md) |
 | Design notes (Parts A and B) | [docs/design-notes.md](docs/design-notes.md) |
 | Part C answers | [docs/part-c-answers.md](docs/part-c-answers.md) |
 | Voice demo evidence | [recordings/](recordings/), [docs/voice-coordination.md](docs/voice-coordination.md) |
