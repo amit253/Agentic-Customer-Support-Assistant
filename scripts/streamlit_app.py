@@ -1,4 +1,4 @@
-"""Small local Streamlit demo for the guarded text and recorded-voice paths.
+"""Small local Streamlit demo for unified text and recorded-voice turns.
 
 Run from the repository root with::
 
@@ -6,7 +6,8 @@ Run from the repository root with::
 
 The app uses the same live SupportService and VoicePipeline as the CLI demos.
 It is intentionally local-only: credentials are loaded by the application from
-the ignored .env and are never displayed.
+the ignored .env and are never displayed. Browser voice is record-then-send;
+the real-time barge-in scenarios remain in the CLI evidence path.
 """
 
 from __future__ import annotations
@@ -59,131 +60,175 @@ def safe_json(value: object) -> object:
 
 def show_provider_error(error: Exception) -> None:
     st.error(
-        "The live provider could not be initialized. Check the local .env and "
+        "The live request could not be completed. Check the local .env and "
         f"retry. ({type(error).__name__})"
     )
 
 
-def render_text_tab() -> None:
-    st.subheader("Text support")
-    st.caption(
-        "This sends the message through input safety, Groq routing, the selected "
-        "handler, and output-claim validation."
-    )
-
-    session_label = st.selectbox("Demo session", list(SESSION_OPTIONS))
-    message = st.text_area(
-        "Customer message",
-        value="How many liters is the Trailmark 28 backpack?",
-        height=100,
-    )
-
-    if st.button("Send text request", type="primary"):
-        if not message.strip():
-            st.warning("Enter a customer message first.")
-            return
-        try:
-            _, service = load_support_service()
-            trace_id = f"streamlit-text-{uuid4().hex[:12]}"
-            response = service.handle(
-                message,
-                session_id=SESSION_OPTIONS[session_label],
-                channel="text",
-                trace_id=trace_id,
-            )
-        except Exception as error:  # pragma: no cover - UI boundary
-            show_provider_error(error)
-            return
-
-        if response.status == "ok":
-            st.success(response.message)
-        elif response.status == "failed_closed":
-            st.warning(response.message)
-        else:
-            st.info(response.message)
-
-        st.json(
-            safe_json(
-                {
-                    "status": response.status,
-                    "trace_id": response.trace_id,
-                    "intent": response.intent,
-                    "handler": response.handler_name,
-                    "metadata": response.metadata,
-                }
-            )
-        )
+def _conversation() -> list[dict[str, object]]:
+    return st.session_state.setdefault("conversation", [])
 
 
-def render_voice_tab() -> None:
-    st.subheader("Recorded voice demo")
-    st.caption(
-        "Select a real recorded clip, listen to it, and run it through Groq STT, "
-        "the shared SupportService, and local Windows TTS."
-    )
+def _append_turn(turn: dict[str, object]) -> None:
+    _conversation().append(turn)
 
-    clip_label = st.selectbox("Input recording", list(VOICE_CLIPS))
-    session_label = st.selectbox(
-        "Voice demo session",
-        list(SESSION_OPTIONS),
-        index=1,
-        key="voice_session",
-    )
-    input_path = VOICE_CLIPS[clip_label]
 
-    if not input_path.exists():
-        st.error(f"Recording is missing: {input_path}")
+def _render_conversation() -> None:
+    turns = _conversation()
+    if not turns:
+        st.info("Start with a text message or record a voice message below.")
         return
 
-    st.audio(input_path.read_bytes(), format="audio/wav")
-    st.caption(f"Input: `{input_path.relative_to(ROOT)}`")
+    for turn in turns:
+        with st.chat_message("user"):
+            if turn["kind"] == "voice":
+                st.audio(turn["audio_bytes"], format="audio/wav")
+                if turn.get("transcript"):
+                    st.caption(f"Transcript: {turn['transcript']}")
+            else:
+                st.write(turn["user_text"])
 
-    if st.button("Run live voice turn", type="primary"):
-        try:
-            _, pipeline = load_voice_pipeline()
-            STREAMLIT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-            trace_id = f"streamlit-voice-{uuid4().hex[:12]}"
-            output_path = STREAMLIT_OUTPUT_DIR / f"{trace_id}.wav"
-            with st.spinner("Running STT, support, and TTS..."):
-                result = pipeline.process(
-                    input_path,
-                    session_id=SESSION_OPTIONS[session_label],
-                    trace_id=trace_id,
-                    output_path=output_path,
-                )
-        except Exception as error:  # pragma: no cover - UI boundary
-            show_provider_error(error)
-            return
+        with st.chat_message("assistant"):
+            status = str(turn["status"])
+            if status == "ok":
+                st.success(turn["assistant_text"])
+            elif status in {"failed_closed", "handoff", "failed"}:
+                st.warning(turn["assistant_text"])
+            else:
+                st.info(turn["assistant_text"])
 
-        if result.status == "ok":
-            st.success("Voice turn completed.")
-        elif result.status == "handoff":
-            st.warning("Voice turn completed with a safe handoff.")
-        else:
-            st.error("Voice turn failed safely.")
+            output_path = turn.get("output_path")
+            if output_path and Path(str(output_path)).exists():
+                st.audio(Path(str(output_path)).read_bytes(), format="audio/wav")
 
-        if result.transcript:
-            st.write(f"**Transcript:** {result.transcript}")
-        if result.support_message:
-            st.write(f"**Support response:** {result.support_message}")
-        if result.output_path and Path(result.output_path).exists():
-            st.write("**Generated response audio:**")
-            st.audio(Path(result.output_path).read_bytes(), format="audio/wav")
-
-        st.json(
-            safe_json(
-                {
-                    "status": result.status,
-                    "trace_id": result.trace_id,
-                    "support_status": result.support_status,
-                    "support_intent": result.support_intent,
-                    "support_handler": result.support_handler,
-                    "error_code": result.error_code,
-                    "latency_ms": result.latency_ms,
-                    "stt_attempts": result.stt_attempts,
-                }
+            st.caption(
+                f"Trace ID: `{turn['trace_id']}` · status: `{status}`"
             )
+            with st.expander("Debug metadata"):
+                st.json(
+                    safe_json(
+                        {
+                            "intent": turn.get("intent"),
+                            "handler": turn.get("handler"),
+                            "metadata": turn.get("metadata", {}),
+                            "error_code": turn.get("error_code"),
+                            "latency_ms": turn.get("latency_ms"),
+                            "stt_attempts": turn.get("stt_attempts"),
+                        }
+                    )
+                )
+
+
+def _handle_text(message: str, session_id: str) -> None:
+    trace_id = f"streamlit-text-{uuid4().hex[:12]}"
+    try:
+        _, service = load_support_service()
+        response = service.handle(
+            message,
+            session_id=session_id,
+            channel="text",
+            trace_id=trace_id,
         )
+        _append_turn(
+            {
+                "kind": "text",
+                "user_text": message,
+                "assistant_text": response.message,
+                "status": response.status,
+                "trace_id": response.trace_id,
+                "intent": response.intent,
+                "handler": response.handler_name,
+                "metadata": response.metadata,
+            }
+        )
+    except Exception as error:  # pragma: no cover - UI boundary
+        _append_turn(
+            {
+                "kind": "text",
+                "user_text": message,
+                "assistant_text": "I could not complete that request safely.",
+                "status": "failed",
+                "trace_id": trace_id,
+                "error_code": type(error).__name__,
+            }
+        )
+
+
+def _handle_voice(audio_bytes: bytes, session_id: str) -> None:
+    STREAMLIT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    trace_id = f"streamlit-voice-{uuid4().hex[:12]}"
+    input_path = STREAMLIT_OUTPUT_DIR / f"{trace_id}-input.wav"
+    output_path = STREAMLIT_OUTPUT_DIR / f"{trace_id}-output.wav"
+    input_path.write_bytes(audio_bytes)
+
+    try:
+        _, pipeline = load_voice_pipeline()
+        with st.spinner("Running STT, support, and TTS..."):
+            result = pipeline.process(
+                input_path,
+                session_id=session_id,
+                trace_id=trace_id,
+                output_path=output_path,
+            )
+        _append_turn(
+            {
+                "kind": "voice",
+                "audio_bytes": audio_bytes,
+                "transcript": result.transcript,
+                "assistant_text": result.support_message
+                or "The voice request completed without a message.",
+                "status": result.status,
+                "trace_id": result.trace_id,
+                "intent": result.support_intent,
+                "handler": result.support_handler,
+                "metadata": result.support_metadata,
+                "output_path": result.output_path,
+                "error_code": result.error_code,
+                "latency_ms": result.latency_ms,
+                "stt_attempts": result.stt_attempts,
+            }
+        )
+    except Exception as error:  # pragma: no cover - UI boundary
+        _append_turn(
+            {
+                "kind": "voice",
+                "audio_bytes": audio_bytes,
+                "assistant_text": "I could not process that audio safely.",
+                "status": "failed",
+                "trace_id": trace_id,
+                "error_code": type(error).__name__,
+            }
+        )
+
+
+def render_voice_input(session_id: str) -> None:
+    st.subheader("Voice input")
+    st.caption(
+        "Record, preview, and send one voice turn. This is batch voice input; "
+        "the real-time barge-in demo remains available in the CLI runbook."
+    )
+    recorded_audio = st.audio_input(
+        "Record a voice message",
+        sample_rate=16000,
+        key="browser_voice_input",
+    )
+    if recorded_audio is not None:
+        audio_bytes = recorded_audio.getvalue()
+        st.audio(audio_bytes, format="audio/wav")
+        if st.button("Send recorded voice", type="primary"):
+            _handle_voice(audio_bytes, session_id)
+            st.rerun()
+
+    with st.expander("Use a checked recording instead"):
+        clip_label = st.selectbox("Recording", list(VOICE_CLIPS))
+        input_path = VOICE_CLIPS[clip_label]
+        if input_path.exists():
+            st.audio(input_path.read_bytes(), format="audio/wav")
+            if st.button("Send checked recording", key="send_checked_recording"):
+                _handle_voice(input_path.read_bytes(), session_id)
+                st.rerun()
+        else:
+            st.error(f"Recording is missing: {input_path}")
 
 
 def main() -> None:
@@ -193,7 +238,7 @@ def main() -> None:
         layout="centered",
     )
     st.title("Northstar Gear Support")
-    st.caption("Local demo of the guarded text and recorded-audio support paths")
+    st.caption("A small GPT-style local demo for text and recorded voice")
 
     try:
         settings = Settings.from_environment()
@@ -202,20 +247,28 @@ def main() -> None:
     except Exception as error:  # pragma: no cover - UI boundary
         st.sidebar.error(f"Configuration error: {type(error).__name__}")
 
+    session_label = st.sidebar.selectbox("Demo session", list(SESSION_OPTIONS))
+    session_id = SESSION_OPTIONS[session_label]
+    if st.sidebar.button("Clear conversation"):
+        st.session_state["conversation"] = []
+        st.rerun()
+
     with st.expander("How this demo works"):
         st.markdown(
-            "1. **Text:** input validation → safety guardrail → Groq router → "
-            "RAG/tool/handoff handler → output-claim guard.\n"
-            "2. **Voice:** recorded WAV → Groq Whisper STT → the same support "
-            "service → local Windows TTS.\n"
-            "3. Every request displays a trace ID for debugging."
+            "Both input types use the same path: input validation → safety "
+            "guardrail → Groq router → RAG/tool/handoff handler → output-claim "
+            "guard. Voice adds Groq Whisper STT before the service and local "
+            "Windows TTS after it. Every turn displays a trace ID."
         )
 
-    text_tab, voice_tab = st.tabs(["Text support", "Voice demo"])
-    with text_tab:
-        render_text_tab()
-    with voice_tab:
-        render_voice_tab()
+    _render_conversation()
+    st.divider()
+    render_voice_input(session_id)
+
+    prompt = st.chat_input("Type a customer message and press Enter...")
+    if prompt and prompt.strip():
+        _handle_text(prompt.strip(), session_id)
+        st.rerun()
 
 
 if __name__ == "__main__":

@@ -76,10 +76,10 @@ python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1 --se
 ```
 
 Open `http://127.0.0.1:8502` (or the local URL printed by Streamlit). Port
-8501 is occupied by another local service on this machine.
-The Text support tab uses the live guarded service. The Voice demo tab plays
-the checked recordings and can run a live recorded-audio turn. Both tabs show
-the response trace ID; no API key value is rendered.
+8501 is occupied by another local service on this machine. The single
+conversation view accepts typed messages and browser-recorded voice turns;
+both use the live guarded service. Each voice turn shows its transcript,
+playable response audio, and trace ID. No API key value is rendered.
 
 ## Presentation and final evidence checks
 

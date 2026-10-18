@@ -512,3 +512,14 @@ runtime dependency. The UI reuses `build_live_support_service` and
 binds the documented launch command to `127.0.0.1`. It does not create a
 second routing or guardrail path and stores generated voice output under the
 ignored `.tmp/streamlit/` directory.
+
+### 2026-10-18T12:26:56.2868874+05:30 - [USER/CODEX] Unified text and browser voice conversation
+
+The user requested a simple GPT-like demo where typed messages and recorded
+human voice can be tested in one conversation. The Streamlit UI now uses one
+conversation history, `st.chat_input` for text, and `st.audio_input` for
+record-then-send browser voice. Both inputs call the existing guarded
+`SupportService`; voice adds the existing STT/TTS pipeline. Each turn exposes
+safe transcript, response audio, status, trace ID, and debug metadata. This is
+not a live microphone/barge-in transport; the CLI evidence path remains the
+place for the recorded real-time interruption scenarios.

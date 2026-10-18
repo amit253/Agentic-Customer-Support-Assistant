@@ -109,11 +109,10 @@ python -m pip install -e ".[dev,demo]"
 python -m streamlit run scripts/streamlit_app.py --server.address 127.0.0.1 --server.port 8502
 ```
 
-Streamlit will print a local URL such as `http://localhost:8501`. The Text
-support tab exercises live routing, RAG/tool handling, and output validation.
-The Voice demo tab plays the checked recordings and can run a live STT → shared
-support service → local TTS turn. Use the trace ID shown in the result when
-following logs or debugging a request.
+Streamlit will print a local URL such as `http://127.0.0.1:8502`. The single
+conversation view accepts text through `st.chat_input` and browser-recorded
+voice through `st.audio_input`; both use the same guarded service path. Each
+voice turn shows its transcript, playable response audio, and trace ID.
 
 The health command prints a JSON response and one structured log event. A
 configured provider is reported only as `groq_configured: true`; key values are
