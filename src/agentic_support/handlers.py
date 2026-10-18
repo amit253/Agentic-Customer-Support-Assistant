@@ -19,6 +19,7 @@ from .facts import AllowedFacts
 from .grounded_answers import GroundedAnswerError, ProductAnswerer
 from .handler_result import HandlerResult
 from .retrieval import Retriever
+from .route_rules import is_explicit_human_request
 from .routing import Intent, RouteDecision
 from .tool_calling import OrderToolCaller, ToolCallProviderError
 from .tools import DeterministicOrderTools, OrderToolError
@@ -47,6 +48,37 @@ _STATUS_PHRASES = {
     "delivered": "was delivered",
     "return_received": "was delivered",
 }
+# Requests the order agent cannot carry out: it only has read-only tools.
+# Refund *status* questions ("did my refund come through?") are excluded so
+# they keep getting the status answer.
+_CANCEL_REQUEST = re.compile(r"\bcancel(?:lation)?\b", re.I)
+_REFUND_REQUEST = re.compile(
+    r"\brefund\s+(?:me|my|it|this|that|the\s+(?:money|amount))\b"
+    r"|\b(?:want|need|get|give\s+me|issue|process|approve|request|claim)\s+"
+    r"(?:a\s+|an\s+|my\s+|the\s+)?refund\b"
+    r"|\bmoney\s+back\b|\brefund\s+(?:please|now)\b",
+    re.I,
+)
+_REFUND_STATUS_QUESTION = re.compile(
+    r"\b(?:did|was|were|has|have|is)\b[^.?!]{0,30}\brefund"
+    r"|\brefund\b[^.?!]{0,30}\b(?:issued|processed|approved|come|came|through|sent|status)\b"
+    r"|\bwhere(?:'s|\s+is)\s+my\s+refund\b",
+    re.I,
+)
+_ACTION_PHRASES = {"cancel": "cancel orders", "refund": "issue refunds"}
+
+
+def requested_unsupported_actions(text: str) -> tuple[str, ...]:
+    """Return the order actions the customer asked for that chat cannot do."""
+
+    actions: list[str] = []
+    if _CANCEL_REQUEST.search(text):
+        actions.append("cancel")
+    if _REFUND_REQUEST.search(text) and not _REFUND_STATUS_QUESTION.search(text):
+        actions.append("refund")
+    return tuple(actions)
+
+
 ACCESS_ERROR_REPLY = (
     "I could not access that order safely. Please check the order ID, or ask "
     "for a human agent."
@@ -129,6 +161,44 @@ def return_eligibility_message(result: ReturnEligibilityResult) -> str:
             "exception applies, I can connect you with a human agent."
         )
     return f"I couldn't confirm return eligibility for order {result.order_id}."
+
+
+def unsupported_action_message(
+    actions: tuple[str, ...],
+    status: OrderStatusResult,
+    eligibility: ReturnEligibilityResult | None,
+    handoff: str | None,
+) -> str:
+    """Say plainly what chat cannot do, then give only verified facts.
+
+    The order agent used to answer "cancel it" or "refund my amount" with a
+    plain status lookup, silently ignoring the request. This reply names the
+    limitation, adds the facts that matter for the request, and points to a
+    human, who can actually act.
+    """
+
+    cannot = " or ".join(_ACTION_PHRASES[action] for action in actions)
+    parts = [
+        f"I can't {cannot} in this chat, but here is what I can confirm.",
+        order_status_message(status),
+    ]
+    if "refund" in actions and status.refund_status != "issued":
+        if status.refund_status == "not_requested":
+            parts.append(
+                "No refund has been issued for this order; a refund can only "
+                "follow a return that we have received."
+            )
+        if eligibility is not None:
+            parts.append(return_eligibility_message(eligibility))
+    if handoff:
+        parts.append(
+            "I've passed your request to a human support agent. Your reference "
+            f"is {handoff}. An agent will review it; I can't promise a specific "
+            "outcome before that review."
+        )
+    else:
+        parts.append('A human agent can review this request: just say "talk to a human".')
+    return " ".join(parts)
 
 
 def _order_choice(orders: tuple[OrderSummary, ...], *, other: bool) -> str:
@@ -304,6 +374,11 @@ class OrderStatusHandler:
                 handler_name=self.name,
                 metadata={"tool_error": "missing_or_ambiguous_order_id"},
             )
+        actions = requested_unsupported_actions(request.text)
+        if actions:
+            return self._unsupported_action(
+                request, session, order_ids[0], actions, memory_resolved
+            )
         if self._tool_caller is None or memory_resolved:
             order_id = order_ids[0]
             tool_name = (
@@ -353,6 +428,62 @@ class OrderStatusHandler:
                 "memory_resolved": memory_resolved,
                 "active_product": product.doc_id if product else None,
             },
+        )
+
+
+    def _unsupported_action(
+        self,
+        request: CheckedInputLike,
+        session: object,
+        order_id: str,
+        actions: tuple[str, ...],
+        memory_resolved: bool,
+    ) -> HandlerResult:
+        """Answer a cancel or refund request with facts and a human route."""
+
+        try:
+            status = self._tools.get_order_status(order_id=order_id, session=session)
+            eligibility = (
+                self._tools.check_return_eligibility(order_id=order_id, session=session)
+                if "refund" in actions
+                else None
+            )
+        except OrderToolError as exc:
+            return HandlerResult(
+                message=ACCESS_ERROR_REPLY,
+                handler_name=self.name,
+                metadata={"tool_error": exc.reason_code},
+            )
+        # A customer who asks for a person in the same message gets the
+        # handoff now instead of being told to ask again.
+        handoff = (
+            handoff_reference(request.trace_id)
+            if is_explicit_human_request(request.text)
+            else None
+        )
+        facts = AllowedFacts.from_order_status(status)
+        if eligibility is not None:
+            facts = facts.merged(AllowedFacts.from_return_eligibility(eligibility))
+        product = product_for_item_name(status.item_name)
+        metadata: dict[str, object] = {
+            "allowed_facts": facts,
+            "tool_name": "get_order_status",
+            "memory_resolved": memory_resolved,
+            "active_product": product.doc_id if product else None,
+            "unsupported_action": actions,
+        }
+        if handoff:
+            metadata.update(
+                handoff_required=True,
+                handoff_reference=handoff,
+                handoff_summary=getattr(request, "handoff_summary", None),
+            )
+        else:
+            metadata["suggestions"] = ("Talk to a human", "What is the return policy?")
+        return HandlerResult(
+            message=unsupported_action_message(actions, status, eligibility, handoff),
+            handler_name=self.name,
+            metadata=metadata,
         )
 
 

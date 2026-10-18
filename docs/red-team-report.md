@@ -102,7 +102,14 @@ committed live evaluation reports is listed.
   clarifying question when both readings are plausible, which needs a
   multi-intent router. The current reply is safe, just unhelpful.
 
-### Finding R2-2 - Explicit human request with an order ID is not handed off (not fixed)
+### Finding R2-2 - Explicit human request with an order ID is not handed off (partly fixed)
+
+Update 2026-10-18 17:56: for refund and cancellation wording this is fixed. The
+order agent now recognizes the unsupported request and, when the same message
+explicitly asks for a person, creates the handoff with a reference
+(`tests/test_order_actions.py`). Other combinations, for example a human
+request alongside a plain status question, still go to the order tool only.
+
 
 - **Input:** `I need a human to approve a refund for NS-26-2044-8`
 - **Observed:** the order-operation rule (exactly one ID plus "refund") ran
@@ -141,6 +148,17 @@ committed live evaluation reports is listed.
 
 `xkcd lorem ipsum dolor` was routed to `out_of_scope` rather than `unclear`
 (live routing evaluation and this run). The reply is still appropriate.
+
+### Finding R2-5 - Cancel and refund requests answered with a status lookup (found by the user, fixed)
+
+- **Input (manual UI test as Omar):** "Where is order NS-26-4006-8?", "Can I
+  return it?", "refund my amount", "i want to cancel it, and i want refund".
+- **Observed:** both of the last two messages received the plain delivery
+  status, silently ignoring the request.
+- **Cause and fix:** the order agent has only read-only tools and fell back to
+  the status tool. It now states that chat cannot cancel orders or issue
+  refunds, gives status, refund, and eligibility facts, and offers or creates
+  a human handoff. Replayed live through the UI after the fix.
 
 ### Found and fixed in this round
 

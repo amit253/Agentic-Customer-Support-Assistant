@@ -75,6 +75,15 @@ class AllowedFacts:
     dates: frozenset[str] = field(default_factory=frozenset)
     amounts: frozenset[str] = field(default_factory=frozenset)
 
+    def merged(self, other: "AllowedFacts") -> "AllowedFacts":
+        """Union of two fact sets, for a reply built from two tool results."""
+
+        return AllowedFacts(
+            order_ids=self.order_ids | other.order_ids,
+            dates=self.dates | other.dates,
+            amounts=self.amounts | other.amounts,
+        )
+
     @classmethod
     def from_order_status(cls, result: OrderStatusResult) -> "AllowedFacts":
         dates = {

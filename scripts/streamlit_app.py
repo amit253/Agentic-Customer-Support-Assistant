@@ -6,8 +6,9 @@ Run from the repository root with::
 
 The app uses the same live SupportService and VoicePipeline as the CLI demos.
 It is intentionally local-only: credentials are loaded by the application from
-the ignored .env and are never displayed. Browser voice is record-then-send;
-the real-time barge-in scenarios remain in the CLI evidence path.
+the ignored .env and are never displayed. Browser voice is record-then-send
+through the microphone inside the message box; the real-time barge-in
+scenarios remain in the CLI evidence path.
 
 UI decisions:
 
@@ -22,7 +23,6 @@ UI decisions:
 
 from __future__ import annotations
 
-import hashlib
 import json
 import time
 from datetime import UTC, datetime
@@ -303,32 +303,31 @@ def _render_checked_recordings(session_id: str) -> None:
 
 
 def _render_composer(session_id: str) -> None:
-    """Render the text composer with a compact adjacent microphone control."""
+    """One message box: type text, or tap the mic inside it to record.
 
-    text_column, voice_column = st.columns([8, 1])
-    with text_column:
-        prompt = st.chat_input("Message Northstar Support...")
-    with voice_column:
-        recorded_audio = st.audio_input(
-            "🎙️",
-            sample_rate=16000,
-            label_visibility="collapsed",
-            key="browser_voice_input",
-        )
+    ``st.chat_input(accept_audio=True)`` puts the microphone inside the box,
+    and a recording is sent with Enter or the send arrow like a typed
+    message. It replaces a separate ``st.audio_input`` widget that sat in a
+    narrow column beside the box, where its controls and error text were
+    clipped. Each submission is returned once, so no duplicate check is needed.
+    """
 
-    if prompt and prompt.strip():
-        _handle_text(prompt.strip(), session_id)
+    submission = st.chat_input(
+        "Type a message, or tap the mic to speak...",
+        accept_audio=True,
+        audio_sample_rate=16000,
+        key="composer",
+    )
+    if submission is None:
+        return
+    audio = getattr(submission, "audio", None)
+    text = (getattr(submission, "text", "") or "").strip()
+    if audio is not None:
+        _handle_voice(audio.getvalue(), session_id)
+    if text:
+        _handle_text(text, session_id)
+    if audio is not None or text:
         st.rerun()
-
-    if recorded_audio is None:
-        return
-    audio_bytes = recorded_audio.getvalue()
-    digest = hashlib.sha256(audio_bytes).hexdigest()
-    if digest == st.session_state.get("last_processed_voice_digest"):
-        return
-    st.session_state["last_processed_voice_digest"] = digest
-    _handle_voice(audio_bytes, session_id)
-    st.rerun()
 
 
 def main() -> None:
@@ -379,7 +378,9 @@ def main() -> None:
             "guardrail → hybrid router (rules, then labeled examples, then the "
             "Groq LLM only when needed) → help-article search, order tools, "
             "human handoff, or a conversational reply → output check that "
-            "blocks unverified dates, amounts, and promises. Voice adds Groq "
+            "blocks unverified dates, amounts, and promises. To speak, tap the "
+            "microphone inside the message box, record, then press Enter or the "
+            "send arrow. Voice adds Groq "
             "Whisper speech-to-text before the service and local Windows "
             "text-to-speech after it. Each reply shows which path answered it; "
             "trace details are in the sidebar."

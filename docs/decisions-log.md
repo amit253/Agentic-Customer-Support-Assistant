@@ -829,3 +829,31 @@ An earlier attempt used 0.811, documented as "accepts every answerable dev
 question"; the offline report showed dev acceptance 0.96 because of rounding,
 so the value was corrected to 0.8106. No held-out question scores between the
 two values, so the live result applies to the final threshold.
+
+### 2026-10-18T17:56:37.1725143+05:30 - [USER/CLAUDE] Silent substitution of cancel and refund requests; microphone in the message box
+
+The user tested the restarted UI as Omar and reported this sequence: "Where is
+order NS-26-4006-8?", "Can I return it?", then "refund my amount" and "i want
+to cancel it, and i want refund". Both of the last two returned the plain
+delivery-status reply. Cause: the order agent has only read-only status and
+return-eligibility tools, and any order request that was not a return fell
+through to the status tool, so the customer's actual request was silently
+ignored.
+
+Decision: detect cancel and refund *requests* (not refund *status* questions
+such as "did you issue the refund?" or past-tense "was it cancelled?"), say
+plainly that chat cannot cancel orders or issue refunds, give the verified
+facts that matter (status, whether a refund exists, return eligibility), and
+offer a human with a quick-reply button. If the same message explicitly asks
+for a person, the handoff is created immediately. This also resolves red-team
+finding R2-2 for refund and cancel wording. The user's exact transcript is a
+regression test (`tests/test_order_actions.py`) and was replayed live through
+the UI.
+
+The user also reported that the separate microphone widget sat in a narrow
+column beside the text box and sometimes showed clipped error text after use,
+and asked for the microphone inside the box with Enter to send. Streamlit
+1.66 supports `st.chat_input(accept_audio=True)`, so the separate
+`st.audio_input` column was removed; a recording is now sent with Enter or the
+send arrow like a typed message. The clipped error's underlying cause was not
+diagnosed; the widget that showed it no longer exists.
