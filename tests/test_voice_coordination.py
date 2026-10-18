@@ -275,5 +275,5 @@ def test_user_adversarial_interruption_still_uses_read_only_order_tool() -> None
 
     assert response.status == "ok"
     assert response.metadata["tool_name"] == "get_order_status"
-    assert "Order NS-26-2044-8 status: delivered." in response.message
+    assert "(order NS-26-2044-8) was delivered on September 25, 2026." in response.message
     assert "refund amount" not in response.message.lower()

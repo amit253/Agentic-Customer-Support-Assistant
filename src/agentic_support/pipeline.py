@@ -7,6 +7,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, field, replace
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Literal
 
 from .config import Settings
@@ -78,6 +79,9 @@ class CheckedInput:
     channel: Channel
     active_order_id: str | None = None
     last_intent: str | None = None
+    active_product: str | None = None
+    unresolved_turns: int = 0
+    handoff_summary: Mapping[str, object] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +163,40 @@ class SupportService:
             router, semantic_router=semantic_router, logger=self.logger
         )
 
+    def _remember(
+        self,
+        session_id: str,
+        channel: str,
+        user_text: str,
+        response: "SupportResponse",
+        *,
+        routing_source: str | None = None,
+        verified_order_id: str | None = None,
+        active_product: str | None = None,
+    ) -> None:
+        """Record every turn, including refused or failed ones.
+
+        Failed turns matter for the handoff summary and for offering a human
+        after repeated misunderstandings. Only successful, verified tool or
+        retrieval results may set the order or product slots.
+        """
+
+        self.memory_store.append(
+            session_id,
+            MemoryTurn(
+                trace_id=response.trace_id,
+                channel=channel if channel in ("text", "voice") else "text",  # type: ignore[arg-type]
+                user_text=user_text,
+                assistant_text=response.message,
+                status=response.status,
+                intent=response.intent,
+                handler_name=response.handler_name,
+                routing_source=routing_source,
+            ),
+            verified_order_id=verified_order_id,
+            active_product=active_product,
+        )
+
     def clear_session(self, session_id: str) -> None:
         """Clear the bounded memory for one authenticated/demo session."""
 
@@ -230,12 +268,19 @@ class SupportService:
                     "input_rejected",
                     reason=rejection_reason or "invalid_input",
                 )
-                return SupportResponse(
+                response = SupportResponse(
                     trace_id=active_trace_id,
                     status="rejected",
                     message=INVALID_INPUT_REPLY,
                     metadata={"reason": rejection_reason or "invalid_input"},
                 )
+                self._remember(
+                    session_id,
+                    channel,
+                    f"[message not accepted: {rejection_reason or 'invalid_input'}]",
+                    response,
+                )
+                return response
 
             safety_decision = self.input_guard.check(checked_input)
             if not safety_decision.allowed:
@@ -244,7 +289,7 @@ class SupportService:
                     "input_guard_failed_closed",
                     reason=safety_decision.reason,
                 )
-                return SupportResponse(
+                response = SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
                     message=(
@@ -254,12 +299,17 @@ class SupportService:
                     ),
                     metadata={"reason": safety_decision.reason},
                 )
+                self._remember(session_id, channel, checked_input.text[:500], response)
+                return response
 
             memory = self.memory_store.snapshot(session_id)
             checked_input = replace(
                 checked_input,
                 active_order_id=memory.active_order_id,
                 last_intent=memory.last_intent,
+                active_product=memory.active_product,
+                unresolved_turns=memory.unresolved_streak,
+                handoff_summary=memory.handoff_summary(),
             )
             decision, routing_source = self._select_route(checked_input, memory)
             if not decision.accepted or decision.intent is None:
@@ -313,13 +363,18 @@ class SupportService:
                     "handler_failed_closed",
                     extra={"event": "handler_failed_closed", "fields": {"intent": decision.intent}},
                 )
-                return SupportResponse(
+                response = SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
                     message=HANDLER_ERROR_REPLY,
                     intent=decision.intent,
                     metadata={"reason": "handler_error"},
                 )
+                self._remember(
+                    session_id, channel, checked_input.text, response,
+                    routing_source=routing_source,
+                )
+                return response
 
             allowed_facts = result.metadata.get("allowed_facts", AllowedFacts())
             if not isinstance(allowed_facts, AllowedFacts):
@@ -333,7 +388,7 @@ class SupportService:
                     "output_guard_failed_closed",
                     reason=claim_decision.reason,
                 )
-                return SupportResponse(
+                response = SupportResponse(
                     trace_id=active_trace_id,
                     status="failed_closed",
                     message=UNVERIFIED_ANSWER_REPLY,
@@ -341,6 +396,11 @@ class SupportService:
                     handler_name=result.handler_name,
                     metadata={"reason": claim_decision.reason},
                 )
+                self._remember(
+                    session_id, channel, checked_input.text, response,
+                    routing_source=routing_source,
+                )
+                return response
 
             public_metadata = {
                 key: value
@@ -365,18 +425,15 @@ class SupportService:
                 order_ids = allowed_facts.order_ids
                 if len(order_ids) == 1:
                     verified_order_id = next(iter(order_ids))
-            self.memory_store.append(
+            active_product = result.metadata.get("active_product")
+            self._remember(
                 session_id,
-                MemoryTurn(
-                    trace_id=active_trace_id,
-                    channel=checked_input.channel,
-                    user_text=checked_input.text,
-                    assistant_text=response.message,
-                    status=response.status,
-                    intent=response.intent,
-                    handler_name=response.handler_name,
-                ),
+                checked_input.channel,
+                checked_input.text,
+                response,
+                routing_source=routing_source,
                 verified_order_id=verified_order_id,
+                active_product=active_product if isinstance(active_product, str) else None,
             )
             return response
 

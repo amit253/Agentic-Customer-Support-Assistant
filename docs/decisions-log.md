@@ -754,3 +754,32 @@ unanswerable declined 13/13 (10 by the retrieval gate, the rest by the
 answerer's insufficient-evidence flag), one correct answer blocked by the
 output guard because its promise pattern ignores negation ("does not mean your
 refund is approved").
+
+### 2026-10-18T16:41:44.5847669+05:30 - [CLAUDE] Phase 4 memory and follow-ups
+
+Finding from the review: memory stored 12 turns per session but nothing read
+them; only `active_order_id` and `last_intent` were used, and failed turns were
+not recorded at all.
+
+Decision: keep two kinds of memory with different trust. Verified slots
+(`active_order_id`, new `active_product`, `last_intent`, new
+`unresolved_streak`) come only from tool results, cited retrieval, or routing
+outcomes and are the only memory an LLM sees. The transcript now records every
+turn, including refused and failed ones, but is never put in a prompt, so an
+earlier message cannot inject instructions later. It feeds the human handoff
+summary, which is also the shared state for a voice-to-text transfer.
+
+Decision: resolve follow-ups deterministically instead of with an LLM rewrite.
+"My other order" uses a new read-only, ownership-checked `list_orders` tool and
+either picks the only remaining order or asks the customer to choose from their
+own list (those IDs are added to the allowed facts for the output guard).
+Product pronoun follow-ups append the remembered product name to the retrieval
+query. A second consecutive unresolved turn offers a human.
+
+Decision: order replies use customer language and output-guard-verifiable
+dates ("was delivered on September 25, 2026") instead of internal codes
+("status: delivered", "trail_week_extended"). Writing the tests caught a
+wording bug before it shipped: a returned order would have said "has been
+returned to us on <delivery date>". Five older tests asserted the old wording
+and were updated to assert the same facts in the new wording; the "another
+order" test now asserts that the active order is never silently reused.

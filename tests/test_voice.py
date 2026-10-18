@@ -83,7 +83,7 @@ def test_file_voice_turn_uses_shared_service_and_writes_playable_audio(
     assert result.transcript == "Where is order NS-26-4006-8?"
     assert result.support_status == "ok"
     assert result.support_message is not None
-    assert "Order NS-26-4006-8 status: in_transit." in result.support_message
+    assert "(order NS-26-4006-8) is on its way" in result.support_message
     assert tts.text == result.support_message
     assert output_path.is_file()
     assert result.output_audio is not None

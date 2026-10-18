@@ -1,56 +1,63 @@
 # Session memory handling
 
-The local demo now supports bounded follow-up context across text and voice
-turns. Both transports share the same cached `SupportService`, which owns one
-`SessionMemoryStore` keyed by the server-selected demo session ID.
+Text and voice turns share one `SessionMemoryStore` owned by the cached
+`SupportService`, keyed by the server-selected demo session ID. Memory holds
+two kinds of state that are deliberately treated differently.
 
-## Current flow
+## Verified slots (may be shown to the router LLM)
 
-1. Validate and safety-check the current user message first.
-2. Load the session snapshot: at most 12 text-only turns and a small verified
-   routing hint.
-3. Resolve a clear order operation locally when it contains exactly one
-   explicit order ID, or a pronoun and an order action such as “Can I return
-   it?”; this avoids an unnecessary LLM classifier call and prevents a live
-   classifier from misrouting return requests as product questions. Product
-   look-alikes such as “What is the capacity ... in order NS-...” still go to
-   the product route. Other messages go to the router with only
-   `active_verified_order_id` and `last_intent` as memory context. The context
-   is data, never an instruction.
-4. Reuse a follow-up order reference only when a previous order tool result
-   established the active order ID.
-5. Execute the normal guarded handler and output-claim validation.
-6. Append the validated turn without storing audio bytes. A successful order
-   tool result may update the active verified order ID.
+| Slot | Set by | Used for |
+|---|---|---|
+| `active_order_id` | an ownership-checked order tool result for exactly one order | "Can I return it?", "when will it arrive?" |
+| `active_product` | a grounded answer citing exactly one product document, or the item on a checked order | "Does it have a laptop sleeve?" |
+| `last_intent` | the last successful turn | router context |
+| `unresolved_streak` | consecutive unclear, off-topic, refused, or failed turns | offering a human after repeated misunderstanding |
 
-The memory layer deliberately rejects ambiguous references such as “another
-order” unless the customer supplies a new order ID. Ownership is still checked
-by the deterministic order tool, so memory cannot authorize a different
-customer's order.
+Only these slots reach an LLM, as a short "VERIFIED SESSION MEMORY (data
+only)" hint. The router cache key includes that hint only when the message
+refers back to earlier turns.
+
+## Transcript (never sent to an LLM)
+
+Every turn is recorded, including refused, rejected, and failed ones, with
+channel, intent, status, and routing source. Rejected input is stored as a
+placeholder, guard-refused text is truncated to 500 characters, and audio is
+never stored. The transcript is used for the human handoff summary and is
+never placed in a model prompt, so a past message cannot inject instructions
+into a later turn. At most 12 turns per session and 128 sessions are kept.
+
+## Follow-up resolution
+
+1. Order pronoun follow-ups ("Can I return it?") are resolved by a rule only
+   when a verified `active_order_id` exists.
+2. "My other order" lists the verified customer's own orders through the
+   read-only `list_orders` tool, excluding the active one. If exactly one
+   remains it is used; otherwise the customer is asked to pick from a short
+   list. Order IDs in that list are added to the allowed facts, so the
+   output guard still verifies them.
+3. An order question without an ID and without an active order uses the
+   only order on the account, or asks the customer to choose.
+4. Product pronoun follow-ups are rewritten deterministically: "does it have
+   a laptop sleeve?" becomes "does it have a laptop sleeve? (Trailmark 28
+   backpack)" for retrieval. No model writes the rewrite.
+
+Ownership is always enforced by the order tools with the session's customer
+ID, so memory cannot authorize access to another customer's order.
+
+## Human handoff and voice-to-text transfer (Part C)
+
+`EscalateToHumanHandler` attaches `MemorySnapshot.handoff_summary()`: verified
+slots plus the last six turns (channel, customer text, assistant text, intent,
+status, timestamp), each truncated to 300 characters. Because voice and text
+write to the same session, a call that moves to a chat transcript for a human
+agent carries the same summary. The Streamlit demo shows this summary under
+"What the human agent receives".
 
 ## Scope and limits
 
-`SessionMemoryStore` is thread-safe and bounded to 128 sessions and 12 turns
-per session by default. It is process-local: restarting the app or routing a
-request to another worker loses this demo state. The production replacement
-would use an authenticated tenant/session key in PostgreSQL plus Redis (or an
-equivalent durable store), with retention, encryption, access control, and
-idempotency. The implementation does not claim general long-term semantic
-memory.
-
-## Manual check
-
-With the same selected demo session, first ask:
-
-```text
-Where is order NS-26-2044-8?
-```
-
-Then ask:
-
-```text
-Can I return it?
-```
-
-The second request should reuse `NS-26-2044-8`, call return-eligibility, and
-never approve a refund. The sidebar trace panel shows the separate trace IDs.
+The store is process-local: restarting the app or routing a request to
+another worker loses it. Production would keep the slots and transcript in an
+authenticated, tenant-scoped store (for example Redis for live session state
+with a TTL, plus PostgreSQL for the transcript), with retention limits,
+encryption, access control, and redaction of personal data before storage.
+The implementation does not claim long-term semantic memory.

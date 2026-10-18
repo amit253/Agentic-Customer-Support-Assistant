@@ -46,7 +46,8 @@ def test_verified_order_memory_resolves_text_follow_up() -> None:
     assert first.status == "ok"
     assert second.status == "ok"
     assert "NS-26-2044-8" in second.message
-    assert "eligible" in second.message
+    assert "can be returned" in second.message
+    assert "not a refund approval" in second.message
     assert second.metadata["memory_resolved"] is True
     assert second.metadata["routing_source"] == "verified_session_memory"
     assert classifier.direct_calls == []
@@ -54,7 +55,7 @@ def test_verified_order_memory_resolves_text_follow_up() -> None:
     snapshot = service.memory_store.snapshot("demo-session-omar")
     assert snapshot.turns[0].channel == "voice"
     assert snapshot.turns[0].user_text == "Where is order NS-26-2044-8?"
-    assert "Order NS-26-2044-8 status: delivered." in snapshot.turns[0].assistant_text
+    assert "(order NS-26-2044-8) was delivered on September 25, 2026." in snapshot.turns[0].assistant_text
 
 
 def test_explicit_order_return_bypasses_misrouting_classifier() -> None:
@@ -73,7 +74,7 @@ def test_explicit_order_return_bypasses_misrouting_classifier() -> None:
     )
 
     assert response.status == "ok"
-    assert "Return eligibility for NS-26-2044-8" in response.message
+    assert "(order NS-26-2044-8) can be returned" in response.message
     assert response.metadata["routing_source"] == "deterministic_order_signal"
 
 
@@ -125,10 +126,12 @@ def test_ambiguous_memory_reference_still_requires_an_order_id() -> None:
         session_id="demo-session-omar",
     )
 
+    # The active order is never silently reused; the customer chooses from
+    # their own other orders instead of being asked for an ID from memory.
     assert response.status == "ok"
-    assert response.message == (
-        "Please provide one Northstar order ID so I can check it safely."
-    )
+    assert response.message.startswith("Which other order should I check?")
+    assert "NS-26-4006-8" in response.message
+    assert "NS-26-2044-8" not in response.message
     assert response.metadata["tool_error"] == "ambiguous_memory_reference"
 
 

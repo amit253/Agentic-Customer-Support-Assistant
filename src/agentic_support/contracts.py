@@ -114,9 +114,19 @@ class ReturnEligibilityResult:
     order_id: str
     eligible: bool
     reason_code: str
+    item_name: str
     policy_basis: str
     deadline: date | None
     next_action: str
+
+
+@dataclass(frozen=True, slots=True)
+class OrderSummary:
+    """Minimal order listing for a verified customer: ID and item only."""
+
+    order_id: str
+    item_name: str
+    status: OrderStatus
 
 
 class SupportOrderTools(Protocol):

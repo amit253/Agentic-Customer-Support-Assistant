@@ -7,6 +7,7 @@ from datetime import date
 from .contracts import (
     CustomerSession,
     OrderStatusResult,
+    OrderSummary,
     ReturnEligibilityResult,
     parse_order_id,
 )
@@ -40,6 +41,17 @@ class DeterministicOrderTools:
             raise OrderToolError("ownership_mismatch")
         return order
 
+    def list_orders(self, *, session: CustomerSession) -> tuple[OrderSummary, ...]:
+        """List only the verified customer's own orders, in ID order."""
+
+        if not isinstance(session, CustomerSession) or not session.verified:
+            raise OrderToolError("unverified_session")
+        return tuple(
+            OrderSummary(order_id=order.order_id, item_name=order.item_name, status=order.status)
+            for order in sorted(DEMO_ORDERS.values(), key=lambda item: item.order_id)
+            if order.customer_id == session.customer_id
+        )
+
     def get_order_status(
         self, *, order_id: str, session: CustomerSession
     ) -> OrderStatusResult:
@@ -62,6 +74,7 @@ class DeterministicOrderTools:
         if order.delivered_date is None:
             return ReturnEligibilityResult(
                 order_id=order.order_id,
+                item_name=order.item_name,
                 eligible=False,
                 reason_code="not_delivered",
                 policy_basis="Returns are evaluated after delivery.",
@@ -71,6 +84,7 @@ class DeterministicOrderTools:
         if order.sale_type == "personalized_final_sale":
             return ReturnEligibilityResult(
                 order_id=order.order_id,
+                item_name=order.item_name,
                 eligible=False,
                 reason_code="final_sale",
                 policy_basis="Personalized items are final sale; defects use warranty review.",
@@ -80,6 +94,7 @@ class DeterministicOrderTools:
         if order.status == "return_received" or order.refund_status == "issued":
             return ReturnEligibilityResult(
                 order_id=order.order_id,
+                item_name=order.item_name,
                 eligible=False,
                 reason_code="already_returned",
                 policy_basis="This order already has a received return or issued refund.",
@@ -90,6 +105,7 @@ class DeterministicOrderTools:
         if deadline is None or deadline < DEMO_AS_OF_DATE:
             return ReturnEligibilityResult(
                 order_id=order.order_id,
+                item_name=order.item_name,
                 eligible=False,
                 reason_code="window_expired",
                 policy_basis="The applicable return deadline has passed.",
@@ -103,6 +119,7 @@ class DeterministicOrderTools:
         )
         return ReturnEligibilityResult(
             order_id=order.order_id,
+            item_name=order.item_name,
             eligible=True,
             reason_code=reason_code,
             policy_basis=order.return_policy_code,
